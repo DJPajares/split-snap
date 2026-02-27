@@ -15,6 +15,11 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const onUpdateRef = useRef(onUpdate);
+
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -44,7 +49,7 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
         try {
           const data = JSON.parse(event.data) as Session;
           setSession(data);
-          onUpdate?.(data);
+          onUpdateRef.current?.(data);
         } catch {
           console.error("Failed to parse SSE event:", event.data);
         }
@@ -60,7 +65,7 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
         connect();
       }, 3000);
     };
-  }, [code, onUpdate]);
+  }, [code]);
 
   useEffect(() => {
     connect();
