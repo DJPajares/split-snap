@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node --env-file=../../.env dist/index.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.43.0",
     "@hono/node-server": "^1.19.9",
     "@split-snap/shared": "workspace:*",
     "bcryptjs": "^3.0.3",

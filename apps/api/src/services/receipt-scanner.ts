@@ -68,21 +68,23 @@ const geminiProvider: ScanProvider = {
   },
 
   async scan(imageBase64: string, mimeType: string): Promise<ScanResult> {
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(config.GOOGLE_AI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const { GoogleGenAI } = await import("@google/genai");
+    const ai = new GoogleGenAI({ apiKey: config.GOOGLE_AI_API_KEY });
 
-    const result = await model.generateContent([
-      SCAN_PROMPT,
-      {
-        inlineData: {
-          data: imageBase64,
-          mimeType,
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: SCAN_PROMPT },
+            { inlineData: { data: imageBase64, mimeType } },
+          ],
         },
-      },
-    ]);
+      ],
+    });
 
-    const content = result.response.text();
+    const content = response.text;
     if (!content) {
       throw new Error("No response from Gemini model");
     }
@@ -304,8 +306,9 @@ export async function scanReceipt(
       return { ...result, provider: provider.name };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.warn(`⚠️  ${provider.name} failed: ${msg}, trying next...`);
-      errors.push(`${provider.name}: ${msg}`);
+      const cause = err instanceof Error && err.cause ? ` (cause: ${err.cause})` : "";
+      console.warn(`⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`);
+      errors.push(`${provider.name}: ${msg}${cause}`);
     }
   }
 
