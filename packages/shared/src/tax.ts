@@ -1,4 +1,4 @@
-import type { Session, PersonSummary } from "./types";
+import type { Session, PersonSummary } from "./types.js";
 
 /**
  * Calculate each participant's share of the bill, including
