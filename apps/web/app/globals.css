@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@plugin "../hero.ts";
+
+@source "../node_modules/@heroui/theme/dist/**/*.{js,ts}";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * HeroUI base layer: apply the .dark theme class utilities
+ * and ensure smooth color transitions on theme toggle.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+}
