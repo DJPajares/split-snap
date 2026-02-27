@@ -1,0 +1,15 @@
+{
+  "name": "split-snap",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.11",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.24.0"
+}

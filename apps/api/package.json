@@ -1,0 +1,30 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@hono/node-server": "^1.19.9",
+    "@split-snap/shared": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "hono": "^4.12.3",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.3",
+    "openai": "^6.25.0",
+    "tesseract.js": "^7.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.19.13",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
