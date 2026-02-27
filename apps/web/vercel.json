@@ -1,0 +1,3 @@
+{
+  "buildCommand": "cd ../.. && npx turbo build --filter=web"
+}

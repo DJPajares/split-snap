@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import mongoose from "mongoose";
 import { sessionRoutes } from "./routes/sessions.js";
 import { receiptRoutes } from "./routes/receipts.js";
 import { authRoutes } from "./routes/auth.js";
@@ -13,12 +14,29 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: config.FRONTEND_URL,
+    origin: (origin) => {
+      // Allow configured frontend URL and common local dev origins
+      const allowed = [
+        config.FRONTEND_URL,
+        "http://localhost:3000",
+        "http://localhost:3001",
+      ];
+      return allowed.includes(origin) ? origin : config.FRONTEND_URL;
+    },
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "X-Participant-Token"],
     credentials: true,
   })
 );
+
+// Lazy DB connection (reuses across Vercel invocations via module cache)
+app.use("*", async (_, next) => {
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(config.MONGODB_URI);
+    console.log("✅ Connected to MongoDB");
+  }
+  await next();
+});
 
 // Health check
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));

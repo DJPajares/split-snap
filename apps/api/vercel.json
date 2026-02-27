@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd ../.. && npx turbo build --filter=api",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/src/vercel.ts" }
+  ],
+  "functions": {
+    "api/src/vercel.ts": {
+      "maxDuration": 30
+    }
+  }
+}
