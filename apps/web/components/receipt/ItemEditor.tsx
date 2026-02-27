@@ -129,7 +129,7 @@ export function ItemEditor({
   const validateExtraAmount = (value: string, type: "tax" | "tip") => {
     const nextError =
       value.trim() !== "" && parseNumber(value) < 0
-        ? `${type === "tax" ? "Tax" : "Tip/Service Charge"} cannot be negative.`
+        ? `${type === "tax" ? "Tax" : "Tip / Service Charge"} cannot be negative.`
         : undefined;
 
     if (type === "tax") {
@@ -300,7 +300,7 @@ export function ItemEditor({
             errorMessage={taxError}
           />
           <Input
-            label="Tip/Service Charge"
+            label="Tip / Service Charge"
             type="number"
             placeholder="0.00"
             value={tip}
