@@ -9,23 +9,24 @@ import { config } from "./lib/config.js";
 
 export const app = new Hono().basePath("/api");
 
-const configuredOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
+// Build allowed origins from env vars (no hardcoded URLs)
 const allowedOrigins = Array.from(
-  new Set([
-    ...configuredOrigins,
-    config.FRONTEND_URL,
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://split-snap-wapp.vercel.app",
-  ])
+  new Set(
+    [
+      config.FRONTEND_URL,
+      "http://localhost:3000",
+      "http://localhost:3001",
+      ...(process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim()),
+    ].filter(Boolean)
+  )
 );
 
-const isAllowedVercelPreviewOrigin = (origin: string) =>
-  /^https:\/\/split-snap-wapp-.*\.vercel\.app$/.test(origin);
+// Allow Vercel preview deployments (derive pattern from FRONTEND_URL)
+const previewPattern = config.FRONTEND_URL.includes(".vercel.app")
+  ? new RegExp(
+      `^${config.FRONTEND_URL.replace("https://", "https://").replace(".vercel.app", "-.*\\.vercel\\.app")}$`
+    )
+  : null;
 
 // Middleware
 app.use("*", logger());
@@ -35,7 +36,7 @@ app.use(
     origin: (origin) => {
       if (!origin) return undefined;
       if (allowedOrigins.includes(origin)) return origin;
-      if (isAllowedVercelPreviewOrigin(origin)) return origin;
+      if (previewPattern?.test(origin)) return origin;
       return undefined;
     },
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
