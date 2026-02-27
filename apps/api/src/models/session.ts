@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-import { SESSION_EXPIRY_DAYS, DEFAULT_CURRENCY } from "@split-snap/shared";
+import mongoose, { Schema, Document } from 'mongoose';
+import { SESSION_EXPIRY_DAYS, DEFAULT_CURRENCY } from '../lib/constants.js';
 
 // ─── Sub-schemas ───────────────────────────────────────────
 
@@ -7,7 +7,7 @@ const ItemClaimSchema = new Schema(
   {
     participantId: { type: String, required: true },
     displayName: { type: String, required: true },
-    portion: { type: Number, required: true, default: 1 },
+    portion: { type: Number, required: true, default: 1 }
   },
   { _id: false }
 );
@@ -16,14 +16,14 @@ const SessionItemSchema = new Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, default: 1 },
-  claimedBy: { type: [ItemClaimSchema], default: [] },
+  claimedBy: { type: [ItemClaimSchema], default: [] }
 });
 
 const ParticipantSchema = new Schema({
   displayName: { type: String, required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   isAnonymous: { type: Boolean, default: true },
-  joinedAt: { type: Date, default: Date.now },
+  joinedAt: { type: Date, default: Date.now }
 });
 
 // ─── Session document ──────────────────────────────────────
@@ -37,7 +37,11 @@ export interface ISession extends Document {
     name: string;
     price: number;
     quantity: number;
-    claimedBy: { participantId: string; displayName: string; portion: number }[];
+    claimedBy: {
+      participantId: string;
+      displayName: string;
+      portion: number;
+    }[];
   }[];
   participants: {
     _id: mongoose.Types.ObjectId;
@@ -51,7 +55,7 @@ export interface ISession extends Document {
   tip: number;
   total: number;
   currency: string;
-  status: "draft" | "active" | "settled";
+  status: 'draft' | 'active' | 'settled';
   createdAt: Date;
   expiresAt: Date;
 }
@@ -59,7 +63,7 @@ export interface ISession extends Document {
 const SessionSchema = new Schema<ISession>(
   {
     code: { type: String, required: true, unique: true, index: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     receiptImageUrl: { type: String, default: null },
     items: { type: [SessionItemSchema], default: [] },
     participants: { type: [ParticipantSchema], default: [] },
@@ -70,19 +74,18 @@ const SessionSchema = new Schema<ISession>(
     currency: { type: String, default: DEFAULT_CURRENCY },
     status: {
       type: String,
-      enum: ["draft", "active", "settled"],
-      default: "active",
+      enum: ['draft', 'active', 'settled'],
+      default: 'active'
     },
     expiresAt: {
       type: Date,
       default: () =>
         new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
-      index: { expires: 0 }, // TTL index: auto-delete at expiresAt
-    },
+      index: { expires: 0 } // TTL index: auto-delete at expiresAt
+    }
   },
   { timestamps: true }
 );
 
 export const SessionModel =
-  mongoose.models.Session ||
-  mongoose.model<ISession>("Session", SessionSchema);
+  mongoose.models.Session || mongoose.model<ISession>('Session', SessionSchema);
