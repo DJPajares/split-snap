@@ -6,7 +6,7 @@ import {
   Chip,
   Checkbox,
 } from "@heroui/react";
-import type { Session, SessionItem } from "@split-snap/shared";
+import type { Session } from "@split-snap/shared";
 
 interface SessionItemListProps {
   session: Session;
@@ -35,7 +35,7 @@ export function SessionItemList({
             key={item.id}
             isPressable={!isSettled && !!participantId}
             onPress={() => !isSettled && participantId && onClaimToggle(item.id)}
-            className={`transition-all ${
+            className={`transition-all w-full ${
               isClaimed
                 ? "border-primary border-2 bg-primary/5"
                 : "border-transparent border-2"
