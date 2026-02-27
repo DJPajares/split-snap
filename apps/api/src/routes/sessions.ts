@@ -213,6 +213,13 @@ sessionRoutes.patch("/:code/settle", async (c) => {
     return c.json({ error: "Session not found" }, 404);
   }
 
+  const hasUnclaimedItems = session.items.some(
+    (item: { claimedBy: unknown[] }) => item.claimedBy.length === 0
+  );
+  if (hasUnclaimedItems) {
+    return c.json({ error: "All items must be claimed before settling" }, 400);
+  }
+
   session.status = "settled";
   await session.save();
 

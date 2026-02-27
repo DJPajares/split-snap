@@ -53,6 +53,9 @@ export default function SessionPage({
   });
 
   const session = liveSession ?? initialSession;
+  const hasUnclaimedItems = Boolean(
+    session?.items.some((item) => item.claimedBy.length === 0)
+  );
 
   useEffect(() => {
     if (!loading && !error && session && !participantId) {
@@ -164,12 +167,18 @@ export default function SessionPage({
               color="success"
               size="sm"
               onPress={handleSettle}
+              isDisabled={hasUnclaimedItems}
             >
               ✓ Settle
             </Button>
           )}
         </div>
       </div>
+      {session.status === "active" && hasUnclaimedItems && (
+        <p className="text-sm text-warning mb-4">
+          Claim all items before finalizing settlement.
+        </p>
+      )}
 
       {/* Main content: items + sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
