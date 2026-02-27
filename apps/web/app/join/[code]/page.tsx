@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import {
   Card,
   CardBody,
@@ -22,14 +22,19 @@ export default function JoinPage({
   const router = useRouter();
   const [name, setName] = useState("");
   const [joining, setJoining] = useState(false);
+  const [checkingStoredParticipant, setCheckingStoredParticipant] = useState(true);
 
-  // Check if already joined
-  if (typeof window !== "undefined") {
+  useEffect(() => {
     const stored = localStorage.getItem(`participant_${code}`);
     if (stored) {
-      router.push(`/session/${code}`);
-      return null;
+      router.replace(`/session/${code}`);
+      return;
     }
+    setCheckingStoredParticipant(false);
+  }, [code, router]);
+
+  if (checkingStoredParticipant) {
+    return null;
   }
 
   const handleJoin = async () => {

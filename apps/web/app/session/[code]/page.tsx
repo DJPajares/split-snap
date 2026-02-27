@@ -54,6 +54,12 @@ export default function SessionPage({
 
   const session = liveSession ?? initialSession;
 
+  useEffect(() => {
+    if (!loading && !error && session && !participantId) {
+      router.replace(`/join/${code}`);
+    }
+  }, [loading, error, session, participantId, router, code]);
+
   const handleClaimToggle = useCallback(
     async (itemId: string) => {
       if (!participantId || !session) return;
@@ -105,7 +111,6 @@ export default function SessionPage({
 
   // If user hasn't joined yet, redirect to join page
   if (!participantId) {
-    router.push(`/join/${code}`);
     return null;
   }
 
