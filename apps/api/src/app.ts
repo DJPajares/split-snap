@@ -9,19 +9,34 @@ import { config } from "./lib/config.js";
 
 export const app = new Hono().basePath("/api");
 
+const configuredOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...configuredOrigins,
+    config.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://split-snap-wapp.vercel.app",
+  ])
+);
+
+const isAllowedVercelPreviewOrigin = (origin: string) =>
+  /^https:\/\/split-snap-wapp-.*\.vercel\.app$/.test(origin);
+
 // Middleware
 app.use("*", logger());
 app.use(
   "*",
   cors({
     origin: (origin) => {
-      // Allow configured frontend URL and common local dev origins
-      const allowed = [
-        config.FRONTEND_URL,
-        "http://localhost:3000",
-        "http://localhost:3001",
-      ];
-      return allowed.includes(origin) ? origin : config.FRONTEND_URL;
+      if (!origin) return undefined;
+      if (allowedOrigins.includes(origin)) return origin;
+      if (isAllowedVercelPreviewOrigin(origin)) return origin;
+      return undefined;
     },
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "X-Participant-Token"],
