@@ -23,9 +23,6 @@ importers:
       '@hono/node-server':
         specifier: ^1.19.9
         version: 1.19.9(hono@4.12.3)
-      '@split-snap/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
