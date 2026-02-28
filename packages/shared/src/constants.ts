@@ -24,6 +24,8 @@ export const API_ROUTES = {
   SESSION_CLAIM: (code: string, itemId: string) =>
     `/sessions/${code}/items/${itemId}/claim`,
   SESSION_SETTLE: (code: string) => `/sessions/${code}/settle`,
+  SESSION_KICK: (code: string, participantId: string) =>
+    `/sessions/${code}/participants/${participantId}`,
   SESSION_UPDATE_ITEMS: (code: string) => `/sessions/${code}/items`,
   SESSION_EVENTS: (code: string) => `/sessions/${code}/events`,
   AUTH_REGISTER: '/auth/register',

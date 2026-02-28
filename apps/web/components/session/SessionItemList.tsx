@@ -1,25 +1,32 @@
-"use client";
+'use client';
 
-import {
-  Card,
-  CardBody,
-  Chip,
-  Checkbox,
-} from "@heroui/react";
-import type { Session } from "@split-snap/shared";
+import { useState } from 'react';
+import { Card, CardBody, Chip, Checkbox, Spinner } from '@heroui/react';
+import type { Session } from '@split-snap/shared';
 
 interface SessionItemListProps {
   session: Session;
   participantId: string | null;
-  onClaimToggle: (itemId: string) => void;
+  onClaimToggle: (itemId: string) => Promise<void>;
 }
 
 export function SessionItemList({
   session,
   participantId,
-  onClaimToggle,
+  onClaimToggle
 }: SessionItemListProps) {
-  const isSettled = session.status === "settled";
+  const isSettled = session.status === 'settled';
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+
+  const handleClaimToggle = async (itemId: string) => {
+    if (loadingItemId || isSettled || !participantId) return;
+    setLoadingItemId(itemId);
+    try {
+      await onClaimToggle(itemId);
+    } finally {
+      setLoadingItemId(null);
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -29,28 +36,34 @@ export function SessionItemList({
           : false;
         const totalClaimers = item.claimedBy.length;
         const itemTotal = item.price * item.quantity;
+        const isLoading = loadingItemId === item.id;
 
         return (
           <Card
             key={item.id}
-            isPressable={!isSettled && !!participantId}
-            onPress={() => !isSettled && participantId && onClaimToggle(item.id)}
+            isPressable={!isSettled && !!participantId && !isLoading}
+            onPress={() => handleClaimToggle(item.id)}
             className={`transition-all w-full ${
-              isClaimed
-                ? "border-primary border-2 bg-primary/5"
-                : "border-transparent border-2"
+              isLoading
+                ? 'opacity-70 pointer-events-none'
+                : isClaimed
+                  ? 'border-primary border-2 bg-primary/5'
+                  : 'border-transparent border-2'
             }`}
           >
             <CardBody className="flex flex-row items-center gap-3 p-3">
-              {participantId && (
-                <Checkbox
-                  isSelected={isClaimed}
-                  isDisabled={isSettled}
-                  onChange={() => onClaimToggle(item.id)}
-                  size="lg"
-                  color="primary"
-                />
-              )}
+              {participantId &&
+                (isLoading ? (
+                  <Spinner size="sm" color="primary" />
+                ) : (
+                  <Checkbox
+                    isSelected={isClaimed}
+                    isDisabled={isSettled}
+                    onChange={() => handleClaimToggle(item.id)}
+                    size="lg"
+                    color="primary"
+                  />
+                ))}
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{item.name}</p>
                 {item.quantity > 1 && (
@@ -67,8 +80,8 @@ export function SessionItemList({
                         variant="flat"
                         color={
                           claim.participantId === participantId
-                            ? "primary"
-                            : "default"
+                            ? 'primary'
+                            : 'default'
                         }
                       >
                         {claim.displayName}

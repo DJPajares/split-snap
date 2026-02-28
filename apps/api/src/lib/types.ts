@@ -20,7 +20,7 @@ export interface Participant {
   joinedAt: string;
 }
 
-export type SessionStatus = "draft" | "active" | "settled";
+export type SessionStatus = 'draft' | 'active' | 'settled';
 
 export interface Session {
   id: string;
@@ -40,12 +40,13 @@ export interface Session {
 }
 
 export type SSEEventType =
-  | "session:updated"
-  | "participant:joined"
-  | "item:claimed"
-  | "item:unclaimed"
-  | "items:updated"
-  | "session:settled";
+  | 'session:updated'
+  | 'participant:joined'
+  | 'participant:kicked'
+  | 'item:claimed'
+  | 'item:unclaimed'
+  | 'items:updated'
+  | 'session:settled';
 
 export interface ScannedItem {
   name: string;

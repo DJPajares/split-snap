@@ -236,8 +236,21 @@ export function ItemEditor({
           {items.map((item, i) => (
             <div
               key={i}
-              className="flex flex-col sm:flex-row gap-2 items-start sm:items-end"
+              className="relative flex flex-col sm:flex-row gap-2 items-start sm:items-center"
             >
+              {/* Mobile: X button top-right of each item group */}
+              <Button
+                isIconOnly
+                variant="light"
+                color="danger"
+                size="sm"
+                onPress={() => removeItem(i)}
+                isDisabled={items.length <= 1}
+                aria-label="Remove item"
+                className="absolute top-0 right-0 sm:hidden z-10"
+              >
+                ✕
+              </Button>
               <Input
                 label="Item"
                 placeholder="e.g. Burger"
@@ -273,6 +286,7 @@ export function ItemEditor({
                 isInvalid={Boolean(itemErrors[i]?.quantity)}
                 errorMessage={itemErrors[i]?.quantity}
               />
+              {/* Desktop: inline X button, vertically centered */}
               <Button
                 isIconOnly
                 variant="light"
@@ -281,6 +295,7 @@ export function ItemEditor({
                 onPress={() => removeItem(i)}
                 isDisabled={items.length <= 1}
                 aria-label="Remove item"
+                className="hidden sm:flex self-center"
               >
                 ✕
               </Button>
@@ -300,7 +315,7 @@ export function ItemEditor({
         <Divider />
 
         {/* Totals */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
           <Input
             label="Tax"
             type="number"
@@ -331,11 +346,9 @@ export function ItemEditor({
             isInvalid={Boolean(tipError)}
             errorMessage={tipError}
           />
-          <div className="flex items-end">
-            <div className="w-full bg-content2 rounded-lg p-3 text-center">
-              <p className="text-xs text-default-500">Total</p>
-              <p className="text-lg font-bold">${total.toFixed(2)}</p>
-            </div>
+          <div className="w-full bg-content2 rounded-lg px-3 py-2 text-center">
+            <p className="text-xs text-default-500">Total</p>
+            <p className="text-lg font-bold">${total.toFixed(2)}</p>
           </div>
         </div>
 

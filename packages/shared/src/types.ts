@@ -102,6 +102,7 @@ export interface AuthResponse {
 export type SSEEventType =
   | 'session:updated'
   | 'participant:joined'
+  | 'participant:kicked'
   | 'item:claimed'
   | 'item:unclaimed'
   | 'items:updated'

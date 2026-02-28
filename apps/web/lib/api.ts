@@ -125,6 +125,11 @@ export const api = {
         body: JSON.stringify(data)
       }),
 
+    kick: (code: string, participantId: string) =>
+      request<Session>(API_ROUTES.SESSION_KICK(code, participantId), {
+        method: 'DELETE'
+      }),
+
     eventsUrl: (code: string) => `${API_URL}${API_ROUTES.SESSION_EVENTS(code)}`
   }
 };

@@ -326,6 +326,63 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
   return c.json(serialized);
 });
 
+// ─── Kick participant ──────────────────────────────────────
+
+sessionRoutes.delete(
+  '/:code/participants/:participantId',
+  requireAuth,
+  async (c) => {
+    const code = c.req.param('code').toUpperCase();
+    const participantId = c.req.param('participantId');
+    const auth = c.get('auth');
+
+    const session = await SessionModel.findOne({ code });
+    if (!session) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
+
+    if (session.status !== 'active') {
+      return c.json(
+        { error: 'Can only kick participants in active sessions' },
+        400
+      );
+    }
+
+    // Only the session creator can kick participants
+    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+      return c.json(
+        { error: 'Only the session creator can kick participants' },
+        403
+      );
+    }
+
+    const participant = session.participants.id(participantId);
+    if (!participant) {
+      return c.json({ error: 'Participant not found' }, 404);
+    }
+
+    // Remove all claims by this participant from every item
+    for (const item of session.items) {
+      item.claimedBy = item.claimedBy.filter(
+        (c: { participantId: string }) => c.participantId !== participantId
+      ) as typeof item.claimedBy;
+    }
+
+    // Remove participant
+    session.participants = session.participants.filter(
+      (p: { _id: mongoose.Types.ObjectId }) =>
+        p._id.toString() !== participantId
+    ) as typeof session.participants;
+
+    await session.save();
+
+    const serialized = serializeSession(session);
+    sseManager.broadcast(code, 'participant:kicked', serialized);
+
+    return c.json(serialized);
+  }
+);
+
 // ─── Settle session ────────────────────────────────────────
 
 sessionRoutes.patch('/:code/settle', async (c) => {

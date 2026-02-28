@@ -46,6 +46,23 @@ export default function SessionPage({
     code,
     onUpdate: (updated) => {
       setInitialSession(updated);
+
+      // Detect if current user was kicked
+      if (participantId && updated.participants) {
+        const stillInSession = updated.participants.some(
+          (p) => p.id === participantId
+        );
+        if (!stillInSession) {
+          localStorage.removeItem(`participant_${code}`);
+          setParticipantId(null);
+          addToast({
+            title: 'You were removed from this session',
+            description: 'You can rejoin using the share link.',
+            color: 'warning'
+          });
+          router.replace(`/join/${code}`);
+        }
+      }
     }
   });
 
@@ -94,6 +111,22 @@ export default function SessionPage({
       });
     }
   }, [code]);
+
+  const handleKick = useCallback(
+    async (targetParticipantId: string) => {
+      try {
+        await api.sessions.kick(code, targetParticipantId);
+        addToast({ title: 'Participant removed', color: 'success' });
+      } catch (err) {
+        addToast({
+          title: 'Failed to remove participant',
+          description: err instanceof Error ? err.message : 'Unknown error',
+          color: 'danger'
+        });
+      }
+    },
+    [code]
+  );
 
   if (loading) {
     return (
@@ -158,30 +191,34 @@ export default function SessionPage({
           >
             📊 Summary
           </Button>
-          {isCreator && session.status !== 'settled' && (
-            <Button
-              as="a"
-              href={`/session/${code}/edit`}
-              variant="flat"
-              color="primary"
-              size="sm"
-            >
-              ✏️ Edit Items
-            </Button>
-          )}
-          {session.status === 'active' && (
-            <Button
-              color="success"
-              size="sm"
-              onPress={handleSettle}
-              isDisabled={hasUnclaimedItems}
-            >
-              ✓ Settle
-            </Button>
-          )}
         </div>
       </div>
-      {session.status === 'active' && hasUnclaimedItems && (
+
+      {/* Creator CTA actions */}
+      {isCreator && session.status === 'active' && (
+        <div className="flex flex-wrap gap-3 mb-4">
+          <Button
+            as="a"
+            href={`/session/${code}/edit`}
+            color="primary"
+            variant="solid"
+            size="md"
+            className="w-full sm:w-auto"
+          >
+            ✏️ Edit Items
+          </Button>
+          <Button
+            color="success"
+            size="md"
+            className="w-full sm:w-auto"
+            onPress={handleSettle}
+            isDisabled={hasUnclaimedItems}
+          >
+            ✓ Settle
+          </Button>
+        </div>
+      )}
+      {session.status === 'active' && hasUnclaimedItems && isCreator && (
         <p className="text-sm text-warning mb-4">
           Claim all items before finalizing settlement.
         </p>
@@ -204,6 +241,8 @@ export default function SessionPage({
           <ParticipantSidebar
             session={session}
             currentParticipantId={participantId}
+            isCreator={isCreator}
+            onKick={handleKick}
           />
         </div>
       </div>

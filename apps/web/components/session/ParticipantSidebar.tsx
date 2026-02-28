@@ -1,26 +1,50 @@
-"use client";
+'use client';
 
+import { useState } from 'react';
 import {
   Card,
   CardBody,
   CardHeader,
   Divider,
   Chip,
-  User as UserAvatar,
-} from "@heroui/react";
-import type { Session } from "@split-snap/shared";
-import { calculateSummaries } from "@split-snap/shared";
+  Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  User as UserAvatar
+} from '@heroui/react';
+import type { Session } from '@split-snap/shared';
+import { calculateSummaries } from '@split-snap/shared';
 
 interface ParticipantSidebarProps {
   session: Session;
   currentParticipantId: string | null;
+  isCreator?: boolean;
+  onKick?: (participantId: string) => Promise<void>;
 }
 
 export function ParticipantSidebar({
   session,
   currentParticipantId,
+  isCreator = false,
+  onKick
 }: ParticipantSidebarProps) {
   const summaries = calculateSummaries(session);
+  const [kickingId, setKickingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  const handleKick = async (participantId: string) => {
+    if (!onKick) return;
+    setKickingId(participantId);
+    setConfirmId(null);
+    try {
+      await onKick(participantId);
+    } finally {
+      setKickingId(null);
+    }
+  };
+
+  const canKick = isCreator && session.status === 'active' && !!onKick;
 
   return (
     <Card>
@@ -49,31 +73,82 @@ export function ParticipantSidebar({
               <div
                 key={participant.id}
                 className={`flex items-center justify-between p-2 rounded-lg ${
-                  isCurrentUser ? "bg-primary/10" : ""
+                  isCurrentUser ? 'bg-primary/10' : ''
                 }`}
               >
                 <UserAvatar
                   name={participant.displayName}
                   description={
                     isCurrentUser
-                      ? "You"
+                      ? 'You'
                       : participant.isAnonymous
-                        ? "Guest"
-                        : "Member"
+                        ? 'Guest'
+                        : 'Member'
                   }
                   avatarProps={{
                     name: participant.displayName[0],
-                    size: "sm",
-                    color: isCurrentUser ? "primary" : "default",
+                    size: 'sm',
+                    color: isCurrentUser ? 'primary' : 'default'
                   }}
                 />
-                <div className="text-right">
-                  <p className="font-semibold text-sm">
-                    ${(summary?.total ?? 0).toFixed(2)}
-                  </p>
-                  <p className="text-xs text-default-400">
-                    {summary?.items.length ?? 0} items
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <p className="font-semibold text-sm">
+                      ${(summary?.total ?? 0).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-default-400">
+                      {summary?.items.length ?? 0} items
+                    </p>
+                  </div>
+                  {canKick && !isCurrentUser && (
+                    <Popover
+                      isOpen={confirmId === participant.id}
+                      onOpenChange={(open) =>
+                        setConfirmId(open ? participant.id : null)
+                      }
+                      placement="left"
+                    >
+                      <PopoverTrigger>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          color="danger"
+                          isLoading={kickingId === participant.id}
+                          aria-label={`Kick ${participant.displayName}`}
+                        >
+                          ✕
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <div className="p-3 space-y-2">
+                          <p className="text-sm font-medium">
+                            Remove {participant.displayName}?
+                          </p>
+                          <p className="text-xs text-default-400">
+                            All their claims will be removed.
+                          </p>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              onPress={() => setConfirmId(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              color="danger"
+                              onPress={() => handleKick(participant.id)}
+                              isLoading={kickingId === participant.id}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
               </div>
             );

@@ -9,17 +9,42 @@ interface UseSessionSSEOptions {
   onUpdate?: (session: Session) => void;
 }
 
+const HEARTBEAT_TIMEOUT_MS = 45_000; // server sends every 30s, 15s grace
+const INITIAL_RECONNECT_MS = 3_000;
+const MAX_RECONNECT_MS = 30_000;
+
 export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
   const [session, setSession] = useState<Session | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const onUpdateRef = useRef(onUpdate);
+  const reconnectDelayRef = useRef(INITIAL_RECONNECT_MS);
 
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
+
+  const resetHeartbeatTimer = useCallback(() => {
+    if (heartbeatTimeoutRef.current) {
+      clearTimeout(heartbeatTimeoutRef.current);
+    }
+    heartbeatTimeoutRef.current = setTimeout(() => {
+      // No events received within timeout — connection is stale
+      setConnected(false);
+      eventSourceRef.current?.close();
+      // Trigger reconnect
+      reconnectTimeoutRef.current = setTimeout(() => {
+        connect();
+      }, reconnectDelayRef.current);
+      reconnectDelayRef.current = Math.min(
+        reconnectDelayRef.current * 2,
+        MAX_RECONNECT_MS
+      );
+    }, HEARTBEAT_TIMEOUT_MS);
+  }, []);
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -33,12 +58,15 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
     es.onopen = () => {
       setConnected(true);
       setError(null);
+      reconnectDelayRef.current = INITIAL_RECONNECT_MS;
+      resetHeartbeatTimer();
     };
 
     // Listen for all session event types
     const eventTypes: SSEEventType[] = [
       'session:updated',
       'participant:joined',
+      'participant:kicked',
       'item:claimed',
       'item:unclaimed',
       'items:updated',
@@ -47,6 +75,7 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
 
     for (const eventType of eventTypes) {
       es.addEventListener(eventType, (event: MessageEvent) => {
+        resetHeartbeatTimer();
         try {
           const data = JSON.parse(event.data) as Session;
           setSession(data);
@@ -57,16 +86,29 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
       });
     }
 
+    // Listen for heartbeat to reset the stale timer
+    es.addEventListener('heartbeat', () => {
+      resetHeartbeatTimer();
+    });
+
     es.onerror = () => {
       setConnected(false);
       es.close();
 
-      // Auto-reconnect after 3 seconds
+      if (heartbeatTimeoutRef.current) {
+        clearTimeout(heartbeatTimeoutRef.current);
+      }
+
+      // Auto-reconnect with exponential backoff
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
-      }, 3000);
+      }, reconnectDelayRef.current);
+      reconnectDelayRef.current = Math.min(
+        reconnectDelayRef.current * 2,
+        MAX_RECONNECT_MS
+      );
     };
-  }, [code]);
+  }, [code, resetHeartbeatTimer]);
 
   useEffect(() => {
     connect();
@@ -75,6 +117,9 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
       eventSourceRef.current?.close();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (heartbeatTimeoutRef.current) {
+        clearTimeout(heartbeatTimeoutRef.current);
       }
     };
   }, [connect]);
