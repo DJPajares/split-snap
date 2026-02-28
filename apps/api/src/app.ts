@@ -67,9 +67,9 @@ app.get('/health', (c) => {
 //   await next();
 // });
 
-app.route('/auth', authRoutes);
-app.route('/receipts', receiptRoutes);
-app.route('/sessions', sessionRoutes);
+// app.route('/auth', authRoutes);
+// app.route('/receipts', receiptRoutes);
+// app.route('/sessions', sessionRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
 
