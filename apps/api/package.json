@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env src/dev.ts",
-    "build": "rm -rf dist && tsc",
+    "build": "tsc",
     "start": "node --env-file=../../.env dist/dev.js",
     "clean": "rm -rf dist"
   },

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-const app = new Hono();
+const app = new Hono().basePath('/api');
 
 const welcomeStrings = [
   'Hello Hono!',
@@ -9,6 +9,13 @@ const welcomeStrings = [
 
 app.get('/', (c) => {
   return c.text(welcomeStrings.join('\n\n'));
+});
+
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 });
 
 export default app;
