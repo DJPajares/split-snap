@@ -1,5 +1,5 @@
-import type { ISession } from "../models/session.js";
-import type { Session, SessionItem, Participant } from "@split-snap/shared";
+import type { ISession } from '../models/session.js';
+import type { Session, SessionItem, Participant } from './types.js';
 
 /**
  * Convert a Mongoose session document into the shared Session type.
@@ -19,8 +19,8 @@ export function serializeSession(doc: ISession): Session {
         claimedBy: item.claimedBy.map((c) => ({
           participantId: c.participantId,
           displayName: c.displayName,
-          portion: c.portion,
-        })),
+          portion: c.portion
+        }))
       })
     ),
     participants: doc.participants.map(
@@ -29,7 +29,7 @@ export function serializeSession(doc: ISession): Session {
         displayName: p.displayName,
         userId: p.userId?.toString() ?? null,
         isAnonymous: p.isAnonymous,
-        joinedAt: p.joinedAt.toISOString(),
+        joinedAt: p.joinedAt.toISOString()
       })
     ),
     subtotal: doc.subtotal,
@@ -39,6 +39,6 @@ export function serializeSession(doc: ISession): Session {
     currency: doc.currency,
     status: doc.status,
     createdAt: doc.createdAt.toISOString(),
-    expiresAt: doc.expiresAt.toISOString(),
+    expiresAt: doc.expiresAt.toISOString()
   };
 }

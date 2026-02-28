@@ -1,4 +1,4 @@
-import type { SSEEventType, Session } from "@split-snap/shared";
+import type { SSEEventType, Session } from '../lib/types.js';
 
 type SSEClient = {
   controller: ReadableStreamDefaultController;
@@ -34,7 +34,7 @@ class SSEManager {
       },
       cancel: () => {
         // Cleanup happens below via the returned stream
-      },
+      }
     });
 
     return stream;

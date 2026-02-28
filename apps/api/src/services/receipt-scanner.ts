@@ -1,5 +1,5 @@
-import type { ScanResult } from "@split-snap/shared";
-import { config } from "../lib/config.js";
+import type { ScanResult } from '../lib/types.js';
+import { config } from '../lib/config.js';
 
 // ─── Shared prompt for AI providers ─────────────────────────
 
@@ -39,21 +39,21 @@ interface ScanProvider {
 function sanitizeResult(parsed: ScanResult): ScanResult {
   return {
     items: (parsed.items || []).map((item) => ({
-      name: String(item.name || "Unknown item"),
+      name: String(item.name || 'Unknown item'),
       price: Math.max(0, Number(item.price) || 0),
-      quantity: Math.max(1, Math.round(Number(item.quantity) || 1)),
+      quantity: Math.max(1, Math.round(Number(item.quantity) || 1))
     })),
     subtotal: Math.max(0, Number(parsed.subtotal) || 0),
     tax: Math.max(0, Number(parsed.tax) || 0),
     tip: Math.max(0, Number(parsed.tip) || 0),
-    total: Math.max(0, Number(parsed.total) || 0),
+    total: Math.max(0, Number(parsed.total) || 0)
   };
 }
 
 function extractJSON(text: string): ScanResult {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error("Could not parse AI response as JSON");
+    throw new Error('Could not parse AI response as JSON');
   }
   return JSON.parse(jsonMatch[0]) as ScanResult;
 }
@@ -61,110 +61,113 @@ function extractJSON(text: string): ScanResult {
 // ─── Gemini provider ─────────────────────────────────────────
 
 const geminiProvider: ScanProvider = {
-  name: "gemini",
+  name: 'gemini',
 
   isAvailable() {
     return !!config.GOOGLE_AI_API_KEY;
   },
 
   async scan(imageBase64: string, mimeType: string): Promise<ScanResult> {
-    const { GoogleGenAI } = await import("@google/genai");
+    const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey: config.GOOGLE_AI_API_KEY });
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: 'gemini-2.0-flash',
       contents: [
         {
-          role: "user",
+          role: 'user',
           parts: [
             { text: SCAN_PROMPT },
-            { inlineData: { data: imageBase64, mimeType } },
-          ],
-        },
-      ],
+            { inlineData: { data: imageBase64, mimeType } }
+          ]
+        }
+      ]
     });
 
     const content = response.text;
     if (!content) {
-      throw new Error("No response from Gemini model");
+      throw new Error('No response from Gemini model');
     }
 
     return sanitizeResult(extractJSON(content));
-  },
+  }
 };
 
 // ─── OpenAI provider ─────────────────────────────────────────
 
 const openaiProvider: ScanProvider = {
-  name: "openai",
+  name: 'openai',
 
   isAvailable() {
     return !!config.OPENAI_API_KEY;
   },
 
   async scan(imageBase64: string, mimeType: string): Promise<ScanResult> {
-    const { default: OpenAI } = await import("openai");
+    const { default: OpenAI } = await import('openai');
     const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: [
-            { type: "text", text: SCAN_PROMPT },
+            { type: 'text', text: SCAN_PROMPT },
             {
-              type: "image_url",
+              type: 'image_url',
               image_url: {
                 url: `data:${mimeType};base64,${imageBase64}`,
-                detail: "high",
-              },
-            },
-          ],
-        },
+                detail: 'high'
+              }
+            }
+          ]
+        }
       ],
       max_tokens: 2000,
-      temperature: 0,
+      temperature: 0
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error("No response from OpenAI model");
+      throw new Error('No response from OpenAI model');
     }
 
     return sanitizeResult(extractJSON(content));
-  },
+  }
 };
 
 // ─── Tesseract OCR provider ──────────────────────────────────
 
 const tesseractProvider: ScanProvider = {
-  name: "tesseract",
+  name: 'tesseract',
 
   isAvailable() {
     return true; // Always available — no API key needed
   },
 
   async scan(imageBase64: string, _mimeType: string): Promise<ScanResult> {
-    const Tesseract = await import("tesseract.js");
+    const Tesseract = await import('tesseract.js');
     const { data } = await Tesseract.recognize(
-      Buffer.from(imageBase64, "base64"),
-      "eng",
+      Buffer.from(imageBase64, 'base64'),
+      'eng'
     );
 
     const text = data.text;
     if (!text.trim()) {
-      throw new Error("OCR could not extract any text from the image");
+      throw new Error('OCR could not extract any text from the image');
     }
 
     return sanitizeResult(parseReceiptText(text));
-  },
+  }
 };
 
 // ─── Receipt text parser (for Tesseract) ─────────────────────
 
 function parseReceiptText(text: string): ScanResult {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   const items: { name: string; price: number; quantity: number }[] = [];
   let subtotal = 0;
@@ -173,37 +176,42 @@ function parseReceiptText(text: string): ScanResult {
   let total = 0;
 
   // Patterns for summary lines
-  const subtotalPattern = /^(?:sub\s*total|subtotal)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
-  const taxPattern = /^(?:tax|sales\s*tax|hst|gst|vat)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
-  const tipPattern = /^(?:tip|gratuity|service\s*charge)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
-  const totalPattern = /^(?:total|amount\s*due|balance\s*due|grand\s*total)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
+  const subtotalPattern =
+    /^(?:sub\s*total|subtotal)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
+  const taxPattern =
+    /^(?:tax|sales\s*tax|hst|gst|vat)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
+  const tipPattern =
+    /^(?:tip|gratuity|service\s*charge)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
+  const totalPattern =
+    /^(?:total|amount\s*due|balance\s*due|grand\s*total)\s*[:\s]*\$?\s*([\d]+[.,]\d{2})/i;
 
   // Pattern for item lines: "Item name    $12.99" or "2x Item name    $25.98"
-  const itemPattern = /^(?:(\d+)\s*[xX×]\s*)?(.+?)\s+\$?\s*([\d]+[.,]\d{2})\s*$/;
+  const itemPattern =
+    /^(?:(\d+)\s*[xX×]\s*)?(.+?)\s+\$?\s*([\d]+[.,]\d{2})\s*$/;
 
   for (const line of lines) {
     // Try summary lines first
     let match = line.match(subtotalPattern);
     if (match) {
-      subtotal = parseFloat(match[1].replace(",", "."));
+      subtotal = parseFloat(match[1].replace(',', '.'));
       continue;
     }
 
     match = line.match(taxPattern);
     if (match) {
-      tax = parseFloat(match[1].replace(",", "."));
+      tax = parseFloat(match[1].replace(',', '.'));
       continue;
     }
 
     match = line.match(tipPattern);
     if (match) {
-      tip = parseFloat(match[1].replace(",", "."));
+      tip = parseFloat(match[1].replace(',', '.'));
       continue;
     }
 
     match = line.match(totalPattern);
     if (match) {
-      total = parseFloat(match[1].replace(",", "."));
+      total = parseFloat(match[1].replace(',', '.'));
       continue;
     }
 
@@ -211,14 +219,16 @@ function parseReceiptText(text: string): ScanResult {
     match = line.match(itemPattern);
     if (match) {
       const quantity = match[1] ? parseInt(match[1], 10) : 1;
-      const name = match[2].replace(/[.\s]+$/, "").trim();
-      const price = parseFloat(match[3].replace(",", "."));
+      const name = match[2].replace(/[.\s]+$/, '').trim();
+      const price = parseFloat(match[3].replace(',', '.'));
 
       // Filter out obvious non-items
       if (
         name.length >= 2 &&
         price > 0 &&
-        !/^(cash|card|change|visa|mastercard|amex|debit|credit|payment)/i.test(name)
+        !/^(cash|card|change|visa|mastercard|amex|debit|credit|payment)/i.test(
+          name
+        )
       ) {
         items.push({ name, price, quantity });
       }
@@ -244,13 +254,13 @@ function parseReceiptText(text: string): ScanResult {
 const providers: Record<string, ScanProvider> = {
   gemini: geminiProvider,
   openai: openaiProvider,
-  tesseract: tesseractProvider,
+  tesseract: tesseractProvider
 };
 
 const autoOrder: ScanProvider[] = [
   geminiProvider,
   openaiProvider,
-  tesseractProvider,
+  tesseractProvider
 ];
 
 // ─── Public API ──────────────────────────────────────────────
@@ -258,34 +268,34 @@ const autoOrder: ScanProvider[] = [
 export function getActiveProvider(): string {
   const setting = config.RECEIPT_SCANNER_PROVIDER;
 
-  if (setting !== "auto") {
+  if (setting !== 'auto') {
     const provider = providers[setting];
     if (provider?.isAvailable()) return provider.name;
-    return "none";
+    return 'none';
   }
 
   for (const p of autoOrder) {
     if (p.isAvailable()) return p.name;
   }
 
-  return "none";
+  return 'none';
 }
 
 export async function scanReceipt(
   imageBase64: string,
-  mimeType: string = "image/jpeg",
+  mimeType: string = 'image/jpeg'
 ): Promise<ScanResult & { provider: string }> {
   const setting = config.RECEIPT_SCANNER_PROVIDER;
 
   // Explicit provider
-  if (setting !== "auto") {
+  if (setting !== 'auto') {
     const provider = providers[setting];
     if (!provider) {
       throw new Error(`Unknown scanner provider: ${setting}`);
     }
     if (!provider.isAvailable()) {
       throw new Error(
-        `Scanner provider "${setting}" is not available. Check your API keys.`,
+        `Scanner provider "${setting}" is not available. Check your API keys.`
       );
     }
 
@@ -306,13 +316,16 @@ export async function scanReceipt(
       return { ...result, provider: provider.name };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      const cause = err instanceof Error && err.cause ? ` (cause: ${err.cause})` : "";
-      console.warn(`⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`);
+      const cause =
+        err instanceof Error && err.cause ? ` (cause: ${err.cause})` : '';
+      console.warn(
+        `⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`
+      );
       errors.push(`${provider.name}: ${msg}${cause}`);
     }
   }
 
   throw new Error(
-    `All scan providers failed.\n${errors.join("\n")}\nPlease enter items manually.`,
+    `All scan providers failed.\n${errors.join('\n')}\nPlease enter items manually.`
   );
 }
