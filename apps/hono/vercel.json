@@ -1,0 +1,9 @@
+{
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && npx turbo build --filter=api",
+  "functions": {
+    "api/[[...route]].ts": {
+      "maxDuration": 30
+    }
+  }
+}
