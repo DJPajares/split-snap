@@ -8,7 +8,8 @@ import { Hono } from 'hono';
 // import mongoose from 'mongoose';
 // import { config } from './lib/config.js';
 
-const app = new Hono().basePath('/api');
+// const app = new Hono().basePath('/api');
+const app = new Hono();
 
 const welcomeStrings = [
   'Hello Hono!',
