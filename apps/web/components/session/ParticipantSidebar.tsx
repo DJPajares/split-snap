@@ -100,54 +100,58 @@ export function ParticipantSidebar({
                       {summary?.items.length ?? 0} items
                     </p>
                   </div>
-                  {canKick && !isCurrentUser && (
-                    <Popover
-                      isOpen={confirmId === participant.id}
-                      onOpenChange={(open) =>
-                        setConfirmId(open ? participant.id : null)
-                      }
-                      placement="left"
-                    >
-                      <PopoverTrigger>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="light"
-                          color="danger"
-                          isLoading={kickingId === participant.id}
-                          aria-label={`Kick ${participant.displayName}`}
+                  {canKick && (
+                    <div className="w-8 flex justify-center shrink-0">
+                      {!isCurrentUser ? (
+                        <Popover
+                          isOpen={confirmId === participant.id}
+                          onOpenChange={(open) =>
+                            setConfirmId(open ? participant.id : null)
+                          }
+                          placement="left"
                         >
-                          ✕
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <div className="p-3 space-y-2">
-                          <p className="text-sm font-medium">
-                            Remove {participant.displayName}?
-                          </p>
-                          <p className="text-xs text-default-400">
-                            All their claims will be removed.
-                          </p>
-                          <div className="flex gap-2 justify-end">
+                          <PopoverTrigger>
                             <Button
+                              isIconOnly
                               size="sm"
-                              variant="flat"
-                              onPress={() => setConfirmId(null)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
+                              variant="light"
                               color="danger"
-                              onPress={() => handleKick(participant.id)}
                               isLoading={kickingId === participant.id}
+                              aria-label={`Kick ${participant.displayName}`}
                             >
-                              Remove
+                              ✕
                             </Button>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                          </PopoverTrigger>
+                          <PopoverContent>
+                            <div className="p-3 space-y-2">
+                              <p className="text-sm font-medium">
+                                Remove {participant.displayName}?
+                              </p>
+                              <p className="text-xs text-default-400">
+                                All their claims will be removed.
+                              </p>
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="flat"
+                                  onPress={() => setConfirmId(null)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  color="danger"
+                                  onPress={() => handleKick(participant.id)}
+                                  isLoading={kickingId === participant.id}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : null}
+                    </div>
                   )}
                 </div>
               </div>

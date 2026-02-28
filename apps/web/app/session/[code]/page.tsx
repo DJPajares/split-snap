@@ -23,17 +23,26 @@ export default function SessionPage({
   const [error, setError] = useState<string | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const { user } = useAuth();
 
-  // Load initial session data
+  // Load initial session data and validate participant
   useEffect(() => {
     api.sessions
       .get(code)
       .then((s) => {
         setInitialSession(s);
-        // Check if we have a stored participant ID for this session
         const stored = localStorage.getItem(`participant_${code}`);
-        if (stored) setParticipantId(stored);
+        if (stored) {
+          // Validate the stored participant still exists in the session
+          const stillExists = s.participants.some((p) => p.id === stored);
+          if (stillExists) {
+            setParticipantId(stored);
+          } else {
+            // Participant was kicked — clear stale data
+            localStorage.removeItem(`participant_${code}`);
+          }
+        }
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Session not found');
@@ -82,7 +91,8 @@ export default function SessionPage({
 
   const handleClaimToggle = useCallback(
     async (itemId: string) => {
-      if (!participantId || !session) return;
+      if (!participantId || !session || actionLoading) return;
+      setActionLoading(true);
       try {
         await api.sessions.claimItem(code, itemId, {
           participantId,
@@ -94,9 +104,11 @@ export default function SessionPage({
           description: err instanceof Error ? err.message : 'Unknown error',
           color: 'danger'
         });
+      } finally {
+        setActionLoading(false);
       }
     },
-    [code, participantId, session]
+    [code, participantId, session, actionLoading]
   );
 
   const handleSettle = useCallback(async () => {
@@ -151,7 +163,14 @@ export default function SessionPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
+    <div className="max-w-6xl mx-auto px-4 py-6 relative">
+      {/* Full-page loading overlay */}
+      {actionLoading && (
+        <div className="absolute inset-0 bg-background/50 z-50 flex items-center justify-center rounded-lg">
+          <Spinner size="lg" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>

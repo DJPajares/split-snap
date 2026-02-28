@@ -232,33 +232,35 @@ export function ItemEditor({
       <Divider />
       <CardBody className="gap-4">
         {/* Items */}
-        <div className="space-y-3">
+        <div className="space-y-0 divide-y divide-default-200">
           {items.map((item, i) => (
             <div
               key={i}
-              className="relative flex flex-col sm:flex-row gap-2 items-start sm:items-center"
+              className="flex flex-col sm:flex-row gap-2 items-start sm:items-center py-4 first:pt-0 last:pb-0"
             >
-              {/* Mobile: X button top-right of each item group */}
-              <Button
-                isIconOnly
-                variant="light"
-                color="danger"
-                size="sm"
-                onPress={() => removeItem(i)}
-                isDisabled={items.length <= 1}
-                aria-label="Remove item"
-                className="absolute top-0 right-0 sm:hidden z-10"
-              >
-                ✕
-              </Button>
-              <Input
-                label="Item"
-                placeholder="e.g. Burger"
-                value={item.name}
-                onValueChange={(val) => updateItem(i, 'name', val)}
-                className="flex-1"
-                size="sm"
-              />
+              {/* Item name + mobile X button in a row */}
+              <div className="flex gap-2 items-start w-full sm:contents">
+                <Input
+                  label="Item"
+                  placeholder="e.g. Burger"
+                  value={item.name}
+                  onValueChange={(val) => updateItem(i, 'name', val)}
+                  className="flex-1"
+                  size="sm"
+                />
+                <Button
+                  isIconOnly
+                  variant="light"
+                  color="danger"
+                  size="sm"
+                  onPress={() => removeItem(i)}
+                  isDisabled={items.length <= 1}
+                  aria-label="Remove item"
+                  className="mt-1 shrink-0 sm:hidden"
+                >
+                  ✕
+                </Button>
+              </div>
               <Input
                 label="Price"
                 type="number"
@@ -315,37 +317,39 @@ export function ItemEditor({
         <Divider />
 
         {/* Totals */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-          <Input
-            label="Tax"
-            type="number"
-            placeholder="0.00"
-            value={tax}
-            onValueChange={(val) => {
-              setTax(val);
-              setTaxError(undefined);
-            }}
-            onBlur={() => validateExtraAmount(tax, 'tax')}
-            startContent={<span className="text-default-400 text-sm">$</span>}
-            size="sm"
-            isInvalid={Boolean(taxError)}
-            errorMessage={taxError}
-          />
-          <Input
-            label="Tip / Service Charge"
-            type="number"
-            placeholder="0.00"
-            value={tip}
-            onValueChange={(val) => {
-              setTip(val);
-              setTipError(undefined);
-            }}
-            onBlur={() => validateExtraAmount(tip, 'tip')}
-            startContent={<span className="text-default-400 text-sm">$</span>}
-            size="sm"
-            isInvalid={Boolean(tipError)}
-            errorMessage={tipError}
-          />
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Tax"
+              type="number"
+              placeholder="0.00"
+              value={tax}
+              onValueChange={(val) => {
+                setTax(val);
+                setTaxError(undefined);
+              }}
+              onBlur={() => validateExtraAmount(tax, 'tax')}
+              startContent={<span className="text-default-400 text-sm">$</span>}
+              size="sm"
+              isInvalid={Boolean(taxError)}
+              errorMessage={taxError}
+            />
+            <Input
+              label="Tip / Service Charge"
+              type="number"
+              placeholder="0.00"
+              value={tip}
+              onValueChange={(val) => {
+                setTip(val);
+                setTipError(undefined);
+              }}
+              onBlur={() => validateExtraAmount(tip, 'tip')}
+              startContent={<span className="text-default-400 text-sm">$</span>}
+              size="sm"
+              isInvalid={Boolean(tipError)}
+              errorMessage={tipError}
+            />
+          </div>
           <div className="w-full bg-content2 rounded-lg px-3 py-2 text-center">
             <p className="text-xs text-default-500">Total</p>
             <p className="text-lg font-bold">${total.toFixed(2)}</p>
