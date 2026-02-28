@@ -1,14 +1,13 @@
 import { Hono } from 'hono';
-// import { cors } from 'hono/cors';
-// import { logger } from 'hono/logger';
-// import { sessionRoutes } from './routes/sessions.js';
-// import { receiptRoutes } from './routes/receipts.js';
-// import { authRoutes } from './routes/auth.js';
-// import { connectDB } from './lib/db.js';
-// import mongoose from 'mongoose';
-// import { config } from './lib/config.js';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
 
-// const app = new Hono().basePath('/api');
+import { authRoutes } from './routes/auth.js';
+import { connectDB } from './lib/db.js';
+
+import { sessionRoutes } from './routes/sessions.js';
+import { receiptRoutes } from './routes/receipts.js';
+
 const app = new Hono();
 
 const welcomeStrings = [
@@ -20,8 +19,8 @@ app.get('/', (c) => {
   return c.text(welcomeStrings.join('\n\n'));
 });
 
-// app.use('*', logger());
-// app.use('*', cors());
+app.use('*', logger());
+app.use('*', cors());
 
 app.get('/health', (c) => {
   return c.json({
@@ -30,30 +29,26 @@ app.get('/health', (c) => {
   });
 });
 
-// app.use('*', async (c, next) => {
-//   if (c.req.path === '/api/health') {
-//     return next();
-//   }
+app.use('*', async (c, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('Mongo connect failed:', err);
+    return c.json({ error: 'Database unavailable' }, 503);
+  }
 
-//   try {
-//     await connectDB();
-//   } catch (err) {
-//     console.error('Mongo connect failed:', err);
-//     return c.json({ error: 'Database unavailable' }, 503);
-//   }
+  await next();
+});
 
-//   await next();
-// });
-
-// app.route('/auth', authRoutes);
-// app.route('/receipts', receiptRoutes);
-// app.route('/sessions', sessionRoutes);
+app.route('/auth', authRoutes);
+app.route('/receipts', receiptRoutes);
+app.route('/sessions', sessionRoutes);
 
 // app.notFound((c) => c.json({ error: 'Not found' }, 404));
 
-// app.onError((err, c) => {
-//   console.error('Unhandled error:', err);
-//   return c.json({ error: 'Internal server error' }, 500);
-// });
+app.onError((err, c) => {
+  console.error('Unhandled error:', err);
+  return c.json({ error: 'Internal server error' }, 500);
+});
 
 export default app;
