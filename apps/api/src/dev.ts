@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server';
-import { app } from './app.js';
+import app from './index.js';
 import { config } from './lib/config.js';
 
 // Local dev server — in production (Vercel), vercel.ts is used instead

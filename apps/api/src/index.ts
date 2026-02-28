@@ -8,7 +8,16 @@ import { logger } from 'hono/logger';
 // import mongoose from 'mongoose';
 // import { config } from './lib/config.js';
 
-export const app = new Hono().basePath('/api');
+const app = new Hono().basePath('/api');
+
+const welcomeStrings = [
+  'Hello Hono!',
+  'To learn more about Hono on Vercel, visit https://vercel.com/docs/frameworks/backend/hono'
+];
+
+app.get('/', (c) => {
+  return c.text(welcomeStrings.join('\n\n'));
+});
 
 app.use('*', logger());
 app.use('*', cors());
