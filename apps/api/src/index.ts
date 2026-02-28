@@ -23,12 +23,12 @@ app.get('/', (c) => {
 // app.use('*', logger());
 // app.use('*', cors());
 
-// app.get('/health', (c) => {
-//   return c.json({
-//     status: 'ok',
-//     timestamp: new Date().toISOString()
-//   });
-// });
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // app.use('*', async (c, next) => {
 //   if (c.req.path === '/api/health') {
