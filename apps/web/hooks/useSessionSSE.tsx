@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import type { Session, SSEEventType } from "@split-snap/shared";
-import { api } from "@/lib/api";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import type { Session, SSEEventType } from '@split-snap/shared';
+import { api } from '@/lib/api';
 
 interface UseSessionSSEOptions {
   code: string;
@@ -37,11 +37,12 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
 
     // Listen for all session event types
     const eventTypes: SSEEventType[] = [
-      "session:updated",
-      "participant:joined",
-      "item:claimed",
-      "item:unclaimed",
-      "session:settled",
+      'session:updated',
+      'participant:joined',
+      'item:claimed',
+      'item:unclaimed',
+      'items:updated',
+      'session:settled'
     ];
 
     for (const eventType of eventTypes) {
@@ -51,7 +52,7 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
           setSession(data);
           onUpdateRef.current?.(data);
         } catch {
-          console.error("Failed to parse SSE event:", event.data);
+          console.error('Failed to parse SSE event:', event.data);
         }
       });
     }

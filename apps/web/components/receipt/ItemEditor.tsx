@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Button,
   Input,
   Card,
   CardBody,
   CardHeader,
-  Divider,
-} from "@heroui/react";
-import type { ScannedItem } from "@split-snap/shared";
+  Divider
+} from '@heroui/react';
+import type { ScannedItem } from '@split-snap/shared';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -25,6 +25,7 @@ interface ItemEditorProps {
     total: number;
   }) => void;
   isSubmitting: boolean;
+  submitLabel?: string;
 }
 
 type EditableItem = {
@@ -46,23 +47,24 @@ export function ItemEditor({
   initialTip,
   onSubmit,
   isSubmitting,
+  submitLabel = 'Create Session'
 }: ItemEditorProps) {
   const [items, setItems] = useState<EditableItem[]>(
     initialItems.length > 0
       ? initialItems.map((item) => ({
           name: item.name,
-          price: item.price ? item.price.toString() : "",
-          quantity: item.quantity ? item.quantity.toString() : "",
+          price: item.price ? item.price.toString() : '',
+          quantity: item.quantity ? item.quantity.toString() : ''
         }))
-      : [{ name: "", price: "", quantity: "" }]
+      : [{ name: '', price: '', quantity: '' }]
   );
-  const [tax, setTax] = useState(initialTax ? initialTax.toString() : "");
-  const [tip, setTip] = useState(initialTip ? initialTip.toString() : "");
-  const [itemErrors, setItemErrors] = useState<ItemErrors[]>(
-    () =>
-      (initialItems.length > 0 ? initialItems : [{ name: "", price: 0, quantity: 1 }]).map(
-        () => ({})
-      )
+  const [tax, setTax] = useState(initialTax ? initialTax.toString() : '');
+  const [tip, setTip] = useState(initialTip ? initialTip.toString() : '');
+  const [itemErrors, setItemErrors] = useState<ItemErrors[]>(() =>
+    (initialItems.length > 0
+      ? initialItems
+      : [{ name: '', price: 0, quantity: 1 }]
+    ).map(() => ({}))
   );
   const [taxError, setTaxError] = useState<string | undefined>();
   const [tipError, setTipError] = useState<string | undefined>();
@@ -90,7 +92,7 @@ export function ItemEditor({
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
 
-    if (field === "price" || field === "quantity") {
+    if (field === 'price' || field === 'quantity') {
       setItemErrors((prev) =>
         prev.map((error, i) =>
           i === index ? { ...error, [field]: undefined } : error
@@ -99,21 +101,21 @@ export function ItemEditor({
     }
   };
 
-  const validateItemField = (index: number, field: "price" | "quantity") => {
-    const value = items[index]?.[field] ?? "";
+  const validateItemField = (index: number, field: 'price' | 'quantity') => {
+    const value = items[index]?.[field] ?? '';
     let error: string | undefined;
 
-    if (field === "price") {
-      if (value.trim() === "") {
-        error = "Price is required.";
+    if (field === 'price') {
+      if (value.trim() === '') {
+        error = 'Price is required.';
       } else if (parseNumber(value) < 0) {
-        error = "Price cannot be negative.";
+        error = 'Price cannot be negative.';
       }
     }
 
-    if (field === "quantity") {
-      if (value.trim() === "" || parseInteger(value) < 1) {
-        error = "Quantity must be at least 1.";
+    if (field === 'quantity') {
+      if (value.trim() === '' || parseInteger(value) < 1) {
+        error = 'Quantity must be at least 1.';
       }
     }
 
@@ -126,13 +128,13 @@ export function ItemEditor({
     return !error;
   };
 
-  const validateExtraAmount = (value: string, type: "tax" | "tip") => {
+  const validateExtraAmount = (value: string, type: 'tax' | 'tip') => {
     const nextError =
-      value.trim() !== "" && parseNumber(value) < 0
-        ? `${type === "tax" ? "Tax" : "Tip / Service Charge"} cannot be negative.`
+      value.trim() !== '' && parseNumber(value) < 0
+        ? `${type === 'tax' ? 'Tax' : 'Tip / Service Charge'} cannot be negative.`
         : undefined;
 
-    if (type === "tax") {
+    if (type === 'tax') {
       setTaxError(nextError);
     } else {
       setTipError(nextError);
@@ -142,7 +144,7 @@ export function ItemEditor({
   };
 
   const addItem = () => {
-    setItems((prev) => [...prev, { name: "", price: "", quantity: "" }]);
+    setItems((prev) => [...prev, { name: '', price: '', quantity: '' }]);
     setItemErrors((prev) => [...prev, {}]);
   };
 
@@ -162,14 +164,14 @@ export function ItemEditor({
       const rowErrors: ItemErrors = {};
 
       if (item.name.trim()) {
-        if (item.price.trim() === "") {
-          rowErrors.price = "Price is required.";
+        if (item.price.trim() === '') {
+          rowErrors.price = 'Price is required.';
         } else if (priceValue < 0) {
-          rowErrors.price = "Price cannot be negative.";
+          rowErrors.price = 'Price cannot be negative.';
         }
 
-        if (item.quantity.trim() === "" || quantityValue < 1) {
-          rowErrors.quantity = "Quantity must be at least 1.";
+        if (item.quantity.trim() === '' || quantityValue < 1) {
+          rowErrors.quantity = 'Quantity must be at least 1.';
         }
       }
 
@@ -182,8 +184,8 @@ export function ItemEditor({
 
     setItemErrors(nextItemErrors);
 
-    const isTaxValid = validateExtraAmount(tax, "tax");
-    const isTipValid = validateExtraAmount(tip, "tip");
+    const isTaxValid = validateExtraAmount(tax, 'tax');
+    const isTipValid = validateExtraAmount(tip, 'tip');
 
     if (!isTaxValid || !isTipValid) {
       hasError = true;
@@ -193,19 +195,27 @@ export function ItemEditor({
       .map((item) => ({
         name: item.name.trim(),
         price: parseNumber(item.price),
-        quantity: parseInteger(item.quantity),
+        quantity: parseInteger(item.quantity)
       }))
       .filter((item) => item.name && item.price > 0 && item.quantity >= 1);
 
     if (validItems.length === 0 || hasError) return;
 
-    onSubmit({ items: validItems, subtotal, tax: taxValue, tip: tipValue, total });
+    onSubmit({
+      items: validItems,
+      subtotal,
+      tax: taxValue,
+      tip: tipValue,
+      total
+    });
   };
 
   const canSubmit =
     items.some(
       (item) =>
-        item.name.trim() && parseNumber(item.price) > 0 && parseInteger(item.quantity) >= 1
+        item.name.trim() &&
+        parseNumber(item.price) > 0 &&
+        parseInteger(item.quantity) >= 1
     ) &&
     itemErrors.every((error) => !error.price && !error.quantity) &&
     !taxError &&
@@ -232,7 +242,7 @@ export function ItemEditor({
                 label="Item"
                 placeholder="e.g. Burger"
                 value={item.name}
-                onValueChange={(val) => updateItem(i, "name", val)}
+                onValueChange={(val) => updateItem(i, 'name', val)}
                 className="flex-1"
                 size="sm"
               />
@@ -241,9 +251,11 @@ export function ItemEditor({
                 type="number"
                 placeholder="0.00"
                 value={item.price}
-                onValueChange={(val) => updateItem(i, "price", val)}
-                onBlur={() => validateItemField(i, "price")}
-                startContent={<span className="text-default-400 text-sm">$</span>}
+                onValueChange={(val) => updateItem(i, 'price', val)}
+                onBlur={() => validateItemField(i, 'price')}
+                startContent={
+                  <span className="text-default-400 text-sm">$</span>
+                }
                 className="w-full sm:w-28"
                 size="sm"
                 isInvalid={Boolean(itemErrors[i]?.price)}
@@ -254,8 +266,8 @@ export function ItemEditor({
                 type="number"
                 placeholder="1"
                 value={item.quantity}
-                onValueChange={(val) => updateItem(i, "quantity", val)}
-                onBlur={() => validateItemField(i, "quantity")}
+                onValueChange={(val) => updateItem(i, 'quantity', val)}
+                onBlur={() => validateItemField(i, 'quantity')}
                 className="w-full sm:w-20"
                 size="sm"
                 isInvalid={Boolean(itemErrors[i]?.quantity)}
@@ -276,7 +288,12 @@ export function ItemEditor({
           ))}
         </div>
 
-        <Button variant="flat" size="sm" onPress={addItem} className="self-start">
+        <Button
+          variant="flat"
+          size="sm"
+          onPress={addItem}
+          className="self-start"
+        >
           + Add Item
         </Button>
 
@@ -293,7 +310,7 @@ export function ItemEditor({
               setTax(val);
               setTaxError(undefined);
             }}
-            onBlur={() => validateExtraAmount(tax, "tax")}
+            onBlur={() => validateExtraAmount(tax, 'tax')}
             startContent={<span className="text-default-400 text-sm">$</span>}
             size="sm"
             isInvalid={Boolean(taxError)}
@@ -308,7 +325,7 @@ export function ItemEditor({
               setTip(val);
               setTipError(undefined);
             }}
-            onBlur={() => validateExtraAmount(tip, "tip")}
+            onBlur={() => validateExtraAmount(tip, 'tip')}
             startContent={<span className="text-default-400 text-sm">$</span>}
             size="sm"
             isInvalid={Boolean(tipError)}
@@ -330,7 +347,7 @@ export function ItemEditor({
           isLoading={isSubmitting}
           isDisabled={!canSubmit}
         >
-          Create Session
+          {submitLabel}
         </Button>
       </CardBody>
     </Card>

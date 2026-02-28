@@ -1,22 +1,18 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, use } from "react";
-import {
-  Button,
-  Chip,
-  Spinner,
-  addToast,
-} from "@heroui/react";
-import { useRouter } from "next/navigation";
-import type { Session } from "@split-snap/shared";
-import { api } from "@/lib/api";
-import { useSessionSSE } from "@/hooks/useSessionSSE";
-import { SessionItemList } from "@/components/session/SessionItemList";
-import { ParticipantSidebar } from "@/components/session/ParticipantSidebar";
-import { ShareLinkModal } from "@/components/session/ShareLinkModal";
+import { useState, useEffect, useCallback, use } from 'react';
+import { Button, Chip, Spinner, addToast } from '@heroui/react';
+import { useRouter } from 'next/navigation';
+import type { Session } from '@split-snap/shared';
+import { api } from '@/lib/api';
+import { useSessionSSE } from '@/hooks/useSessionSSE';
+import { useAuth } from '@/hooks/useAuth';
+import { SessionItemList } from '@/components/session/SessionItemList';
+import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
+import { ShareLinkModal } from '@/components/session/ShareLinkModal';
 
 export default function SessionPage({
-  params,
+  params
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -27,6 +23,7 @@ export default function SessionPage({
   const [error, setError] = useState<string | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const { user } = useAuth();
 
   // Load initial session data
   useEffect(() => {
@@ -39,7 +36,7 @@ export default function SessionPage({
         if (stored) setParticipantId(stored);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : "Session not found");
+        setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
   }, [code]);
@@ -49,12 +46,15 @@ export default function SessionPage({
     code,
     onUpdate: (updated) => {
       setInitialSession(updated);
-    },
+    }
   });
 
   const session = liveSession ?? initialSession;
   const hasUnclaimedItems = Boolean(
     session?.items.some((item) => item.claimedBy.length === 0)
+  );
+  const isCreator = Boolean(
+    user && session?.createdBy && session.createdBy === user.id
   );
 
   useEffect(() => {
@@ -69,13 +69,13 @@ export default function SessionPage({
       try {
         await api.sessions.claimItem(code, itemId, {
           participantId,
-          portion: 1,
+          portion: 1
         });
       } catch (err) {
         addToast({
-          title: "Failed to update claim",
-          description: err instanceof Error ? err.message : "Unknown error",
-          color: "danger",
+          title: 'Failed to update claim',
+          description: err instanceof Error ? err.message : 'Unknown error',
+          color: 'danger'
         });
       }
     },
@@ -85,12 +85,12 @@ export default function SessionPage({
   const handleSettle = useCallback(async () => {
     try {
       await api.sessions.settle(code);
-      addToast({ title: "Session settled!", color: "success" });
+      addToast({ title: 'Session settled!', color: 'success' });
     } catch (err) {
       addToast({
-        title: "Failed to settle",
-        description: err instanceof Error ? err.message : "Unknown error",
-        color: "danger",
+        title: 'Failed to settle',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        color: 'danger'
       });
     }
   }, [code]);
@@ -106,8 +106,8 @@ export default function SessionPage({
   if (error || !session) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-xl text-danger">{error || "Session not found"}</p>
-        <Button onPress={() => router.push("/")}>Go Home</Button>
+        <p className="text-xl text-danger">{error || 'Session not found'}</p>
+        <Button onPress={() => router.push('/')}>Go Home</Button>
       </div>
     );
   }
@@ -127,11 +127,11 @@ export default function SessionPage({
             <Chip
               size="sm"
               color={
-                session.status === "active"
-                  ? "success"
-                  : session.status === "settled"
-                    ? "default"
-                    : "warning"
+                session.status === 'active'
+                  ? 'success'
+                  : session.status === 'settled'
+                    ? 'default'
+                    : 'warning'
               }
               variant="flat"
             >
@@ -140,18 +140,14 @@ export default function SessionPage({
             <Chip
               size="sm"
               variant="dot"
-              color={connected ? "success" : "danger"}
+              color={connected ? 'success' : 'danger'}
             >
-              {connected ? "Live" : "Reconnecting..."}
+              {connected ? 'Live' : 'Reconnecting...'}
             </Chip>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="flat"
-            size="sm"
-            onPress={() => setShowShare(true)}
-          >
+          <Button variant="flat" size="sm" onPress={() => setShowShare(true)}>
             🔗 Share
           </Button>
           <Button
@@ -162,7 +158,18 @@ export default function SessionPage({
           >
             📊 Summary
           </Button>
-          {session.status === "active" && (
+          {isCreator && session.status !== 'settled' && (
+            <Button
+              as="a"
+              href={`/session/${code}/edit`}
+              variant="flat"
+              color="primary"
+              size="sm"
+            >
+              ✏️ Edit Items
+            </Button>
+          )}
+          {session.status === 'active' && (
             <Button
               color="success"
               size="sm"
@@ -174,7 +181,7 @@ export default function SessionPage({
           )}
         </div>
       </div>
-      {session.status === "active" && hasUnclaimedItems && (
+      {session.status === 'active' && hasUnclaimedItems && (
         <p className="text-sm text-warning mb-4">
           Claim all items before finalizing settlement.
         </p>

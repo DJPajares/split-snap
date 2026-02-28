@@ -1,6 +1,6 @@
 // ─── Session ───────────────────────────────────────────────
 
-export type SessionStatus = "draft" | "active" | "settled";
+export type SessionStatus = 'draft' | 'active' | 'settled';
 
 export interface SessionItem {
   id: string;
@@ -54,7 +54,7 @@ export interface User {
 // ─── API Payloads ──────────────────────────────────────────
 
 export interface CreateSessionPayload {
-  items: Omit<SessionItem, "id" | "claimedBy">[];
+  items: Omit<SessionItem, 'id' | 'claimedBy'>[];
   subtotal: number;
   tax: number;
   tip: number;
@@ -66,6 +66,14 @@ export interface CreateSessionPayload {
 export interface JoinSessionPayload {
   displayName: string;
   userId?: string | null;
+}
+
+export interface UpdateItemsPayload {
+  items: { id?: string; name: string; price: number; quantity: number }[];
+  subtotal: number;
+  tax: number;
+  tip: number;
+  total: number;
 }
 
 export interface ClaimItemPayload {
@@ -92,11 +100,12 @@ export interface AuthResponse {
 // ─── SSE Events ────────────────────────────────────────────
 
 export type SSEEventType =
-  | "session:updated"
-  | "participant:joined"
-  | "item:claimed"
-  | "item:unclaimed"
-  | "session:settled";
+  | 'session:updated'
+  | 'participant:joined'
+  | 'item:claimed'
+  | 'item:unclaimed'
+  | 'items:updated'
+  | 'session:settled';
 
 export interface SSEEvent {
   type: SSEEventType;
