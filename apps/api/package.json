@@ -7,6 +7,7 @@
     "dev": "tsx watch --env-file=../../.env src/dev.ts",
     "build": "tsc",
     "start": "node --env-file=../../.env dist/dev.js",
+    "start:prod": "node dist/dev.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {

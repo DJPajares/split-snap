@@ -52,18 +52,15 @@ export function SessionItemList({
             }`}
           >
             <CardBody className="flex flex-row items-center gap-3 p-3">
-              {participantId &&
-                (isLoading ? (
-                  <Spinner size="sm" color="primary" />
-                ) : (
-                  <Checkbox
-                    isSelected={isClaimed}
-                    isDisabled={isSettled}
-                    onChange={() => handleClaimToggle(item.id)}
-                    size="lg"
-                    color="primary"
-                  />
-                ))}
+              {participantId && (
+                <Checkbox
+                  isSelected={isClaimed}
+                  isDisabled={isSettled}
+                  onChange={() => handleClaimToggle(item.id)}
+                  size="lg"
+                  color="primary"
+                />
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{item.name}</p>
                 {item.quantity > 1 && (

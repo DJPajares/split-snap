@@ -171,7 +171,7 @@ export function ParticipantSidebar({
             <span>${session.tax.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-default-500">Tip / Service Charge</span>
+            <span className="text-default-500">Service Charge/Tip</span>
             <span>${session.tip.toFixed(2)}</span>
           </div>
           <Divider />

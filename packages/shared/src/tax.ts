@@ -1,4 +1,4 @@
-import type { Session, PersonSummary } from "./types.js";
+import type { Session, PersonSummary } from './types.js';
 
 /**
  * Calculate each participant's share of the bill, including
@@ -18,7 +18,7 @@ export function calculateSummaries(session: Session): PersonSummary[] {
       itemsSubtotal: 0,
       taxShare: 0,
       tipShare: 0,
-      total: 0,
+      total: 0
     });
   }
 
@@ -31,10 +31,16 @@ export function calculateSummaries(session: Session): PersonSummary[] {
       const summary = summaryMap.get(claim.participantId);
       if (!summary) continue;
 
-      const amount =
-        totalPortions > 0 ? (claim.portion / totalPortions) * itemTotal : 0;
+      const ratio = totalPortions > 0 ? claim.portion / totalPortions : 0;
+      const amount = ratio * itemTotal;
+      const claimedQuantity = ratio * item.quantity;
 
-      summary.items.push({ name: item.name, amount: round(amount) });
+      summary.items.push({
+        name: item.name,
+        claimedQuantity: round(claimedQuantity),
+        totalQuantity: item.quantity,
+        amount: round(amount)
+      });
       summary.itemsSubtotal += amount;
     }
   }

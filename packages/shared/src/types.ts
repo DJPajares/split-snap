@@ -134,7 +134,12 @@ export interface ScanResult {
 export interface PersonSummary {
   participantId: string;
   displayName: string;
-  items: { name: string; amount: number }[];
+  items: {
+    name: string;
+    claimedQuantity: number;
+    totalQuantity: number;
+    amount: number;
+  }[];
   itemsSubtotal: number;
   taxShare: number;
   tipShare: number;

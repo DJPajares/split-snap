@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use } from 'react';
 import {
   Card,
   CardBody,
@@ -8,15 +8,15 @@ import {
   Divider,
   Spinner,
   Button,
-  Chip,
-} from "@heroui/react";
-import { useRouter } from "next/navigation";
-import type { Session, PersonSummary } from "@split-snap/shared";
-import { calculateSummaries } from "@split-snap/shared";
-import { api } from "@/lib/api";
+  Chip
+} from '@heroui/react';
+import { useRouter } from 'next/navigation';
+import type { Session, PersonSummary } from '@split-snap/shared';
+import { calculateSummaries } from '@split-snap/shared';
+import { api } from '@/lib/api';
 
 export default function SummaryPage({
-  params,
+  params
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -29,7 +29,7 @@ export default function SummaryPage({
     api.sessions
       .get(code)
       .then(setSession)
-      .catch(() => router.push("/"))
+      .catch(() => router.push('/'))
       .finally(() => setLoading(false));
   }, [code, router]);
 
@@ -103,6 +103,61 @@ export default function SummaryPage({
 }
 
 function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
+  const quantityFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+
+  const fractionGlyphs = [
+    { value: 0.125, glyph: '⅛' },
+    { value: 0.25, glyph: '¼' },
+    { value: 0.333, glyph: '⅓' },
+    { value: 0.375, glyph: '⅜' },
+    { value: 0.5, glyph: '½' },
+    { value: 0.625, glyph: '⅝' },
+    { value: 0.667, glyph: '⅔' },
+    { value: 0.75, glyph: '¾' },
+    { value: 0.875, glyph: '⅞' }
+  ];
+
+  const isWholeNumber = (value: number) => Math.abs(value - Math.round(value)) < 0.001;
+
+  const formatFriendlyQuantity = (value: number) => {
+    const rounded = Math.round(value * 100) / 100;
+    const whole = Math.trunc(rounded);
+    const fractional = rounded - whole;
+
+    for (const fraction of fractionGlyphs) {
+      if (Math.abs(fractional - fraction.value) < 0.02) {
+        return whole > 0 ? `${whole}${fraction.glyph}` : fraction.glyph;
+      }
+    }
+
+    return quantityFormatter.format(rounded);
+  };
+
+  const getItemQuantityLabel = (
+    claimedQuantity: number,
+    totalQuantity: number
+  ) => {
+    const normalizedClaimed = isWholeNumber(claimedQuantity)
+      ? Math.round(claimedQuantity)
+      : claimedQuantity;
+    const normalizedTotal = isWholeNumber(totalQuantity)
+      ? Math.round(totalQuantity)
+      : totalQuantity;
+
+    if (normalizedClaimed === 1 && normalizedTotal === 1) {
+      return '';
+    }
+
+    if (Number.isInteger(normalizedClaimed)) {
+      return ` (x${normalizedClaimed})`;
+    }
+
+    return ` (${formatFriendlyQuantity(normalizedClaimed)} share)`;
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -117,7 +172,10 @@ function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
       <CardBody className="pt-3 gap-2">
         {summary.items.map((item, i) => (
           <div key={i} className="flex justify-between text-sm">
-            <span className="text-default-600">{item.name}</span>
+            <span className="text-default-600">
+              {item.name}
+              {getItemQuantityLabel(item.claimedQuantity, item.totalQuantity)}
+            </span>
             <span>${item.amount.toFixed(2)}</span>
           </div>
         ))}
@@ -129,11 +187,11 @@ function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
           <span>${summary.itemsSubtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-default-500">Tax share</span>
+          <span className="text-default-500">Tax (share)</span>
           <span>${summary.taxShare.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-default-500">Tip share</span>
+          <span className="text-default-500">Service Charge/Tip (share)</span>
           <span>${summary.tipShare.toFixed(2)}</span>
         </div>
       </CardBody>

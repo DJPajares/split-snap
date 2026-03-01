@@ -34,7 +34,7 @@ const createSessionSchema = z.object({
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
   total: z.number().min(0),
-  currency: z.string().default('USD'),
+  currency: z.string().default('SGD'),
   receiptImageUrl: z.string().nullable().optional()
 });
 
