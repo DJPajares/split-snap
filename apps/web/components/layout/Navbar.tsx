@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Navbar as HeroNavbar,
@@ -9,11 +9,12 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   Button,
-  Link,
-} from "@heroui/react";
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+  Link
+} from '@heroui/react';
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,12 +30,22 @@ export function Navbar() {
     >
       <NavbarContent>
         <NavbarMenuToggle
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           className="sm:hidden"
         />
         <NavbarBrand>
-          <Link href="/" className="font-bold text-inherit text-xl gap-2 flex items-center">
-            <span className="text-2xl">📸</span>
+          <Link
+            href="/"
+            className="font-bold text-inherit text-xl gap-2 flex items-center"
+          >
+            <Image
+              src="/logo.png"
+              alt="Split Snap logo"
+              width={28}
+              height={28}
+              className="rounded-md"
+              priority
+            />
             <span>Split Snap</span>
           </Link>
         </NavbarBrand>
@@ -59,9 +70,7 @@ export function Navbar() {
         {user ? (
           <>
             <NavbarItem className="hidden sm:flex">
-              <span className="text-sm text-default-500">
-                {user.name}
-              </span>
+              <span className="text-sm text-default-500">{user.name}</span>
             </NavbarItem>
             <NavbarItem>
               <Button
@@ -69,7 +78,7 @@ export function Navbar() {
                 variant="flat"
                 onPress={() => {
                   logout();
-                  router.push("/");
+                  router.push('/');
                 }}
               >
                 Log Out
@@ -79,12 +88,7 @@ export function Navbar() {
         ) : (
           <>
             <NavbarItem>
-              <Button
-                as={Link}
-                href="/auth/login"
-                size="sm"
-                variant="flat"
-              >
+              <Button as={Link} href="/auth/login" size="sm" variant="flat">
                 Log In
               </Button>
             </NavbarItem>

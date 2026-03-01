@@ -4,15 +4,15 @@
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16, React 19, Tailwind CSS 4, HeroUI |
-| Backend | Hono (Node.js) |
-| Database | MongoDB + Mongoose 9 |
-| AI / OCR | Google Gemini (free), OpenAI GPT-4o (paid), Tesseract.js (offline) |
-| Real-time | Server-Sent Events (SSE) |
-| Monorepo | Turborepo + pnpm workspaces |
-| Language | TypeScript 5.9 |
+| Layer     | Technology                                                         |
+| --------- | ------------------------------------------------------------------ |
+| Frontend  | Next.js 16, React 19, Tailwind CSS 4, HeroUI                       |
+| Backend   | Hono (Node.js)                                                     |
+| Database  | MongoDB + Mongoose 9                                               |
+| AI / OCR  | Google Gemini (free), OpenAI GPT-4o (paid), Tesseract.js (offline) |
+| Real-time | Server-Sent Events (SSE)                                           |
+| Monorepo  | Turborepo + pnpm workspaces                                        |
+| Language  | TypeScript 5.9                                                     |
 
 ## Project Structure
 
@@ -64,6 +64,7 @@ pnpm dev
 ```
 
 This starts:
+
 - **Frontend** at http://localhost:3000
 - **API** at http://localhost:3001
 
@@ -77,12 +78,12 @@ pnpm build
 
 The scanner supports **3 providers** with an auto-fallback chain. Set `RECEIPT_SCANNER_PROVIDER` in `.env` to choose:
 
-| Provider | Cost | Accuracy | Setup |
-|----------|------|----------|-------|
-| `gemini` | **Free** (15 req/min) | Best | Get key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
-| `openai` | ~$0.01–0.03/scan | Best | Get key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
-| `tesseract` | **Free, offline** | Good | No setup needed — works out of the box |
-| Manual entry | Free | N/A | Always available in the UI |
+| Provider     | Cost                  | Accuracy | Setup                                                                           |
+| ------------ | --------------------- | -------- | ------------------------------------------------------------------------------- |
+| `gemini`     | **Free** (15 req/min) | Best     | Get key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey)     |
+| `openai`     | ~$0.01–0.03/scan      | Best     | Get key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| `tesseract`  | **Free, offline**     | Good     | No setup needed — works out of the box                                          |
+| Manual entry | Free                  | N/A      | Always available in the UI                                                      |
 
 **Default mode (`auto`)** tries in order: Gemini → OpenAI → Tesseract. If no API keys are set, Tesseract OCR is used automatically.
 
@@ -114,19 +115,19 @@ OPENAI_API_KEY=sk-...               # for OpenAI (optional)
 
 ## API Endpoints
 
-| Method | Route | Description |
-|--------|-------|-------------|
-| `POST` | `/api/receipts/scan` | Scan receipt image |
-| `GET` | `/api/receipts/provider` | Get active scanner provider |
-| `POST` | `/api/sessions` | Create a new session |
-| `GET` | `/api/sessions/:code` | Get session details |
-| `POST` | `/api/sessions/:code/join` | Join a session |
-| `PATCH` | `/api/sessions/:code/items/:id/claim` | Claim/unclaim an item |
-| `PATCH` | `/api/sessions/:code/settle` | Mark session as settled |
-| `GET` | `/api/sessions/:code/events` | SSE real-time updates |
-| `POST` | `/api/auth/register` | Register |
-| `POST` | `/api/auth/login` | Login |
-| `GET` | `/api/auth/me` | Current user |
+| Method  | Route                             | Description                 |
+| ------- | --------------------------------- | --------------------------- |
+| `POST`  | `/receipts/scan`                  | Scan receipt image          |
+| `GET`   | `/receipts/provider`              | Get active scanner provider |
+| `POST`  | `/sessions`                       | Create a new session        |
+| `GET`   | `/sessions/:code`                 | Get session details         |
+| `POST`  | `/sessions/:code/join`            | Join a session              |
+| `PATCH` | `/sessions/:code/items/:id/claim` | Claim/unclaim an item       |
+| `PATCH` | `/sessions/:code/settle`          | Mark session as settled     |
+| `GET`   | `/sessions/:code/events`          | SSE real-time updates       |
+| `POST`  | `/auth/register`                  | Register                    |
+| `POST`  | `/auth/login`                     | Login                       |
+| `GET`   | `/auth/me`                        | Current user                |
 
 ## License
 
