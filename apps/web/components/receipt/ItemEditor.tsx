@@ -17,6 +17,7 @@ interface ItemEditorProps {
   initialTax: number;
   initialTip: number;
   initialTotal: number;
+  initialPriceInterpretation?: 'unit' | 'line-total';
   onSubmit: (data: {
     items: ScannedItem[];
     subtotal: number;
@@ -30,14 +31,14 @@ interface ItemEditorProps {
 
 type EditableItem = {
   name: string;
-  price: string;
+  amount: string;
   quantity: string;
 };
 
 type ItemField = keyof EditableItem;
 
 type ItemErrors = {
-  price?: string;
+  amount?: string;
   quantity?: string;
 };
 
@@ -45,6 +46,7 @@ export function ItemEditor({
   initialItems,
   initialTax,
   initialTip,
+  initialPriceInterpretation = 'unit',
   onSubmit,
   isSubmitting,
   submitLabel = 'Create Session'
@@ -53,18 +55,24 @@ export function ItemEditor({
     initialItems.length > 0
       ? initialItems.map((item) => ({
           name: item.name,
-          price: item.price ? item.price.toString() : '',
+          amount:
+            item.price && item.quantity
+              ? (initialPriceInterpretation === 'unit'
+                  ? item.price * item.quantity
+                  : item.price
+                ).toString()
+              : '',
           quantity: item.quantity ? item.quantity.toString() : ''
         }))
-      : [{ name: '', price: '', quantity: '' }]
+      : [{ name: '', amount: '', quantity: '' }]
   );
   const [tax, setTax] = useState(initialTax ? initialTax.toString() : '');
   const [tip, setTip] = useState(initialTip ? initialTip.toString() : '');
   const [itemErrors, setItemErrors] = useState<ItemErrors[]>(() =>
-    (initialItems.length > 0
-      ? initialItems
-      : [{ name: '', price: 0, quantity: 1 }]
-    ).map(() => ({}))
+    Array.from(
+      { length: initialItems.length > 0 ? initialItems.length : 1 },
+      () => ({})
+    )
   );
   const [taxError, setTaxError] = useState<string | undefined>();
   const [tipError, setTipError] = useState<string | undefined>();
@@ -80,7 +88,7 @@ export function ItemEditor({
   };
 
   const subtotal = items.reduce(
-    (sum, item) => sum + parseNumber(item.price) * parseInteger(item.quantity),
+    (sum, item) => sum + parseNumber(item.amount),
     0
   );
   const taxValue = parseNumber(tax);
@@ -92,7 +100,7 @@ export function ItemEditor({
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
 
-    if (field === 'price' || field === 'quantity') {
+    if (field === 'amount' || field === 'quantity') {
       setItemErrors((prev) =>
         prev.map((error, i) =>
           i === index ? { ...error, [field]: undefined } : error
@@ -101,15 +109,15 @@ export function ItemEditor({
     }
   };
 
-  const validateItemField = (index: number, field: 'price' | 'quantity') => {
+  const validateItemField = (index: number, field: 'amount' | 'quantity') => {
     const value = items[index]?.[field] ?? '';
     let error: string | undefined;
 
-    if (field === 'price') {
+    if (field === 'amount') {
       if (value.trim() === '') {
-        error = 'Price is required.';
+        error = 'Amount is required.';
       } else if (parseNumber(value) < 0) {
-        error = 'Price cannot be negative.';
+        error = 'Amount cannot be negative.';
       }
     }
 
@@ -144,7 +152,7 @@ export function ItemEditor({
   };
 
   const addItem = () => {
-    setItems((prev) => [...prev, { name: '', price: '', quantity: '' }]);
+    setItems((prev) => [...prev, { name: '', amount: '', quantity: '' }]);
     setItemErrors((prev) => [...prev, {}]);
   };
 
@@ -158,16 +166,16 @@ export function ItemEditor({
     let hasError = false;
 
     const nextItemErrors = items.map((item) => {
-      const priceValue = parseNumber(item.price);
+      const amountValue = parseNumber(item.amount);
       const quantityValue = parseInteger(item.quantity);
 
       const rowErrors: ItemErrors = {};
 
       if (item.name.trim()) {
-        if (item.price.trim() === '') {
-          rowErrors.price = 'Price is required.';
-        } else if (priceValue < 0) {
-          rowErrors.price = 'Price cannot be negative.';
+        if (item.amount.trim() === '') {
+          rowErrors.amount = 'Amount is required.';
+        } else if (amountValue < 0) {
+          rowErrors.amount = 'Amount cannot be negative.';
         }
 
         if (item.quantity.trim() === '' || quantityValue < 1) {
@@ -175,7 +183,7 @@ export function ItemEditor({
         }
       }
 
-      if (rowErrors.price || rowErrors.quantity) {
+      if (rowErrors.amount || rowErrors.quantity) {
         hasError = true;
       }
 
@@ -194,8 +202,13 @@ export function ItemEditor({
     const validItems: ScannedItem[] = items
       .map((item) => ({
         name: item.name.trim(),
-        price: parseNumber(item.price),
-        quantity: parseInteger(item.quantity)
+        quantity: parseInteger(item.quantity),
+        amount: parseNumber(item.amount)
+      }))
+      .map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.quantity > 0 ? item.amount / item.quantity : 0
       }))
       .filter((item) => item.name && item.price > 0 && item.quantity >= 1);
 
@@ -214,10 +227,10 @@ export function ItemEditor({
     items.some(
       (item) =>
         item.name.trim() &&
-        parseNumber(item.price) > 0 &&
+        parseNumber(item.amount) > 0 &&
         parseInteger(item.quantity) >= 1
     ) &&
-    itemErrors.every((error) => !error.price && !error.quantity) &&
+    itemErrors.every((error) => !error.amount && !error.quantity) &&
     !taxError &&
     !tipError;
 
@@ -226,7 +239,7 @@ export function ItemEditor({
       <CardHeader className="flex flex-col items-start gap-1">
         <h2 className="text-xl font-bold">Review Items</h2>
         <p className="text-sm text-default-500">
-          Edit, add, or remove items before creating the session.
+          Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
       </CardHeader>
       <Divider />
@@ -262,19 +275,19 @@ export function ItemEditor({
                 </Button>
               </div>
               <Input
-                label="Price"
+                label="Amount"
                 type="number"
                 placeholder="0.00"
-                value={item.price}
-                onValueChange={(val) => updateItem(i, 'price', val)}
-                onBlur={() => validateItemField(i, 'price')}
+                value={item.amount}
+                onValueChange={(val) => updateItem(i, 'amount', val)}
+                onBlur={() => validateItemField(i, 'amount')}
                 startContent={
                   <span className="text-default-400 text-sm">$</span>
                 }
                 className="w-full sm:w-28"
                 size="sm"
-                isInvalid={Boolean(itemErrors[i]?.price)}
-                errorMessage={itemErrors[i]?.price}
+                isInvalid={Boolean(itemErrors[i]?.amount)}
+                errorMessage={itemErrors[i]?.amount}
               />
               <Input
                 label="Qty"
@@ -288,6 +301,16 @@ export function ItemEditor({
                 isInvalid={Boolean(itemErrors[i]?.quantity)}
                 errorMessage={itemErrors[i]?.quantity}
               />
+              {parseInteger(item.quantity) > 1 &&
+                parseNumber(item.amount) > 0 && (
+                  <p className="text-xs text-default-500 w-full sm:w-auto sm:min-w-28 sm:text-right">
+                    $
+                    {(
+                      parseNumber(item.amount) / parseInteger(item.quantity)
+                    ).toFixed(2)}{' '}
+                    each
+                  </p>
+                )}
               {/* Desktop: inline X button, vertically centered */}
               <Button
                 isIconOnly

@@ -1,16 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Tabs, Tab, addToast, Spinner } from "@heroui/react";
-import { ReceiptUploader } from "@/components/receipt/ReceiptUploader";
-import { ItemEditor } from "@/components/receipt/ItemEditor";
-import { api } from "@/lib/api";
-import type { ScanResult, ScannedItem } from "@split-snap/shared";
+import { useState, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Tabs, Tab, addToast, Spinner } from '@heroui/react';
+import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
+import { ItemEditor } from '@/components/receipt/ItemEditor';
+import { api } from '@/lib/api';
+import type { ScanResult, ScannedItem } from '@split-snap/shared';
 
 export default function ScanPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center py-20"><Spinner size="lg" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-20">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
       <ScanPageInner />
     </Suspense>
   );
@@ -19,25 +25,26 @@ export default function ScanPage() {
 function ScanPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const startManual = searchParams.get("manual") === "true";
+  const startManual = searchParams.get('manual') === 'true';
 
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState(startManual ? "manual" : "scan");
+  const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
 
   const handleFileSelected = useCallback(async (file: File) => {
     setScanning(true);
     try {
       const result = await api.receipts.scan(file);
       setScanResult(result);
-      setActiveTab("manual"); // Switch to editor after scan
+      setActiveTab('manual'); // Switch to editor after scan
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to scan receipt";
+      const message =
+        err instanceof Error ? err.message : 'Failed to scan receipt';
       addToast({
-        title: "Scan failed",
-        description: message + ". You can enter items manually.",
-        color: "danger",
+        title: 'Scan failed',
+        description: message + '. You can enter items manually.',
+        color: 'danger'
       });
     } finally {
       setScanning(false);
@@ -59,15 +66,16 @@ function ScanPageInner() {
           subtotal: data.subtotal,
           tax: data.tax,
           tip: data.tip,
-          total: data.total,
+          total: data.total
         });
         router.push(`/session/${session.code}`);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to create session";
+        const message =
+          err instanceof Error ? err.message : 'Failed to create session';
         addToast({
-          title: "Error",
+          title: 'Error',
           description: message,
-          color: "danger",
+          color: 'danger'
         });
       } finally {
         setCreating(false);
@@ -104,6 +112,7 @@ function ScanPageInner() {
               initialTax={scanResult?.tax ?? 0}
               initialTip={scanResult?.tip ?? 0}
               initialTotal={scanResult?.total ?? 0}
+              initialPriceInterpretation="line-total"
               onSubmit={handleCreateSession}
               isSubmitting={creating}
             />
