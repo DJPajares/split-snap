@@ -1,4 +1,4 @@
-import type { ScanResult } from '../lib/types.js';
+import type { ScanResult } from '@split-snap/shared';
 import { config } from '../lib/config.js';
 
 // ─── Shared prompt for AI providers ─────────────────────────
