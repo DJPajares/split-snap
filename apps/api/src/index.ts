@@ -9,6 +9,8 @@ import { authRoutes } from './routes/auth.js';
 import { sessionRoutes } from './routes/sessions.js';
 import { receiptRoutes } from './routes/receipts.js';
 
+import { scanReceiptTest } from './services/receipt-scanner.js';
+
 const app = new Hono();
 
 // one-time startup connection (fail-fast on cold start)
@@ -57,20 +59,6 @@ app.get('/tesseract-test', async (c) => {
 
   return c.text(text);
 });
-
-const scanReceiptTest = async (imageBase64: string) => {
-  const worker = await createWorker('eng');
-  const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
-  const text = ret.data.text;
-
-  await worker.terminate();
-
-  if (!text.trim()) {
-    throw new Error('OCR could not extract any text from the image');
-  }
-
-  return text;
-};
 
 app.post('/tesseract-upload-test', async (c) => {
   try {

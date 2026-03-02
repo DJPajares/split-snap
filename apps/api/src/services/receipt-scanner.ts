@@ -329,3 +329,17 @@ export async function scanReceipt(
     `All scan providers failed.\n${errors.join('\n')}\nPlease enter items manually.`
   );
 }
+
+export async function scanReceiptTest(imageBase64: string) {
+  const worker = await createWorker('eng');
+  const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
+  const text = ret.data.text;
+
+  await worker.terminate();
+
+  if (!text.trim()) {
+    throw new Error('OCR could not extract any text from the image');
+  }
+
+  return text;
+};
