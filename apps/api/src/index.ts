@@ -58,6 +58,20 @@ app.get('/tesseract-test', async (c) => {
   return c.text(text);
 });
 
+const scanReceiptTest = async (imageBase64: string) => {
+  const worker = await createWorker('eng');
+  const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
+  const text = ret.data.text;
+
+  await worker.terminate();
+
+  if (!text.trim()) {
+    throw new Error('OCR could not extract any text from the image');
+  }
+
+  return text;
+};
+
 app.post('/tesseract-upload-test', async (c) => {
   try {
     const contentType = c.req.header('Content-Type') || '';
@@ -85,13 +99,9 @@ app.post('/tesseract-upload-test', async (c) => {
       mimeType = body.mimeType || 'image/jpeg';
     }
 
-    const worker = await createWorker('eng');
-    const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
+    const result = await scanReceiptTest(imageBase64);
 
-    const text = ret.data.text;
-    await worker.terminate();
-
-    return c.text(text);
+    return c.text(result);
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : 'Failed to scan receipt';
