@@ -7,13 +7,14 @@ import { api } from '@/lib/api';
 interface UseSessionSSEOptions {
   code: string;
   onUpdate?: (session: Session) => void;
+  onDeleted?: () => void;
 }
 
 const HEARTBEAT_TIMEOUT_MS = 45_000; // server sends every 30s, 15s grace
 const INITIAL_RECONNECT_MS = 3_000;
 const MAX_RECONNECT_MS = 30_000;
 
-export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
+export function useSessionSSE({ code, onUpdate, onDeleted }: UseSessionSSEOptions) {
   const [session, setSession] = useState<Session | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +22,16 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const onUpdateRef = useRef(onUpdate);
+  const onDeletedRef = useRef(onDeleted);
   const reconnectDelayRef = useRef(INITIAL_RECONNECT_MS);
 
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
+
+  useEffect(() => {
+    onDeletedRef.current = onDeleted;
+  }, [onDeleted]);
 
   const resetHeartbeatTimer = useCallback(() => {
     if (heartbeatTimeoutRef.current) {
@@ -85,6 +91,13 @@ export function useSessionSSE({ code, onUpdate }: UseSessionSSEOptions) {
         }
       });
     }
+
+    // Listen for session:deleted
+    es.addEventListener('session:deleted', () => {
+      resetHeartbeatTimer();
+      es.close();
+      onDeletedRef.current?.();
+    });
 
     // Listen for heartbeat to reset the stale timer
     es.addEventListener('heartbeat', () => {

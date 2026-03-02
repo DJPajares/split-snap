@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import type { Session } from '@split-snap/shared';
 import { api } from '@/lib/api';
+import { getCurrencySymbol } from '@split-snap/shared';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -115,7 +116,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">
-                    ${session.total.toFixed(2)}
+                    {getCurrencySymbol(session.currency)}{session.total.toFixed(2)}
                   </p>
                   <p className="text-xs text-default-400">{session.currency}</p>
                 </div>

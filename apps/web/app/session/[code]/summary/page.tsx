@@ -12,7 +12,7 @@ import {
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import type { Session, PersonSummary } from '@split-snap/shared';
-import { calculateSummaries } from '@split-snap/shared';
+import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
 import { api } from '@/lib/api';
 
 export default function SummaryPage({
@@ -44,6 +44,7 @@ export default function SummaryPage({
   if (!session) return null;
 
   const summaries = calculateSummaries(session);
+  const cs = getCurrencySymbol(session.currency);
   const unclaimedItems = session.items.filter(
     (item) => item.claimedBy.length === 0
   );
@@ -73,7 +74,7 @@ export default function SummaryPage({
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
                 <Chip key={item.id} size="sm" variant="flat" color="warning">
-                  {item.name} (${(item.price * item.quantity).toFixed(2)})
+                  {item.name} ({cs}{(item.price * item.quantity).toFixed(2)})
                 </Chip>
               ))}
             </div>
@@ -83,7 +84,7 @@ export default function SummaryPage({
 
       <div className="space-y-4">
         {summaries.map((summary) => (
-          <PersonSummaryCard key={summary.participantId} summary={summary} />
+          <PersonSummaryCard key={summary.participantId} summary={summary} currencySymbol={cs} />
         ))}
       </div>
 
@@ -93,7 +94,7 @@ export default function SummaryPage({
           <div className="flex justify-between items-center">
             <span className="text-lg font-bold">Grand Total</span>
             <span className="text-2xl font-bold">
-              ${session.total.toFixed(2)}
+              {cs}{session.total.toFixed(2)}
             </span>
           </div>
         </CardBody>
@@ -102,7 +103,7 @@ export default function SummaryPage({
   );
 }
 
-function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
+function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary; currencySymbol: string }) {
   const quantityFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
@@ -164,7 +165,7 @@ function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
         <div className="flex items-center justify-between w-full">
           <h3 className="font-bold text-lg">{summary.displayName}</h3>
           <span className="text-xl font-bold text-primary">
-            ${summary.total.toFixed(2)}
+            {currencySymbol}{summary.total.toFixed(2)}
           </span>
         </div>
       </CardHeader>
@@ -176,7 +177,7 @@ function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
               {item.name}
               {getItemQuantityLabel(item.claimedQuantity, item.totalQuantity)}
             </span>
-            <span>${item.amount.toFixed(2)}</span>
+            <span>{currencySymbol}{item.amount.toFixed(2)}</span>
           </div>
         ))}
 
@@ -184,15 +185,15 @@ function PersonSummaryCard({ summary }: { summary: PersonSummary }) {
 
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Items subtotal</span>
-          <span>${summary.itemsSubtotal.toFixed(2)}</span>
+          <span>{currencySymbol}{summary.itemsSubtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Tax (share)</span>
-          <span>${summary.taxShare.toFixed(2)}</span>
+          <span>{currencySymbol}{summary.taxShare.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Service Charge/Tip (share)</span>
-          <span>${summary.tipShare.toFixed(2)}</span>
+          <span>{currencySymbol}{summary.tipShare.toFixed(2)}</span>
         </div>
       </CardBody>
     </Card>

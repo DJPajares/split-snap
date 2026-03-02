@@ -240,7 +240,8 @@ const updateItemsSchema = z.object({
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
-  total: z.number().min(0)
+  total: z.number().min(0),
+  currency: z.string().optional()
 });
 
 sessionRoutes.put('/:code/items', requireAuth, async (c) => {
@@ -317,6 +318,9 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
   session.tax = parsed.data.tax;
   session.tip = parsed.data.tip;
   session.total = parsed.data.total;
+  if (parsed.data.currency) {
+    session.currency = parsed.data.currency;
+  }
 
   await session.save();
 
@@ -383,13 +387,46 @@ sessionRoutes.delete(
   }
 );
 
-// ─── Settle session ────────────────────────────────────────
+// ─── Delete session ────────────────────────────────────────
 
-sessionRoutes.patch('/:code/settle', async (c) => {
+sessionRoutes.delete('/:code', requireAuth, async (c) => {
   const code = c.req.param('code').toUpperCase();
+  const auth = c.get('auth');
+
   const session = await SessionModel.findOne({ code });
   if (!session) {
     return c.json({ error: 'Session not found' }, 404);
+  }
+
+  // Only the session creator can delete
+  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    return c.json(
+      { error: 'Only the session creator can delete the session' },
+      403
+    );
+  }
+
+  // Broadcast deletion to all connected clients before deleting
+  const serialized = serializeSession(session);
+  sseManager.broadcast(code, 'session:deleted', serialized);
+
+  await SessionModel.deleteOne({ _id: session._id });
+
+  return c.json({ success: true });
+});
+
+// ─── Settle session ────────────────────────────────────────
+
+sessionRoutes.patch('/:code/settle', requireAuth, async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const auth = c.get('auth');
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    return c.json({ error: 'Session not found' }, 404);
+  }
+
+  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    return c.json({ error: 'Only the session creator can settle' }, 403);
   }
 
   const hasUnclaimedItems = session.items.some(
@@ -404,6 +441,31 @@ sessionRoutes.patch('/:code/settle', async (c) => {
 
   const serialized = serializeSession(session);
   sseManager.broadcast(code, 'session:settled', serialized);
+
+  return c.json(serialized);
+});
+
+sessionRoutes.patch('/:code/unsettle', requireAuth, async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const auth = c.get('auth');
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    return c.json({ error: 'Session not found' }, 404);
+  }
+
+  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    return c.json({ error: 'Only the session creator can undo settlement' }, 403);
+  }
+
+  if (session.status !== 'settled') {
+    return c.json({ error: 'Session is not settled' }, 400);
+  }
+
+  session.status = 'active';
+  await session.save();
+
+  const serialized = serializeSession(session);
+  sseManager.broadcast(code, 'session:updated', serialized);
 
   return c.json(serialized);
 });

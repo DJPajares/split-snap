@@ -41,6 +41,7 @@ export interface Session {
 
 export type SSEEventType =
   | 'session:updated'
+  | 'session:deleted'
   | 'participant:joined'
   | 'participant:kicked'
   | 'item:claimed'

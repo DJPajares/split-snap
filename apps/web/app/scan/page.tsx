@@ -58,6 +58,7 @@ function ScanPageInner() {
       tax: number;
       tip: number;
       total: number;
+      currency: string;
     }) => {
       setCreating(true);
       try {
@@ -66,7 +67,8 @@ function ScanPageInner() {
           subtotal: data.subtotal,
           tax: data.tax,
           tip: data.tip,
-          total: data.total
+          total: data.total,
+          currency: data.currency
         });
         router.push(`/session/${session.code}`);
       } catch (err) {

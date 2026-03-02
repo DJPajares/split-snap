@@ -1,31 +1,28 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardBody, Chip, Checkbox, Spinner } from '@heroui/react';
 import type { Session } from '@split-snap/shared';
+import { getCurrencySymbol } from '@split-snap/shared';
 
 interface SessionItemListProps {
   session: Session;
   participantId: string | null;
-  onClaimToggle: (itemId: string) => Promise<void>;
+  onClaimToggle: (itemId: string) => void;
+  claimingItems?: Set<string>;
 }
 
 export function SessionItemList({
   session,
   participantId,
-  onClaimToggle
+  onClaimToggle,
+  claimingItems = new Set()
 }: SessionItemListProps) {
   const isSettled = session.status === 'settled';
-  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const cs = getCurrencySymbol(session.currency);
 
-  const handleClaimToggle = async (itemId: string) => {
-    if (loadingItemId || isSettled || !participantId) return;
-    setLoadingItemId(itemId);
-    try {
-      await onClaimToggle(itemId);
-    } finally {
-      setLoadingItemId(null);
-    }
+  const handleClaimToggle = (itemId: string) => {
+    if (isSettled || !participantId) return;
+    onClaimToggle(itemId);
   };
 
   return (
@@ -36,7 +33,7 @@ export function SessionItemList({
           : false;
         const totalClaimers = item.claimedBy.length;
         const itemTotal = item.price * item.quantity;
-        const isLoading = loadingItemId === item.id;
+        const isLoading = claimingItems.has(item.id);
 
         return (
           <Card
@@ -45,7 +42,7 @@ export function SessionItemList({
             onPress={() => handleClaimToggle(item.id)}
             className={`transition-all w-full ${
               isLoading
-                ? 'opacity-70 pointer-events-none'
+                ? 'opacity-70'
                 : isClaimed
                   ? 'border-primary border-2 bg-primary/5'
                   : 'border-transparent border-2'
@@ -65,7 +62,7 @@ export function SessionItemList({
                 <p className="font-medium truncate">{item.name}</p>
                 {item.quantity > 1 && (
                   <p className="text-xs text-default-400">
-                    ${item.price.toFixed(2)} × {item.quantity}
+                    {cs}{item.price.toFixed(2)} × {item.quantity}
                   </p>
                 )}
                 {totalClaimers > 0 && (
@@ -93,7 +90,7 @@ export function SessionItemList({
                 )}
               </div>
               <div className="text-right shrink-0">
-                <p className="font-semibold">${itemTotal.toFixed(2)}</p>
+                <p className="font-semibold">{cs}{itemTotal.toFixed(2)}</p>
                 {totalClaimers === 0 && (
                   <p className="text-xs text-warning">unclaimed</p>
                 )}

@@ -49,6 +49,7 @@ export default function EditSessionPage({
     tax: number;
     tip: number;
     total: number;
+    currency: string;
   }) => {
     setSubmitting(true);
     try {
@@ -71,7 +72,8 @@ export default function EditSessionPage({
         subtotal: data.subtotal,
         tax: data.tax,
         tip: data.tip,
-        total: data.total
+        total: data.total,
+        currency: data.currency
       });
 
       addToast({ title: 'Items updated!', color: 'success' });
@@ -119,15 +121,18 @@ export default function EditSessionPage({
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold">Edit Items</h1>
+            <p className="text-default-500 text-base font-semibold">Session {code}</p>
+          </div>
           <Button
-            variant="light"
+            variant="flat"
             size="sm"
             onPress={() => router.push(`/session/${code}`)}
           >
             ← Back
           </Button>
-          <h1 className="text-2xl font-bold">Edit Items — Session {code}</h1>
         </div>
         <p className="text-default-500 text-sm">
           Modify items, prices, or quantities. Claims on changed items will be
@@ -141,6 +146,7 @@ export default function EditSessionPage({
         initialTax={session.tax}
         initialTip={session.tip}
         initialTotal={session.total}
+        initialCurrency={session.currency}
         onSubmit={handleSubmit}
         isSubmitting={submitting}
         submitLabel="Save Changes"

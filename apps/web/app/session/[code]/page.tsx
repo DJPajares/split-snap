@@ -1,7 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
-import { Button, Chip, Spinner, addToast } from '@heroui/react';
+import { useState, useEffect, useCallback, useRef, use } from 'react';
+import {
+  Button,
+  Chip,
+  Spinner,
+  addToast,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
+} from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import type { Session } from '@split-snap/shared';
 import { api } from '@/lib/api';
@@ -23,7 +34,17 @@ export default function SessionPage({
   const [error, setError] = useState<string | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [claimingItems, setClaimingItems] = useState<Set<string>>(new Set());
+  const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const [settleLoading, setSettleLoading] = useState(false);
+  const [unsettleLoading, setUnsettleLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const {
+    isOpen: isSettleOpen,
+    onOpen: onSettleOpen,
+    onOpenChange: onSettleOpenChange
+  } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
   const { user } = useAuth();
 
   // Load initial session data and validate participant
@@ -72,6 +93,15 @@ export default function SessionPage({
           router.replace(`/join/${code}`);
         }
       }
+    },
+    onDeleted: () => {
+      addToast({
+        title: 'Session deleted',
+        description: 'This session was deleted by the host.',
+        color: 'warning'
+      });
+      localStorage.removeItem(`participant_${code}`);
+      router.replace('/');
     }
   });
 
@@ -90,28 +120,44 @@ export default function SessionPage({
   }, [loading, error, session, participantId, router, code]);
 
   const handleClaimToggle = useCallback(
-    async (itemId: string) => {
-      if (!participantId || !session || actionLoading) return;
-      setActionLoading(true);
-      try {
-        await api.sessions.claimItem(code, itemId, {
-          participantId,
-          portion: 1
-        });
-      } catch (err) {
-        addToast({
-          title: 'Failed to update claim',
-          description: err instanceof Error ? err.message : 'Unknown error',
-          color: 'danger'
-        });
-      } finally {
-        setActionLoading(false);
-      }
+    (itemId: string) => {
+      if (!participantId || !session) return;
+
+      // Clear existing debounce timer for this item
+      const existing = debounceTimers.current.get(itemId);
+      if (existing) clearTimeout(existing);
+
+      // Debounce: wait 400ms before firing the API call
+      const timer = setTimeout(async () => {
+        debounceTimers.current.delete(itemId);
+        setClaimingItems((prev) => new Set(prev).add(itemId));
+        try {
+          await api.sessions.claimItem(code, itemId, {
+            participantId,
+            portion: 1
+          });
+        } catch (err) {
+          addToast({
+            title: 'Failed to update claim',
+            description: err instanceof Error ? err.message : 'Unknown error',
+            color: 'danger'
+          });
+        } finally {
+          setClaimingItems((prev) => {
+            const next = new Set(prev);
+            next.delete(itemId);
+            return next;
+          });
+        }
+      }, 400);
+
+      debounceTimers.current.set(itemId, timer);
     },
-    [code, participantId, session, actionLoading]
+    [code, participantId, session]
   );
 
   const handleSettle = useCallback(async () => {
+    setSettleLoading(true);
     try {
       await api.sessions.settle(code);
       addToast({ title: 'Session settled!', color: 'success' });
@@ -121,6 +167,24 @@ export default function SessionPage({
         description: err instanceof Error ? err.message : 'Unknown error',
         color: 'danger'
       });
+    } finally {
+      setSettleLoading(false);
+    }
+  }, [code]);
+
+  const handleUnsettle = useCallback(async () => {
+    setUnsettleLoading(true);
+    try {
+      await api.sessions.unsettle(code);
+      addToast({ title: 'Settlement undone', color: 'success' });
+    } catch (err) {
+      addToast({
+        title: 'Failed to undo settlement',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        color: 'danger'
+      });
+    } finally {
+      setUnsettleLoading(false);
     }
   }, [code]);
 
@@ -139,6 +203,23 @@ export default function SessionPage({
     },
     [code]
   );
+
+  const handleDelete = useCallback(async () => {
+    setDeleteLoading(true);
+    try {
+      await api.sessions.delete(code);
+      addToast({ title: 'Session deleted', color: 'success' });
+      router.push('/');
+    } catch (err) {
+      addToast({
+        title: 'Failed to delete session',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        color: 'danger'
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  }, [code, router]);
 
   if (loading) {
     return (
@@ -164,12 +245,6 @@ export default function SessionPage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 relative">
-      {/* Full-page loading overlay */}
-      {actionLoading && (
-        <div className="absolute inset-0 bg-background/50 z-50 flex items-center justify-center rounded-lg">
-          <Spinner size="lg" />
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
@@ -217,23 +292,56 @@ export default function SessionPage({
       {isCreator && session.status === 'active' && (
         <div className="flex flex-wrap gap-3 mb-4">
           <Button
+            color="success"
+            variant="solid"
+            size="md"
+            className="w-full sm:w-auto"
+            onPress={onSettleOpen}
+            isDisabled={hasUnclaimedItems}
+          >
+            ✓ Settle
+          </Button>
+          <Button
             as="a"
             href={`/session/${code}/edit`}
             color="primary"
-            variant="solid"
+            variant="flat"
             size="md"
             className="w-full sm:w-auto"
           >
             ✏️ Edit Items
           </Button>
           <Button
-            color="success"
+            color="danger"
+            variant="light"
             size="md"
             className="w-full sm:w-auto"
-            onPress={handleSettle}
-            isDisabled={hasUnclaimedItems}
+            onPress={onDeleteOpen}
           >
-            ✓ Settle
+            🗑️ Delete
+          </Button>
+        </div>
+      )}
+      {isCreator && session.status === 'settled' && (
+        <div className="flex flex-wrap gap-3 mb-4">
+          <Button
+            color="warning"
+            variant="flat"
+            size="md"
+            className="w-full sm:w-auto"
+            onPress={handleUnsettle}
+            isLoading={unsettleLoading}
+          >
+            ↩ Undo Settlement
+          </Button>
+          <Button
+            color="danger"
+            variant="light"
+            size="md"
+            className="w-full sm:w-auto"
+            onPress={onDeleteOpen}
+          >
+            🗑️ Delete
           </Button>
         </div>
       )}
@@ -253,6 +361,7 @@ export default function SessionPage({
             session={session}
             participantId={participantId}
             onClaimToggle={handleClaimToggle}
+            claimingItems={claimingItems}
           />
         </div>
 
@@ -272,6 +381,71 @@ export default function SessionPage({
         onClose={() => setShowShare(false)}
         sessionCode={code}
       />
+
+      <Modal isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Settle Session</ModalHeader>
+              <ModalBody>
+                <p>Finalize this session now?</p>
+                <p className="text-sm text-default-500">
+                  Participants will no longer be able to claim or unclaim items
+                  until you undo settlement.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color="success"
+                  onPress={async () => {
+                    await handleSettle();
+                    onClose();
+                  }}
+                  isLoading={settleLoading}
+                >
+                  Confirm Settle
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Delete Session</ModalHeader>
+              <ModalBody>
+                <p>Are you sure you want to delete this session?</p>
+                <p className="text-sm text-default-500">
+                  This will permanently remove the session and disconnect all
+                  participants. This action cannot be undone.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color="danger"
+                  onPress={async () => {
+                    await handleDelete();
+                    onClose();
+                  }}
+                  isLoading={deleteLoading}
+                >
+                  Delete Session
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -74,6 +74,7 @@ export interface UpdateItemsPayload {
   tax: number;
   tip: number;
   total: number;
+  currency?: string;
 }
 
 export interface ClaimItemPayload {
@@ -101,6 +102,7 @@ export interface AuthResponse {
 
 export type SSEEventType =
   | 'session:updated'
+  | 'session:deleted'
   | 'participant:joined'
   | 'participant:kicked'
   | 'item:claimed'

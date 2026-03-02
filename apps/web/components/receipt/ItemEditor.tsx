@@ -7,9 +7,12 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Divider
+  Divider,
+  Select,
+  SelectItem
 } from '@heroui/react';
 import type { ScannedItem } from '@split-snap/shared';
+import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -18,12 +21,14 @@ interface ItemEditorProps {
   initialTip: number;
   initialTotal: number;
   initialPriceInterpretation?: 'unit' | 'line-total';
+  initialCurrency?: string;
   onSubmit: (data: {
     items: ScannedItem[];
     subtotal: number;
     tax: number;
     tip: number;
     total: number;
+    currency: string;
   }) => void;
   isSubmitting: boolean;
   submitLabel?: string;
@@ -47,10 +52,13 @@ export function ItemEditor({
   initialTax,
   initialTip,
   initialPriceInterpretation = 'unit',
+  initialCurrency = 'SGD',
   onSubmit,
   isSubmitting,
   submitLabel = 'Create Session'
 }: ItemEditorProps) {
+  const [currency, setCurrency] = useState(initialCurrency);
+  const currencySymbol = getCurrencySymbol(currency);
   const [items, setItems] = useState<EditableItem[]>(
     initialItems.length > 0
       ? initialItems.map((item) => ({
@@ -219,7 +227,8 @@ export function ItemEditor({
       subtotal,
       tax: taxValue,
       tip: tipValue,
-      total
+      total,
+      currency
     });
   };
 
@@ -236,11 +245,27 @@ export function ItemEditor({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col items-start gap-1">
+      <CardHeader className="flex flex-col items-start gap-2">
         <h2 className="text-xl font-bold">Review Items</h2>
         <p className="text-sm text-default-500">
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
+        <Select
+          label="Currency"
+          selectedKeys={[currency]}
+          onSelectionChange={(keys) => {
+            const selected = Array.from(keys)[0] as string;
+            if (selected) setCurrency(selected);
+          }}
+          size="sm"
+          className="max-w-xs"
+        >
+          {CURRENCIES.map((c) => (
+            <SelectItem key={c.code} textValue={`${c.code} (${c.symbol})`}>
+              {c.symbol} — {c.code} ({c.name})
+            </SelectItem>
+          ))}
+        </Select>
       </CardHeader>
       <Divider />
       <CardBody className="gap-4">
@@ -282,7 +307,7 @@ export function ItemEditor({
                 onValueChange={(val) => updateItem(i, 'amount', val)}
                 onBlur={() => validateItemField(i, 'amount')}
                 startContent={
-                  <span className="text-default-400 text-sm">$</span>
+                  <span className="text-default-400 text-sm">{currencySymbol}</span>
                 }
                 className="w-full sm:w-28"
                 size="sm"
@@ -304,7 +329,7 @@ export function ItemEditor({
               {parseInteger(item.quantity) > 1 &&
                 parseNumber(item.amount) > 0 && (
                   <p className="text-xs text-default-500 w-full sm:w-auto sm:min-w-28 sm:text-right">
-                    $
+                    {currencySymbol}
                     {(
                       parseNumber(item.amount) / parseInteger(item.quantity)
                     ).toFixed(2)}{' '}
@@ -352,7 +377,7 @@ export function ItemEditor({
                 setTaxError(undefined);
               }}
               onBlur={() => validateExtraAmount(tax, 'tax')}
-              startContent={<span className="text-default-400 text-sm">$</span>}
+              startContent={<span className="text-default-400 text-sm">{currencySymbol}</span>}
               size="sm"
               isInvalid={Boolean(taxError)}
               errorMessage={taxError}
@@ -367,7 +392,7 @@ export function ItemEditor({
                 setTipError(undefined);
               }}
               onBlur={() => validateExtraAmount(tip, 'tip')}
-              startContent={<span className="text-default-400 text-sm">$</span>}
+              startContent={<span className="text-default-400 text-sm">{currencySymbol}</span>}
               size="sm"
               isInvalid={Boolean(tipError)}
               errorMessage={tipError}
@@ -375,7 +400,7 @@ export function ItemEditor({
           </div>
           <div className="w-full bg-content2 rounded-lg px-3 py-2 text-center">
             <p className="text-xs text-default-500">Total</p>
-            <p className="text-lg font-bold">${total.toFixed(2)}</p>
+            <p className="text-lg font-bold">{currencySymbol}{total.toFixed(2)}</p>
           </div>
         </div>
 

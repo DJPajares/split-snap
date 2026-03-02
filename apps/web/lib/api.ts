@@ -119,6 +119,9 @@ export const api = {
     settle: (code: string) =>
       request<Session>(API_ROUTES.SESSION_SETTLE(code), { method: 'PATCH' }),
 
+    unsettle: (code: string) =>
+      request<Session>(API_ROUTES.SESSION_UNSETTLE(code), { method: 'PATCH' }),
+
     updateItems: (code: string, data: UpdateItemsPayload) =>
       request<Session>(API_ROUTES.SESSION_UPDATE_ITEMS(code), {
         method: 'PUT',
@@ -127,6 +130,11 @@ export const api = {
 
     kick: (code: string, participantId: string) =>
       request<Session>(API_ROUTES.SESSION_KICK(code, participantId), {
+        method: 'DELETE'
+      }),
+
+    delete: (code: string) =>
+      request<{ success: boolean }>(API_ROUTES.SESSION_DELETE(code), {
         method: 'DELETE'
       }),
 
