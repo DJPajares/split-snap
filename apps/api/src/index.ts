@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { createWorker } from 'tesseract.js';
 
 import { connectDB } from './lib/db.js';
 
@@ -13,7 +14,6 @@ const app = new Hono();
 // one-time startup connection (fail-fast on cold start)
 const dbReady = (async () => {
   await connectDB();
-  console.log('MongoDB connected');
 })();
 
 app.use('*', logger());
@@ -46,11 +46,32 @@ app.get('/health', (c) => {
   });
 });
 
+app.get('/tesseract-test', async (c) => {
+  let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
+
+  try {
+    worker = await createWorker('eng');
+    const ret = await worker.recognize('https://tesseract.projectnaptha.com/img/eng_bw.png');
+    return c.text(ret.data.text);
+  } catch (err) {
+    console.error('Tesseract error:', err);
+    return c.json(
+      {
+        error: 'Tesseract failed',
+        message: err instanceof Error ? err.message : String(err),
+      },
+      500
+    );
+  } finally {
+    if (worker) await worker.terminate();
+  }
+});
+
 app.route('/auth', authRoutes);
 app.route('/receipts', receiptRoutes);
 app.route('/sessions', sessionRoutes);
 
-// app.notFound((c) => c.json({ error: 'Not found' }, 404));
+app.notFound((c) => c.json({ error: 'Not found' }, 404));
 
 app.onError((err, c) => {
   console.error('Unhandled error:', err);
