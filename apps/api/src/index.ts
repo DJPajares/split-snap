@@ -48,31 +48,56 @@ app.get('/health', (c) => {
 
 app.get('/tesseract-test', async (c) => {
   const worker = await createWorker('eng');
-  const ret = await worker.recognize('https://tesseract.projectnaptha.com/img/eng_bw.png');
+  const ret = await worker.recognize(
+    'https://tesseract.projectnaptha.com/img/eng_bw.png'
+  );
+
   const text = ret.data.text;
-  console.log('Tesseract OCR result:', text);
   await worker.terminate();
+
   return c.text(text);
+});
 
-  // WORKING EXAMPLE FOR TESSERACT.JS IN NODE
-  // let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
+app.get('/tesseract-upload-test', async (c) => {
+  try {
+    const contentType = c.req.header('Content-Type') || '';
 
-  // try {
-  //   worker = await createWorker('eng');
-  //   const ret = await worker.recognize('https://tesseract.projectnaptha.com/img/eng_bw.png');
-  //   return c.text(ret.data.text);
-  // } catch (err) {
-  //   console.error('Tesseract error:', err);
-  //   return c.json(
-  //     {
-  //       error: 'Tesseract failed',
-  //       message: err instanceof Error ? err.message : String(err),
-  //     },
-  //     500
-  //   );
-  // } finally {
-  //   if (worker) await worker.terminate();
-  // }
+    let imageBase64: string;
+    let mimeType = 'image/jpeg';
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await c.req.formData();
+      const file = formData.get('receipt') as File | null;
+      if (!file) {
+        return c.json({ error: 'No receipt image provided' }, 400);
+      }
+
+      mimeType = file.type || 'image/jpeg';
+      const buffer = await file.arrayBuffer();
+      imageBase64 = Buffer.from(buffer).toString('base64');
+    } else {
+      // Expect JSON with base64 image
+      const body = await c.req.json();
+      if (!body.image) {
+        return c.json({ error: 'No image data provided' }, 400);
+      }
+      imageBase64 = body.image;
+      mimeType = body.mimeType || 'image/jpeg';
+    }
+
+    const worker = await createWorker('eng');
+    const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
+
+    const text = ret.data.text;
+    await worker.terminate();
+
+    return c.text(text);
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Failed to scan receipt';
+    console.error('Receipt scan error:', err);
+    return c.json({ error: message }, 500);
+  }
 });
 
 app.route('/auth', authRoutes);
