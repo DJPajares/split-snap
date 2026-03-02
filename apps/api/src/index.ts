@@ -42,10 +42,14 @@ app.get('/', (c) => {
 });
 
 app.get('/health', (c) => {
-  return c.json({
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
+  return c.json(
+    {
+      ok: true,
+      service: 'split-snap-api',
+      timestamp: new Date().toISOString()
+    },
+    200
+  );
 });
 
 app.get('/tesseract-test', async (c) => {

@@ -49,6 +49,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // ─── Auth ──────────────────────────────────────────────────
 
 export const api = {
+  health: {
+    check: () =>
+      request<{ ok: boolean; service: string; timestamp: string }>('/health')
+  },
+
   auth: {
     register: (data: RegisterPayload) =>
       request<AuthResponse>(API_ROUTES.AUTH_REGISTER, {
