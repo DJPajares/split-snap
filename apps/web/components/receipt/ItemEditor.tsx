@@ -258,7 +258,6 @@ export function ItemEditor({
             if (selected) setCurrency(selected);
           }}
           size="sm"
-          className="max-w-xs"
         >
           {CURRENCIES.map((c) => (
             <SelectItem key={c.code} textValue={`${c.code} (${c.symbol})`}>
@@ -268,87 +267,78 @@ export function ItemEditor({
         </Select>
       </CardHeader>
       <Divider />
-      <CardBody className="gap-4">
+      <CardBody className="gap-5">
         {/* Items */}
-        <div className="space-y-0 divide-y divide-default-200">
+        <div className="space-y-4">
           {items.map((item, i) => (
-            <div
-              key={i}
-              className="flex flex-col sm:flex-row gap-2 items-start sm:items-center py-4 first:pt-0 last:pb-0"
-            >
-              {/* Item name + mobile X button in a row */}
-              <div className="flex gap-2 items-start w-full sm:contents">
-                <Input
-                  label="Item"
-                  placeholder="e.g. Burger"
-                  value={item.name}
-                  onValueChange={(val) => updateItem(i, 'name', val)}
-                  className="flex-1"
-                  size="sm"
-                />
-                <Button
-                  isIconOnly
-                  variant="light"
-                  color="danger"
-                  size="sm"
-                  onPress={() => removeItem(i)}
-                  isDisabled={items.length <= 1}
-                  aria-label="Remove item"
-                  className="mt-1 shrink-0 sm:hidden"
-                >
-                  ✕
-                </Button>
-              </div>
-              <Input
-                label="Amount"
-                type="number"
-                placeholder="0.00"
-                value={item.amount}
-                onValueChange={(val) => updateItem(i, 'amount', val)}
-                onBlur={() => validateItemField(i, 'amount')}
-                startContent={
-                  <span className="text-default-400 text-sm">{currencySymbol}</span>
-                }
-                className="w-full sm:w-28"
-                size="sm"
-                isInvalid={Boolean(itemErrors[i]?.amount)}
-                errorMessage={itemErrors[i]?.amount}
-              />
-              <Input
-                label="Qty"
-                type="number"
-                placeholder="1"
-                value={item.quantity}
-                onValueChange={(val) => updateItem(i, 'quantity', val)}
-                onBlur={() => validateItemField(i, 'quantity')}
-                className="w-full sm:w-20"
-                size="sm"
-                isInvalid={Boolean(itemErrors[i]?.quantity)}
-                errorMessage={itemErrors[i]?.quantity}
-              />
-              {parseInteger(item.quantity) > 1 &&
-                parseNumber(item.amount) > 0 && (
-                  <p className="text-xs text-default-500 w-full sm:w-auto sm:min-w-28 sm:text-right">
-                    {currencySymbol}
-                    {(
-                      parseNumber(item.amount) / parseInteger(item.quantity)
-                    ).toFixed(2)}{' '}
-                    each
+            <div key={i} className="space-y-1.5">
+              <div className="rounded-2xl border border-default-200 bg-content1/90 p-3 sm:p-4 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-default-500">
+                    Item {i + 1}
                   </p>
-                )}
-              {/* Desktop: inline X button, vertically centered */}
-              <Button
-                isIconOnly
-                variant="light"
-                color="danger"
-                size="sm"
-                onPress={() => removeItem(i)}
-                isDisabled={items.length <= 1}
-                aria-label="Remove item"
-                className="hidden sm:flex self-center"
-              >
-                ✕
-              </Button>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    color="danger"
+                    size="sm"
+                    onPress={() => removeItem(i)}
+                    isDisabled={items.length <= 1}
+                    aria-label="Remove item"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
+                  <Input
+                    label="Item"
+                    placeholder="e.g. Burger"
+                    value={item.name}
+                    onValueChange={(val) => updateItem(i, 'name', val)}
+                    className="w-full sm:col-span-7"
+                    size="sm"
+                  />
+                  <Input
+                    label="Amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={item.amount}
+                    onValueChange={(val) => updateItem(i, 'amount', val)}
+                    onBlur={() => validateItemField(i, 'amount')}
+                    startContent={
+                      <span className="text-default-400 text-sm">
+                        {currencySymbol}
+                      </span>
+                    }
+                    className="w-full sm:col-span-3"
+                    size="sm"
+                    isInvalid={Boolean(itemErrors[i]?.amount)}
+                    errorMessage={itemErrors[i]?.amount}
+                  />
+                  <Input
+                    label="Qty"
+                    type="number"
+                    placeholder="1"
+                    value={item.quantity}
+                    onValueChange={(val) => updateItem(i, 'quantity', val)}
+                    onBlur={() => validateItemField(i, 'quantity')}
+                    className="w-full sm:col-span-2"
+                    size="sm"
+                    isInvalid={Boolean(itemErrors[i]?.quantity)}
+                    errorMessage={itemErrors[i]?.quantity}
+                  />
+                </div>
+                {parseInteger(item.quantity) > 1 &&
+                  parseNumber(item.amount) > 0 && (
+                    <p className="text-xs text-default-500">
+                      {currencySymbol}
+                      {(
+                        parseNumber(item.amount) / parseInteger(item.quantity)
+                      ).toFixed(2)}{' '}
+                      each
+                    </p>
+                  )}
+              </div>
             </div>
           ))}
         </div>
@@ -377,7 +367,11 @@ export function ItemEditor({
                 setTaxError(undefined);
               }}
               onBlur={() => validateExtraAmount(tax, 'tax')}
-              startContent={<span className="text-default-400 text-sm">{currencySymbol}</span>}
+              startContent={
+                <span className="text-default-400 text-sm">
+                  {currencySymbol}
+                </span>
+              }
               size="sm"
               isInvalid={Boolean(taxError)}
               errorMessage={taxError}
@@ -392,7 +386,11 @@ export function ItemEditor({
                 setTipError(undefined);
               }}
               onBlur={() => validateExtraAmount(tip, 'tip')}
-              startContent={<span className="text-default-400 text-sm">{currencySymbol}</span>}
+              startContent={
+                <span className="text-default-400 text-sm">
+                  {currencySymbol}
+                </span>
+              }
               size="sm"
               isInvalid={Boolean(tipError)}
               errorMessage={tipError}
@@ -400,7 +398,10 @@ export function ItemEditor({
           </div>
           <div className="w-full bg-content2 rounded-lg px-3 py-2 text-center">
             <p className="text-xs text-default-500">Total</p>
-            <p className="text-lg font-bold">{currencySymbol}{total.toFixed(2)}</p>
+            <p className="text-lg font-bold">
+              {currencySymbol}
+              {total.toFixed(2)}
+            </p>
           </div>
         </div>
 
