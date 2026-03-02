@@ -58,7 +58,7 @@ app.get('/tesseract-test', async (c) => {
   return c.text(text);
 });
 
-app.get('/tesseract-upload-test', async (c) => {
+app.post('/tesseract-upload-test', async (c) => {
   try {
     const contentType = c.req.header('Content-Type') || '';
 
