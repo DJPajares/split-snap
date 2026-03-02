@@ -1,5 +1,6 @@
 import type { ScanResult } from '../lib/types.js';
 import { config } from '../lib/config.js';
+import { createWorker } from 'tesseract.js';
 
 // ─── Shared prompt for AI providers ─────────────────────────
 
@@ -145,19 +146,41 @@ const tesseractProvider: ScanProvider = {
     return true; // Always available — no API key needed
   },
 
+  // async scan(imageBase64: string, _mimeType: string): Promise<ScanResult> {
+  //   const Tesseract = await import('tesseract.js');
+  //   const { data } = await Tesseract.recognize(
+  //     Buffer.from(imageBase64, 'base64'),
+  //     'eng'
+  //   );
+
+  //   const text = data.text;
+  //   if (!text.trim()) {
+  //     throw new Error('OCR could not extract any text from the image');
+  //   }
+
+  //   return sanitizeResult(parseReceiptText(text));
+  // }
+
   async scan(imageBase64: string, _mimeType: string): Promise<ScanResult> {
-    const Tesseract = await import('tesseract.js');
-    const { data } = await Tesseract.recognize(
-      Buffer.from(imageBase64, 'base64'),
-      'eng'
-    );
-
-    const text = data.text;
-    if (!text.trim()) {
-      throw new Error('OCR could not extract any text from the image');
-    }
-
+    const worker = await createWorker('eng');
+    const ret = await worker.recognize(Buffer.from(imageBase64, 'base64'));
+    const text = ret.data.text;
+    console.log('Tesseract OCR result:', text);
+    await worker.terminate();
     return sanitizeResult(parseReceiptText(text));
+
+    // const Tesseract = await import('tesseract.js');
+    // const { data } = await Tesseract.recognize(
+    //   Buffer.from(imageBase64, 'base64'),
+    //   'eng'
+    // );
+
+    // const text = data.text;
+    // if (!text.trim()) {
+    //   throw new Error('OCR could not extract any text from the image');
+    // }
+
+    // return sanitizeResult(parseReceiptText(text));
   }
 };
 
