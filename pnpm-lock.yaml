@@ -58,25 +58,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  apps/hono:
-    dependencies:
-      '@hono/node-server':
-        specifier: ^1.19.9
-        version: 1.19.9(hono@4.12.3)
-      hono:
-        specifier: ^4.12.3
-        version: 4.12.3
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.17
-        version: 20.19.35
-      tsx:
-        specifier: ^4.7.1
-        version: 4.21.0
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-
   apps/web:
     dependencies:
       '@heroui/react':
@@ -1988,9 +1969,6 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
-
-  '@types/node@20.19.35':
-    resolution: {integrity: sha512-Uarfe6J91b9HAUXxjvSOdiO2UPOKLm07Q1oh0JHxoZ1y8HoqxDAu3gVrsrOHeiio0kSsoVBt4wFrKOm0dKxVPQ==}
 
   '@types/node@22.19.13':
     resolution: {integrity: sha512-akNQMv0wW5uyRpD2v2IEyRSZiR+BeGuoB6L310EgGObO44HSMNT8z1xzio28V8qOrgYaopIDNA18YgdXd+qTiw==}
@@ -6557,10 +6535,6 @@ snapshots:
       '@types/node': 22.19.13
 
   '@types/ms@2.1.0': {}
-
-  '@types/node@20.19.35':
-    dependencies:
-      undici-types: 6.21.0
 
   '@types/node@22.19.13':
     dependencies:
