@@ -64,10 +64,16 @@ export default function SessionPage({
           // Validate the stored participant still exists in the session
           const participant = s.participants.find((p) => p.id === stored);
           if (participant) {
-            // If user is logged in, verify this participant belongs to them
-            // (prevents accessing session as a previously logged-in user after logout + new login)
-            if (user && participant.userId && participant.userId !== user.id) {
-              localStorage.removeItem(`participant_${code}`);
+            // If user is logged in, only allow a participant explicitly linked to them.
+            if (user) {
+              if (!participant.userId) {
+                localStorage.setItem(`guest_participant_${code}`, stored);
+                localStorage.removeItem(`participant_${code}`);
+              } else if (participant.userId !== user.id) {
+                localStorage.removeItem(`participant_${code}`);
+              } else {
+                setParticipantId(stored);
+              }
             } else {
               setParticipantId(stored);
             }
@@ -119,11 +125,18 @@ export default function SessionPage({
   });
 
   const session = liveSession ?? initialSession;
+  const currentParticipant = session?.participants.find(
+    (participant) => participant.id === participantId
+  );
   const hasUnclaimedItems = Boolean(
     session?.items.some((item) => item.claimedBy.length === 0)
   );
   const isCreator = Boolean(
-    user && session?.createdBy && session.createdBy === user.id
+    user &&
+    session?.createdBy &&
+    session.createdBy === user.id &&
+    currentParticipant?.userId === user.id &&
+    !currentParticipant.isAnonymous
   );
 
   useEffect(() => {
@@ -224,25 +237,6 @@ export default function SessionPage({
     },
     [code, handleError]
   );
-
-  // Upgrade guest participant to logged-in user
-  useEffect(() => {
-    if (!user || !participantId || !session) return;
-    const participant = session.participants.find(
-      (p) => p.id === participantId
-    );
-    if (participant && participant.isAnonymous && !participant.userId) {
-      // This participant was created as a guest, but the user is now logged in
-      void api.sessions
-        .upgradeParticipant(code, participantId, {
-          userId: user.id,
-          displayName: user.name
-        })
-        .catch(() => {
-          // Silently fail — not critical
-        });
-    }
-  }, [user, participantId, session, code]);
 
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);

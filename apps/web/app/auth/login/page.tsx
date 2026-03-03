@@ -27,12 +27,28 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const getPostAuthRedirect = (): string => {
     const pendingCode = localStorage.getItem('pending_session_code');
     if (pendingCode) {
-      localStorage.removeItem('pending_session_code');
+      // Restore guest participantId if it was preserved before login redirect
+      const pendingParticipantId = localStorage.getItem(
+        'pending_participant_id'
+      );
+      if (pendingParticipantId) {
+        // Save the guest participantId separately so it can be restored on logout
+        localStorage.setItem(
+          `guest_participant_${pendingCode}`,
+          pendingParticipantId
+        );
+        localStorage.removeItem('pending_participant_id');
+      }
+      // Clear logged-in participant so join page doesn't short-circuit to session
+      localStorage.removeItem(`participant_${pendingCode}`);
+      // Note: Don't remove pending_session_code here — it's consumed by the join page
+      // to auto-join after redirect
       return `/join/${pendingCode}`;
     }
     return '/dashboard';
@@ -95,11 +111,23 @@ export default function LoginPage() {
                 />
                 <Input
                   label="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••"
                   value={password}
                   onValueChange={setPassword}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  endContent={
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  }
                 />
                 <Button
                   color="primary"
@@ -130,11 +158,23 @@ export default function LoginPage() {
                 />
                 <Input
                   label="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="At least 6 characters"
                   value={password}
                   onValueChange={setPassword}
                   onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+                  endContent={
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  }
                 />
                 <Button
                   color="primary"

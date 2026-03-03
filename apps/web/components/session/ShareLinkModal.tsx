@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Modal,
   ModalContent,
@@ -8,9 +8,10 @@ import {
   ModalBody,
   Button,
   Input,
-  addToast,
-} from "@heroui/react";
-import { QRCodeSVG } from "qrcode.react";
+  addToast
+} from '@heroui/react';
+import { QRCodeSVG } from 'qrcode.react';
+import { on } from 'events';
 
 interface ShareLinkModalProps {
   isOpen: boolean;
@@ -21,19 +22,20 @@ interface ShareLinkModalProps {
 export function ShareLinkModal({
   isOpen,
   onClose,
-  sessionCode,
+  sessionCode
 }: ShareLinkModalProps) {
   const shareUrl =
-    typeof window !== "undefined"
+    typeof window !== 'undefined'
       ? `${window.location.origin}/join/${sessionCode}`
-      : "";
+      : '';
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      addToast({ title: "Link copied!", color: "success" });
+      addToast({ title: 'Link copied!', color: 'success' });
+      onClose();
     } catch {
-      addToast({ title: "Failed to copy", color: "danger" });
+      addToast({ title: 'Failed to copy', color: 'danger' });
     }
   };
 
@@ -52,12 +54,7 @@ export function ShareLinkModal({
           </div>
 
           <div className="flex gap-2">
-            <Input
-              readOnly
-              value={shareUrl}
-              size="sm"
-              className="flex-1"
-            />
+            <Input readOnly value={shareUrl} size="sm" className="flex-1" />
             <Button color="primary" size="sm" onPress={copyLink}>
               Copy
             </Button>

@@ -33,3 +33,6 @@ pnpm-debug.log*
 coverage/
 .vercel
 .env*.local
+
+# tesseract.js trained data files
+*.traineddata

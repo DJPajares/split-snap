@@ -1,6 +1,7 @@
 import type {
   Session,
   CreateSessionPayload,
+  CreateSessionResponse,
   UpdateItemsPayload,
   JoinSessionPayload,
   ClaimItemPayload,
@@ -10,6 +11,7 @@ import type {
   ScanResult,
   User,
   UpgradeParticipantPayload,
+  MergeParticipantPayload,
   UpdateSessionSettingsPayload
 } from '@split-snap/shared';
 import { API_ROUTES } from '@split-snap/shared';
@@ -110,7 +112,7 @@ export const api = {
     },
 
     create: (data: CreateSessionPayload) =>
-      request<Session>(API_ROUTES.SESSIONS, {
+      request<CreateSessionResponse>(API_ROUTES.SESSIONS, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
@@ -158,6 +160,15 @@ export const api = {
     ) =>
       request<Session>(
         API_ROUTES.SESSION_UPGRADE_PARTICIPANT(code, participantId),
+        {
+          method: 'POST',
+          body: JSON.stringify(data)
+        }
+      ),
+
+    mergeParticipants: (code: string, data: MergeParticipantPayload) =>
+      request<{ session: Session; participantId: string }>(
+        API_ROUTES.SESSION_MERGE_PARTICIPANTS(code),
         {
           method: 'POST',
           body: JSON.stringify(data)

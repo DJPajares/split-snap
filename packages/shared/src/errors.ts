@@ -110,7 +110,7 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.SESSION_JOIN_REJECTED]:
     'Your join request was rejected by the host.',
   [ErrorCode.SESSION_JOIN_KICKED]:
-    'You have been removed from this session and cannot rejoin.',
+    'You have been removed from this session. You can rejoin after a short cooldown.',
   [ErrorCode.SESSION_SETTINGS_FORBIDDEN]:
     'Only the session creator can change settings.',
   [ErrorCode.SESSION_APPROVE_FORBIDDEN]:

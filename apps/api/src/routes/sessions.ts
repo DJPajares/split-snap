@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
 import mongoose from 'mongoose';
-import { ErrorCode } from '@split-snap/shared';
-import { SessionModel } from '../models/index.js';
+import { ErrorCode, KICK_COOLDOWN_MS } from '@split-snap/shared';
+import { SessionModel, UserModel } from '../models/index.js';
 import { generateSessionCode } from '../lib/utils.js';
 import { serializeSession } from '../lib/serialize.js';
 import { sseManager } from '../services/sse-manager.js';
@@ -107,7 +107,28 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
     receiptImageUrl: parsed.data.receiptImageUrl ?? null
   });
 
-  return c.json(serializeSession(session), 201);
+  // Auto-join the host as a participant
+  let hostParticipantId: string | null = null;
+  if (auth?.userId) {
+    const hostUser = await UserModel.findById(auth.userId);
+    if (hostUser) {
+      session.participants.push({
+        displayName: hostUser.name,
+        userId: new mongoose.Types.ObjectId(auth.userId),
+        isAnonymous: false,
+        joinedAt: new Date()
+      } as never);
+      await session.save();
+      const newParticipant =
+        session.participants[session.participants.length - 1];
+      hostParticipantId = newParticipant._id.toString();
+    }
+  }
+
+  return c.json(
+    { ...serializeSession(session), participantId: hostParticipantId },
+    201
+  );
 });
 
 // ─── Get session ───────────────────────────────────────────
@@ -150,13 +171,33 @@ sessionRoutes.post('/:code/join', async (c) => {
     throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
-  // Check if user was kicked
-  if (parsed.data.userId && session.kickedUserIds?.length) {
-    const isKicked = session.kickedUserIds.some(
-      (id: mongoose.Types.ObjectId) => id.toString() === parsed.data.userId
+  // Check if user was kicked (with cooldown)
+  if (parsed.data.userId && session.kickedUsers?.length) {
+    const kickedEntry = session.kickedUsers.find(
+      (k: { userId: mongoose.Types.ObjectId; kickedAt: Date }) =>
+        k.userId.toString() === parsed.data.userId
     );
-    if (isKicked) {
-      throw forbidden(ErrorCode.SESSION_JOIN_KICKED);
+    if (kickedEntry) {
+      const elapsed = Date.now() - kickedEntry.kickedAt.getTime();
+      if (elapsed < KICK_COOLDOWN_MS) {
+        const remainingMs = KICK_COOLDOWN_MS - elapsed;
+        throw forbidden(
+          ErrorCode.SESSION_JOIN_KICKED,
+          'You were kicked from this session. Try again later.',
+          {
+            remainingMs,
+            cooldownEndsAt: new Date(
+              kickedEntry.kickedAt.getTime() + KICK_COOLDOWN_MS
+            ).toISOString()
+          }
+        );
+      }
+      // Cooldown expired — remove from kicked list and allow rejoin
+      session.kickedUsers = session.kickedUsers.filter(
+        (k: { userId: mongoose.Types.ObjectId }) =>
+          k.userId.toString() !== parsed.data.userId
+      ) as typeof session.kickedUsers;
+      await session.save();
     }
   }
 
@@ -491,12 +532,20 @@ sessionRoutes.delete(
       throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
     }
 
-    // If participant has a userId, add to kicked list to prevent rejoin
+    // If participant has a userId, add to kicked list with timestamp
     if (participant.userId) {
-      if (!session.kickedUserIds) {
-        session.kickedUserIds = [] as typeof session.kickedUserIds;
+      if (!session.kickedUsers) {
+        session.kickedUsers = [] as typeof session.kickedUsers;
       }
-      session.kickedUserIds.push(participant.userId);
+      // Remove any existing entry for this user first (in case of re-kick)
+      session.kickedUsers = session.kickedUsers.filter(
+        (k: { userId: mongoose.Types.ObjectId }) =>
+          k.userId.toString() !== participant.userId!.toString()
+      ) as typeof session.kickedUsers;
+      session.kickedUsers.push({
+        userId: participant.userId,
+        kickedAt: new Date()
+      } as never);
     }
 
     // Remove all claims by this participant from every item
@@ -574,6 +623,117 @@ sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
   sseManager.broadcast(code, 'participant:updated', serialized);
 
   return c.json(serialized);
+});
+
+// ─── Merge participant (guest → logged-in user) ────────────
+
+const mergeSchema = z.object({
+  fromParticipantId: z.string().min(1),
+  toUserId: z.string().min(1),
+  toDisplayName: z.string().min(1).max(30)
+});
+
+sessionRoutes.post('/:code/participants/merge', async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const body = await c.req.json();
+  const parsed = mergeSchema.safeParse(body);
+  if (!parsed.success) {
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
+  }
+
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
+  }
+
+  const guestParticipant = session.participants.id(
+    parsed.data.fromParticipantId
+  );
+  if (!guestParticipant) {
+    throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
+  }
+
+  // Find an existing participant with the target userId
+  const existingLoggedIn = session.participants.find(
+    (p: {
+      userId: mongoose.Types.ObjectId | null;
+      _id: mongoose.Types.ObjectId;
+    }) =>
+      p.userId &&
+      p.userId.toString() === parsed.data.toUserId &&
+      p._id.toString() !== parsed.data.fromParticipantId
+  );
+
+  let survivingParticipantId: string;
+
+  if (existingLoggedIn) {
+    // Transfer all claims from guest to the logged-in participant
+    for (const item of session.items) {
+      const guestClaimIndex = item.claimedBy.findIndex(
+        (c: { participantId: string }) =>
+          c.participantId === parsed.data.fromParticipantId
+      );
+      if (guestClaimIndex >= 0) {
+        // Check if logged-in user already claims this item
+        const loggedInClaim = item.claimedBy.find(
+          (c: { participantId: string }) =>
+            c.participantId === existingLoggedIn._id.toString()
+        );
+        if (!loggedInClaim) {
+          // Transfer the claim
+          item.claimedBy[guestClaimIndex].participantId =
+            existingLoggedIn._id.toString();
+          item.claimedBy[guestClaimIndex].displayName =
+            parsed.data.toDisplayName;
+        } else {
+          // Remove duplicate claim
+          item.claimedBy.splice(guestClaimIndex, 1);
+        }
+      }
+    }
+
+    // Remove the guest participant
+    session.participants = session.participants.filter(
+      (p: { _id: mongoose.Types.ObjectId }) =>
+        p._id.toString() !== parsed.data.fromParticipantId
+    ) as typeof session.participants;
+
+    survivingParticipantId = existingLoggedIn._id.toString();
+  } else {
+    // No existing logged-in participant — just upgrade the guest
+    const oldDisplayName = guestParticipant.displayName;
+    guestParticipant.userId = new mongoose.Types.ObjectId(parsed.data.toUserId);
+    guestParticipant.isAnonymous = false;
+    guestParticipant.displayName = parsed.data.toDisplayName;
+
+    // Update claims
+    for (const item of session.items) {
+      for (const claim of item.claimedBy) {
+        if (
+          claim.participantId === parsed.data.fromParticipantId &&
+          claim.displayName === oldDisplayName
+        ) {
+          claim.displayName = parsed.data.toDisplayName;
+        }
+      }
+    }
+
+    survivingParticipantId = guestParticipant._id.toString();
+  }
+
+  await session.save();
+
+  const serialized = serializeSession(session);
+  sseManager.broadcast(code, 'participant:updated', serialized);
+
+  return c.json({
+    session: serialized,
+    participantId: survivingParticipantId
+  });
 });
 
 // ─── Approve pending participant ───────────────────────────

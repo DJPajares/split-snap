@@ -32,6 +32,7 @@ interface ItemEditorProps {
   }) => void;
   isSubmitting: boolean;
   submitLabel?: string;
+  receiptImageUrl?: string | null;
 }
 
 type EditableItem = {
@@ -55,7 +56,8 @@ export function ItemEditor({
   initialCurrency = 'SGD',
   onSubmit,
   isSubmitting,
-  submitLabel = 'Create Session'
+  submitLabel = 'Create Session',
+  receiptImageUrl
 }: ItemEditorProps) {
   const [currency, setCurrency] = useState(initialCurrency);
   const currencySymbol = getCurrencySymbol(currency);
@@ -84,6 +86,8 @@ export function ItemEditor({
   );
   const [taxError, setTaxError] = useState<string | undefined>();
   const [tipError, setTipError] = useState<string | undefined>();
+  const [receiptExpanded, setReceiptExpanded] = useState(false);
+  const [receiptZoom, setReceiptZoom] = useState(1);
 
   const parseNumber = (value: string) => {
     const parsed = parseFloat(value);
@@ -275,6 +279,71 @@ export function ItemEditor({
       </CardHeader>
       <Divider />
       <CardBody className="gap-5">
+        {/* Receipt reference image */}
+        {receiptImageUrl && (
+          <div className="space-y-2">
+            <button
+              className="flex items-center gap-2 w-full text-left"
+              onClick={() => setReceiptExpanded(!receiptExpanded)}
+            >
+              <span className="text-lg">🧾</span>
+              <span className="text-sm font-medium flex-1">
+                Receipt Reference
+              </span>
+              <span className="text-xs text-default-400">
+                {receiptExpanded ? 'Hide' : 'Show'}
+              </span>
+            </button>
+            {receiptExpanded && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="flat"
+                    onPress={() =>
+                      setReceiptZoom((z) => Math.max(0.5, z - 0.25))
+                    }
+                    aria-label="Zoom out"
+                  >
+                    −
+                  </Button>
+                  <span className="text-xs text-default-500 w-12 text-center">
+                    {Math.round(receiptZoom * 100)}%
+                  </span>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="flat"
+                    onPress={() => setReceiptZoom((z) => Math.min(3, z + 0.25))}
+                    aria-label="Zoom in"
+                  >
+                    +
+                  </Button>
+                  {receiptZoom !== 1 && (
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setReceiptZoom(1)}
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
+                <div className="overflow-auto max-h-80 rounded-lg border border-default-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={receiptImageUrl}
+                    alt="Scanned receipt"
+                    className="w-full origin-top-left transition-transform"
+                    style={{ transform: `scale(${receiptZoom})` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Items */}
         <div className="space-y-4">
           {items.map((item, i) => (

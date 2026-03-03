@@ -1,6 +1,7 @@
 export const SESSION_CODE_LENGTH = 6;
 export const SESSION_EXPIRY_DAYS = 7;
 export const DEFAULT_CURRENCY = 'SGD';
+export const KICK_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 export const SESSION_STATUSES = {
   DRAFT: 'draft' as const,
@@ -22,6 +23,8 @@ export const API_ROUTES = {
     `/sessions/${code}/participants/${participantId}`,
   SESSION_UPGRADE_PARTICIPANT: (code: string, participantId: string) =>
     `/sessions/${code}/participants/${participantId}/upgrade`,
+  SESSION_MERGE_PARTICIPANTS: (code: string) =>
+    `/sessions/${code}/participants/merge`,
   SESSION_APPROVE_PARTICIPANT: (code: string, participantId: string) =>
     `/sessions/${code}/participants/${participantId}/approve`,
   SESSION_REJECT_PARTICIPANT: (code: string, participantId: string) =>
