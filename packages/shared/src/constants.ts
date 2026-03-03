@@ -20,6 +20,13 @@ export const API_ROUTES = {
   SESSION_UNSETTLE: (code: string) => `/sessions/${code}/unsettle`,
   SESSION_KICK: (code: string, participantId: string) =>
     `/sessions/${code}/participants/${participantId}`,
+  SESSION_UPGRADE_PARTICIPANT: (code: string, participantId: string) =>
+    `/sessions/${code}/participants/${participantId}/upgrade`,
+  SESSION_APPROVE_PARTICIPANT: (code: string, participantId: string) =>
+    `/sessions/${code}/participants/${participantId}/approve`,
+  SESSION_REJECT_PARTICIPANT: (code: string, participantId: string) =>
+    `/sessions/${code}/participants/${participantId}/reject`,
+  SESSION_SETTINGS: (code: string) => `/sessions/${code}/settings`,
   SESSION_UPDATE_ITEMS: (code: string) => `/sessions/${code}/items`,
   SESSION_EVENTS: (code: string) => `/sessions/${code}/events`,
   AUTH_REGISTER: '/auth/register',
@@ -29,4 +36,4 @@ export const API_ROUTES = {
 
 export const APP = {
   NAME: 'Split Snap'
-}
+};

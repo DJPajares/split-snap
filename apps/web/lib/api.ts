@@ -8,7 +8,9 @@ import type {
   RegisterPayload,
   LoginPayload,
   ScanResult,
-  User
+  User,
+  UpgradeParticipantPayload,
+  UpdateSessionSettingsPayload
 } from '@split-snap/shared';
 import { API_ROUTES } from '@split-snap/shared';
 import { parseApiError } from './errors';
@@ -33,10 +35,14 @@ function getHeaders(): HeadersInit {
   return headers;
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(
+  path: string,
+  options?: RequestInit & { rawResponse?: boolean }
+): Promise<T> {
+  const { rawResponse, ...fetchOptions } = options ?? {};
   const res = await fetch(`${API_URL}${path}`, {
     headers: getHeaders(),
-    ...options
+    ...fetchOptions
   });
 
   if (!res.ok) {
@@ -98,7 +104,10 @@ export const api = {
   // ─── Sessions ──────────────────────────────────────────
 
   sessions: {
-    list: () => request<Session[]>(API_ROUTES.SESSIONS),
+    list: (role?: 'host' | 'participant') => {
+      const params = role ? `?role=${role}` : '';
+      return request<Session[]>(`${API_ROUTES.SESSIONS}${params}`);
+    },
 
     create: (data: CreateSessionPayload) =>
       request<Session>(API_ROUTES.SESSIONS, {
@@ -109,10 +118,15 @@ export const api = {
     get: (code: string) => request<Session>(API_ROUTES.SESSION(code)),
 
     join: (code: string, data: JoinSessionPayload) =>
-      request<{ session: Session; participantId: string }>(
-        API_ROUTES.SESSION_JOIN(code),
-        { method: 'POST', body: JSON.stringify(data) }
-      ),
+      request<{
+        session: Session;
+        participantId?: string;
+        status?: 'pending';
+        pendingParticipantId?: string;
+      }>(API_ROUTES.SESSION_JOIN(code), {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
 
     claimItem: (code: string, itemId: string, data: ClaimItemPayload) =>
       request<Session>(API_ROUTES.SESSION_CLAIM(code, itemId), {
@@ -135,6 +149,41 @@ export const api = {
     kick: (code: string, participantId: string) =>
       request<Session>(API_ROUTES.SESSION_KICK(code, participantId), {
         method: 'DELETE'
+      }),
+
+    upgradeParticipant: (
+      code: string,
+      participantId: string,
+      data: UpgradeParticipantPayload
+    ) =>
+      request<Session>(
+        API_ROUTES.SESSION_UPGRADE_PARTICIPANT(code, participantId),
+        {
+          method: 'POST',
+          body: JSON.stringify(data)
+        }
+      ),
+
+    approveParticipant: (code: string, participantId: string) =>
+      request<{ session: Session; participantId: string }>(
+        API_ROUTES.SESSION_APPROVE_PARTICIPANT(code, participantId),
+        {
+          method: 'POST'
+        }
+      ),
+
+    rejectParticipant: (code: string, participantId: string) =>
+      request<Session>(
+        API_ROUTES.SESSION_REJECT_PARTICIPANT(code, participantId),
+        {
+          method: 'POST'
+        }
+      ),
+
+    updateSettings: (code: string, data: UpdateSessionSettingsPayload) =>
+      request<Session>(API_ROUTES.SESSION_SETTINGS(code), {
+        method: 'PATCH',
+        body: JSON.stringify(data)
       }),
 
     delete: (code: string) =>

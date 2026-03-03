@@ -16,10 +16,33 @@ export const sessionRoutes = new Hono();
 
 sessionRoutes.get('/', requireAuth, async (c) => {
   const auth = c.get('auth');
-  const sessions = await SessionModel.find({ createdBy: auth.userId }).sort({
-    createdAt: -1
-  });
-  return c.json(sessions.map(serializeSession));
+  const roleFilter = c.req.query('role'); // 'host' | 'participant' | undefined (all)
+
+  let query;
+  if (roleFilter === 'host') {
+    query = { createdBy: auth.userId };
+  } else if (roleFilter === 'participant') {
+    query = {
+      'participants.userId': new mongoose.Types.ObjectId(auth.userId),
+      createdBy: { $ne: new mongoose.Types.ObjectId(auth.userId) }
+    };
+  } else {
+    query = {
+      $or: [
+        { createdBy: auth.userId },
+        { 'participants.userId': new mongoose.Types.ObjectId(auth.userId) }
+      ]
+    };
+  }
+
+  const sessions = await SessionModel.find(query).sort({ createdAt: -1 });
+  return c.json(
+    sessions.map((s) =>
+      serializeSession(s, {
+        role: s.createdBy?.toString() === auth.userId ? 'host' : 'participant'
+      })
+    )
+  );
 });
 
 // ─── Create session ────────────────────────────────────────
@@ -44,7 +67,11 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
   const body = await c.req.json();
   const parsed = createSessionSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
   }
 
   const auth = c.get('auth' as never) as { userId: string } | undefined;
@@ -107,7 +134,11 @@ sessionRoutes.post('/:code/join', async (c) => {
   const body = await c.req.json();
   const parsed = joinSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
   }
 
   const session = await SessionModel.findOne({ code });
@@ -119,13 +150,49 @@ sessionRoutes.post('/:code/join', async (c) => {
     throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
-  // Check if participant with same name already exists
+  // Check if user was kicked
+  if (parsed.data.userId && session.kickedUserIds?.length) {
+    const isKicked = session.kickedUserIds.some(
+      (id: mongoose.Types.ObjectId) => id.toString() === parsed.data.userId
+    );
+    if (isKicked) {
+      throw forbidden(ErrorCode.SESSION_JOIN_KICKED);
+    }
+  }
+
+  // Check if participant with same name already exists (rejoin)
   const existingParticipant = session.participants.find(
     (p: { displayName: string }) =>
       p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase()
   );
 
   if (existingParticipant) {
+    // If existing participant is anonymous but now a userId is provided, upgrade
+    if (
+      existingParticipant.isAnonymous &&
+      parsed.data.userId &&
+      !existingParticipant.userId
+    ) {
+      existingParticipant.userId = new mongoose.Types.ObjectId(
+        parsed.data.userId
+      );
+      existingParticipant.isAnonymous = false;
+      existingParticipant.displayName = parsed.data.displayName;
+
+      // Update displayName in all claimedBy entries
+      for (const item of session.items) {
+        for (const claim of item.claimedBy) {
+          if (claim.participantId === existingParticipant._id.toString()) {
+            claim.displayName = parsed.data.displayName;
+          }
+        }
+      }
+
+      await session.save();
+      const serialized = serializeSession(session);
+      sseManager.broadcast(code, 'participant:updated', serialized);
+    }
+
     // Return existing participant (rejoin)
     return c.json({
       session: serializeSession(session),
@@ -133,9 +200,76 @@ sessionRoutes.post('/:code/join', async (c) => {
     });
   }
 
+  // Also check for existing participant by userId (logged-in user may have different display name)
+  if (parsed.data.userId) {
+    const existingByUserId = session.participants.find(
+      (p: { userId: mongoose.Types.ObjectId | null }) =>
+        p.userId && p.userId.toString() === parsed.data.userId
+    );
+    if (existingByUserId) {
+      return c.json({
+        session: serializeSession(session),
+        participantId: existingByUserId._id.toString()
+      });
+    }
+  }
+
+  // Check if the joiner is the session creator — skip approval for host
+  const isHost =
+    parsed.data.userId &&
+    session.createdBy &&
+    session.createdBy.toString() === parsed.data.userId;
+
+  // If approval is required and the joiner is not the host, add to pending
+  if (session.requireApproval && !isHost) {
+    // Check if already pending
+    const alreadyPending = session.pendingParticipants.find(
+      (p: { displayName: string }) =>
+        p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase()
+    );
+    if (alreadyPending) {
+      return c.json(
+        {
+          status: 'pending' as const,
+          session: serializeSession(session),
+          pendingParticipantId: alreadyPending._id.toString()
+        },
+        202
+      );
+    }
+
+    session.pendingParticipants.push({
+      displayName: parsed.data.displayName,
+      userId: parsed.data.userId
+        ? new mongoose.Types.ObjectId(parsed.data.userId)
+        : null,
+      isAnonymous: !parsed.data.userId,
+      requestedAt: new Date()
+    } as never);
+
+    await session.save();
+
+    const serialized = serializeSession(session);
+    sseManager.broadcast(code, 'participant:pending', serialized);
+
+    const newPending =
+      session.pendingParticipants[session.pendingParticipants.length - 1];
+
+    return c.json(
+      {
+        status: 'pending' as const,
+        session: serialized,
+        pendingParticipantId: newPending._id.toString()
+      },
+      202
+    );
+  }
+
   session.participants.push({
     displayName: parsed.data.displayName,
-    userId: parsed.data.userId ?? null,
+    userId: parsed.data.userId
+      ? new mongoose.Types.ObjectId(parsed.data.userId)
+      : null,
     isAnonymous: !parsed.data.userId,
     joinedAt: new Date()
   } as never);
@@ -166,7 +300,11 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
   const body = await c.req.json();
   const parsed = claimSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
   }
 
   const session = await SessionModel.findOne({ code });
@@ -243,7 +381,11 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
   const body = await c.req.json();
   const parsed = updateItemsSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
   }
 
   const session = await SessionModel.findOne({ code });
@@ -349,6 +491,14 @@ sessionRoutes.delete(
       throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
     }
 
+    // If participant has a userId, add to kicked list to prevent rejoin
+    if (participant.userId) {
+      if (!session.kickedUserIds) {
+        session.kickedUserIds = [] as typeof session.kickedUserIds;
+      }
+      session.kickedUserIds.push(participant.userId);
+    }
+
     // Remove all claims by this participant from every item
     for (const item of session.items) {
       item.claimedBy = item.claimedBy.filter(
@@ -370,6 +520,191 @@ sessionRoutes.delete(
     return c.json(serialized);
   }
 );
+
+// ─── Upgrade participant (guest → logged-in) ───────────────
+
+const upgradeSchema = z.object({
+  userId: z.string().min(1),
+  displayName: z.string().min(1).max(30)
+});
+
+sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const participantId = c.req.param('participantId');
+  const body = await c.req.json();
+  const parsed = upgradeSchema.safeParse(body);
+  if (!parsed.success) {
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
+  }
+
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
+  }
+
+  const participant = session.participants.id(participantId);
+  if (!participant) {
+    throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
+  }
+
+  const oldDisplayName = participant.displayName;
+  participant.userId = new mongoose.Types.ObjectId(parsed.data.userId);
+  participant.isAnonymous = false;
+  participant.displayName = parsed.data.displayName;
+
+  // Update displayName in all claimedBy entries
+  for (const item of session.items) {
+    for (const claim of item.claimedBy) {
+      if (
+        claim.participantId === participantId &&
+        claim.displayName === oldDisplayName
+      ) {
+        claim.displayName = parsed.data.displayName;
+      }
+    }
+  }
+
+  await session.save();
+
+  const serialized = serializeSession(session);
+  sseManager.broadcast(code, 'participant:updated', serialized);
+
+  return c.json(serialized);
+});
+
+// ─── Approve pending participant ───────────────────────────
+
+sessionRoutes.post(
+  '/:code/participants/:participantId/approve',
+  requireAuth,
+  async (c) => {
+    const code = c.req.param('code').toUpperCase();
+    const participantId = c.req.param('participantId');
+    const auth = c.get('auth');
+
+    const session = await SessionModel.findOne({ code });
+    if (!session) {
+      throw notFound(ErrorCode.SESSION_NOT_FOUND);
+    }
+
+    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+      throw forbidden(ErrorCode.SESSION_APPROVE_FORBIDDEN);
+    }
+
+    const pendingIndex = session.pendingParticipants.findIndex(
+      (p: { _id: mongoose.Types.ObjectId }) =>
+        p._id.toString() === participantId
+    );
+    if (pendingIndex === -1) {
+      throw notFound(ErrorCode.PENDING_PARTICIPANT_NOT_FOUND);
+    }
+
+    const pending = session.pendingParticipants[pendingIndex];
+
+    // Move from pending to participants
+    session.participants.push({
+      displayName: pending.displayName,
+      userId: pending.userId,
+      isAnonymous: pending.isAnonymous,
+      joinedAt: new Date()
+    } as never);
+
+    session.pendingParticipants.splice(pendingIndex, 1);
+
+    await session.save();
+
+    const newParticipant =
+      session.participants[session.participants.length - 1];
+    const serialized = serializeSession(session);
+    sseManager.broadcast(code, 'participant:approved', serialized);
+
+    return c.json({
+      session: serialized,
+      participantId: newParticipant._id.toString()
+    });
+  }
+);
+
+// ─── Reject pending participant ────────────────────────────
+
+sessionRoutes.post(
+  '/:code/participants/:participantId/reject',
+  requireAuth,
+  async (c) => {
+    const code = c.req.param('code').toUpperCase();
+    const participantId = c.req.param('participantId');
+    const auth = c.get('auth');
+
+    const session = await SessionModel.findOne({ code });
+    if (!session) {
+      throw notFound(ErrorCode.SESSION_NOT_FOUND);
+    }
+
+    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+      throw forbidden(ErrorCode.SESSION_APPROVE_FORBIDDEN);
+    }
+
+    const pendingIndex = session.pendingParticipants.findIndex(
+      (p: { _id: mongoose.Types.ObjectId }) =>
+        p._id.toString() === participantId
+    );
+    if (pendingIndex === -1) {
+      throw notFound(ErrorCode.PENDING_PARTICIPANT_NOT_FOUND);
+    }
+
+    session.pendingParticipants.splice(pendingIndex, 1);
+    await session.save();
+
+    const serialized = serializeSession(session);
+    sseManager.broadcast(code, 'participant:rejected', serialized);
+
+    return c.json(serialized);
+  }
+);
+
+// ─── Update session settings ───────────────────────────────
+
+const settingsSchema = z.object({
+  requireApproval: z.boolean().optional()
+});
+
+sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const auth = c.get('auth');
+  const body = await c.req.json();
+  const parsed = settingsSchema.safeParse(body);
+  if (!parsed.success) {
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten()
+    );
+  }
+
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
+  }
+
+  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    throw forbidden(ErrorCode.SESSION_SETTINGS_FORBIDDEN);
+  }
+
+  if (parsed.data.requireApproval !== undefined) {
+    session.requireApproval = parsed.data.requireApproval;
+  }
+
+  await session.save();
+
+  const serialized = serializeSession(session);
+  sseManager.broadcast(code, 'session:updated', serialized);
+
+  return c.json(serialized);
+});
 
 // ─── Delete session ────────────────────────────────────────
 
