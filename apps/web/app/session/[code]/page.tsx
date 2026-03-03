@@ -225,25 +225,6 @@ export default function SessionPage({
     [code, handleError]
   );
 
-  // Upgrade guest participant to logged-in user
-  useEffect(() => {
-    if (!user || !participantId || !session) return;
-    const participant = session.participants.find(
-      (p) => p.id === participantId
-    );
-    if (participant && participant.isAnonymous && !participant.userId) {
-      // This participant was created as a guest, but the user is now logged in
-      void api.sessions
-        .upgradeParticipant(code, participantId, {
-          userId: user.id,
-          displayName: user.name
-        })
-        .catch(() => {
-          // Silently fail — not critical
-        });
-    }
-  }, [user, participantId, session, code]);
-
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
     try {

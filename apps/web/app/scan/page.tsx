@@ -32,24 +32,31 @@ function ScanPageInner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError();
 
-  const handleFileSelected = useCallback(async (file: File) => {
-    setScanning(true);
-    try {
-      const result = await api.receipts.scan(file);
-      setScanResult(result);
-      setActiveTab('manual'); // Switch to editor after scan
-    } catch (err) {
-      handleError(err, 'Scan failed');
-      addToast({
-        description: 'You can enter items manually.',
-        color: 'warning'
-      });
-    } finally {
-      setScanning(false);
-    }
-  }, [handleError]);
+  const handleFileSelected = useCallback(
+    async (file: File) => {
+      setScanning(true);
+      setReceiptFile(file);
+      setReceiptImageUrl(URL.createObjectURL(file));
+      try {
+        const result = await api.receipts.scan(file);
+        setScanResult(result);
+        setActiveTab('manual'); // Switch to editor after scan
+      } catch (err) {
+        handleError(err, 'Scan failed');
+        addToast({
+          description: 'You can enter items manually.',
+          color: 'warning'
+        });
+      } finally {
+        setScanning(false);
+      }
+    },
+    [handleError]
+  );
 
   const handleCreateSession = useCallback(
     async (data: {
@@ -70,6 +77,15 @@ function ScanPageInner() {
           total: data.total,
           currency: data.currency
         });
+
+        // If the host was auto-joined, store participant ID to skip join page
+        if (session.participantId) {
+          localStorage.setItem(
+            `participant_${session.code}`,
+            session.participantId
+          );
+        }
+
         router.push(`/session/${session.code}`);
       } catch (err) {
         handleError(err, 'Failed to create session');
@@ -111,6 +127,7 @@ function ScanPageInner() {
               initialPriceInterpretation="line-total"
               onSubmit={handleCreateSession}
               isSubmitting={creating}
+              receiptImageUrl={receiptImageUrl}
             />
           </div>
         </Tab>

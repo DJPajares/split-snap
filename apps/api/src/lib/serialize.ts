@@ -3,7 +3,8 @@ import type {
   Session,
   SessionItem,
   Participant,
-  PendingParticipant
+  PendingParticipant,
+  KickedUser
 } from '@split-snap/shared';
 
 /**
@@ -49,7 +50,12 @@ export function serializeSession(
         requestedAt: p.requestedAt.toISOString()
       })
     ),
-    kickedUserIds: (doc.kickedUserIds ?? []).map((id) => id.toString()),
+    kickedUsers: (doc.kickedUsers ?? []).map(
+      (k): KickedUser => ({
+        userId: k.userId.toString(),
+        kickedAt: k.kickedAt.toISOString()
+      })
+    ),
     requireApproval: doc.requireApproval ?? true,
     subtotal: doc.subtotal,
     tax: doc.tax,

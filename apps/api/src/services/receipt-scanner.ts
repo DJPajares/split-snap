@@ -35,15 +35,29 @@ interface ScanProvider {
   scan(imageBase64: string, mimeType: string): Promise<ScanResult>;
 }
 
+// ─── Proper case conversion (for Tesseract OCR output) ───────
+
+function toProperCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/(?:^|\s|[-/])\S/g, (char) => char.toUpperCase());
+}
+
 // ─── Sanitize parsed result ──────────────────────────────────
 
-function sanitizeResult(parsed: ScanResult): ScanResult {
+function sanitizeResult(
+  parsed: ScanResult,
+  opts?: { properCaseNames?: boolean }
+): ScanResult {
   return {
-    items: (parsed.items || []).map((item) => ({
-      name: String(item.name || 'Unknown item'),
-      price: Math.max(0, Number(item.price) || 0),
-      quantity: Math.max(1, Math.round(Number(item.quantity) || 1))
-    })),
+    items: (parsed.items || []).map((item) => {
+      const name = String(item.name || 'Unknown item');
+      return {
+        name: opts?.properCaseNames ? toProperCase(name) : name,
+        price: Math.max(0, Number(item.price) || 0),
+        quantity: Math.max(1, Math.round(Number(item.quantity) || 1))
+      };
+    }),
     subtotal: Math.max(0, Number(parsed.subtotal) || 0),
     tax: Math.max(0, Number(parsed.tax) || 0),
     tip: Math.max(0, Number(parsed.tip) || 0),
@@ -157,7 +171,7 @@ const tesseractProvider: ScanProvider = {
       throw new Error('OCR could not extract any text from the image');
     }
 
-    return sanitizeResult(parseReceiptText(text));
+    return sanitizeResult(parseReceiptText(text), { properCaseNames: true });
   }
 };
 
@@ -165,8 +179,25 @@ const tesseractProvider: ScanProvider = {
 
 // Multi-character currency symbols (order matters — longest first to avoid partial matches)
 const CURRENCY_SYMBOLS = [
-  'HK\\$', 'NT\\$', 'NZ\\$', 'Mex\\$', 'A\\$', 'C\\$', 'R\\$', 'S\\$',
-  'RM', 'Rp', '₱', '₹', '₩', '₫', '€', '£', '¥', '฿', '\\$'
+  'HK\\$',
+  'NT\\$',
+  'NZ\\$',
+  'Mex\\$',
+  'A\\$',
+  'C\\$',
+  'R\\$',
+  'S\\$',
+  'RM',
+  'Rp',
+  '₱',
+  '₹',
+  '₩',
+  '₫',
+  '€',
+  '£',
+  '¥',
+  '฿',
+  '\\$'
 ];
 const CURRENCY_PATTERN = `(?:${CURRENCY_SYMBOLS.join('|')})`;
 
@@ -200,9 +231,9 @@ function parseReceiptText(text: string): ScanResult {
   //       G.S.T., S.S.T., incl. tax, excl. tax, tax incl, tax amt, tax amount
   const taxPattern = new RegExp(
     `^(?:g\\.?s\\.?t\\.?|s\\.?s\\.?t\\.?|v\\.?a\\.?t\\.?|h\\.?s\\.?t\\.?|p\\.?s\\.?t\\.?|q\\.?s\\.?t\\.?` +
-    `|sales\\s*tax|goods\\s*(?:&|and)\\s*services?\\s*tax|consumption\\s*tax` +
-    `|tax\\s*(?:incl(?:uded)?|excl(?:uded)?|amt|amount)?|incl\\.?\\s*tax|excl\\.?\\s*tax` +
-    `)\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
+      `|sales\\s*tax|goods\\s*(?:&|and)\\s*services?\\s*tax|consumption\\s*tax` +
+      `|tax\\s*(?:incl(?:uded)?|excl(?:uded)?|amt|amount)?|incl\\.?\\s*tax|excl\\.?\\s*tax` +
+      `)\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
     'i'
   );
 
@@ -210,8 +241,8 @@ function parseReceiptText(text: string): ScanResult {
   //                     gratuity, grat, tip, service fee, srv chrg, auto grat, auto gratuity
   const tipPattern = new RegExp(
     `^(?:svc\\s*ch(?:a?r)?g(?:e)?|service\\s*ch(?:a?r)?g(?:e)?|service\\s*fee|serv\\.?\\s*ch(?:a?r)?g(?:e)?` +
-    `|srv\\s*ch(?:a?r)?g(?:e)?|s\\/c|sc\\b|auto\\s*grat(?:uity)?|gratuity|grat\\b|tip|service)` +
-    `\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
+      `|srv\\s*ch(?:a?r)?g(?:e)?|s\\/c|sc\\b|auto\\s*grat(?:uity)?|gratuity|grat\\b|tip|service)` +
+      `\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
     'i'
   );
 
@@ -219,7 +250,7 @@ function parseReceiptText(text: string): ScanResult {
   //        bill total, amt due
   const totalPattern = new RegExp(
     `^(?:grand\\s*total|total\\s*(?:due|amount|amt)?|amount\\s*due|balance\\s*due|net\\s*total|bill\\s*total|amt\\s*due)` +
-    `\\s*[:\\s]*${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})`,
+      `\\s*[:\\s]*${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})`,
     'i'
   );
 
@@ -296,7 +327,9 @@ function parseReceiptText(text: string): ScanResult {
     // ── Try item line ───────────────────────────────────
 
     // Skip obvious non-item lines
-    const trimmedLine = line.replace(new RegExp(`${CURRENCY_PATTERN}`, 'gi'), '').trim();
+    const trimmedLine = line
+      .replace(new RegExp(`${CURRENCY_PATTERN}`, 'gi'), '')
+      .trim();
     if (nonItemKeywords.test(trimmedLine)) {
       // Still track for total fallback
       const amountMatch = line.match(amountInLine);
@@ -345,7 +378,10 @@ function parseReceiptText(text: string): ScanResult {
       if (price > 0) {
         // Remove the amount portion to get name + possible quantity
         let remaining = line
-          .replace(new RegExp(`${CURRENCY_PATTERN}\\s*[\\d]+[.,]\\d{1,2}`, 'i'), '')
+          .replace(
+            new RegExp(`${CURRENCY_PATTERN}\\s*[\\d]+[.,]\\d{1,2}`, 'i'),
+            ''
+          )
           .replace(/[\d]+[.,]\d{1,2}\s*$/, '')
           .trim();
 
@@ -366,11 +402,7 @@ function parseReceiptText(text: string): ScanResult {
 
         const name = remaining.replace(/[.\s]+$/, '').trim();
 
-        if (
-          name.length >= 2 &&
-          quantity >= 1 &&
-          !nonItemKeywords.test(name)
-        ) {
+        if (name.length >= 2 && quantity >= 1 && !nonItemKeywords.test(name)) {
           items.push({ name, price, quantity });
           lastAmountLine = { lineIndex, amount: price };
         } else {
@@ -506,4 +538,4 @@ export async function scanReceiptTest(imageBase64: string) {
   }
 
   return text;
-};
+}

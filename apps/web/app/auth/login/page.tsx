@@ -32,7 +32,22 @@ export default function LoginPage() {
   const getPostAuthRedirect = (): string => {
     const pendingCode = localStorage.getItem('pending_session_code');
     if (pendingCode) {
-      localStorage.removeItem('pending_session_code');
+      // Restore guest participantId if it was preserved before login redirect
+      const pendingParticipantId = localStorage.getItem(
+        'pending_participant_id'
+      );
+      if (pendingParticipantId) {
+        // Save the guest participantId separately so it can be restored on logout
+        localStorage.setItem(
+          `guest_participant_${pendingCode}`,
+          pendingParticipantId
+        );
+        localStorage.removeItem('pending_participant_id');
+      }
+      // Clear logged-in participant so join page doesn't short-circuit to session
+      localStorage.removeItem(`participant_${pendingCode}`);
+      // Note: Don't remove pending_session_code here — it's consumed by the join page
+      // to auto-join after redirect
       return `/join/${pendingCode}`;
     }
     return '/dashboard';

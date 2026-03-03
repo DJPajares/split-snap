@@ -31,6 +31,8 @@ export default function JoinPage({
   const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [joinState, setJoinState] = useState<JoinState>('idle');
+  const [kickCooldownEnd, setKickCooldownEnd] = useState<string | null>(null);
+  const [kickCountdown, setKickCountdown] = useState(0);
   const [checkingStoredParticipant, setCheckingStoredParticipant] =
     useState(true);
   const [autoJoinError, setAutoJoinError] = useState<string | null>(null);
@@ -76,8 +78,14 @@ export default function JoinPage({
           router.push(`/session/${code}`);
         }
       } catch (err) {
-        // Check if kicked
+        // Check if kicked (with cooldown)
         if (err instanceof ApiError && err.code === 'SESSION_JOIN_KICKED') {
+          const details = err.details as
+            | { cooldownEndsAt?: string; remainingMs?: number }
+            | undefined;
+          if (details?.cooldownEndsAt) {
+            setKickCooldownEnd(details.cooldownEndsAt);
+          }
           setJoinState('kicked');
           return;
         }
@@ -139,10 +147,43 @@ export default function JoinPage({
     setName(user.name);
   }, [checkingStoredParticipant, authLoading, user]);
 
+  // Auto-join after login redirect (user came from handleLoginRedirect)
+  useEffect(() => {
+    if (checkingStoredParticipant || authLoading || !user) return;
+    const pendingCode = localStorage.getItem('pending_session_code');
+    if (pendingCode === code) {
+      localStorage.removeItem('pending_session_code');
+      // Auto-submit join for the logged-in user
+      void joinSession(user.name, user.id);
+    }
+  }, [checkingStoredParticipant, authLoading, user, code, joinSession]);
+
   const handleLoginRedirect = () => {
     localStorage.setItem('pending_session_code', code);
+    // Preserve existing guest participantId so it survives the login flow
+    const existingParticipant = localStorage.getItem(`participant_${code}`);
+    if (existingParticipant) {
+      localStorage.setItem('pending_participant_id', existingParticipant);
+    }
     router.push('/auth/login');
   };
+
+  // Kick cooldown countdown timer
+  useEffect(() => {
+    if (joinState !== 'kicked' || !kickCooldownEnd) return;
+    const endTime = new Date(kickCooldownEnd).getTime();
+    const tick = () => {
+      const remaining = Math.max(0, endTime - Date.now());
+      setKickCountdown(remaining);
+      if (remaining <= 0) {
+        setJoinState('idle');
+        setKickCooldownEnd(null);
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [joinState, kickCooldownEnd]);
 
   if (checkingStoredParticipant || authLoading) {
     return null;
@@ -150,18 +191,32 @@ export default function JoinPage({
 
   // Kicked state
   if (joinState === 'kicked') {
+    const minutes = Math.floor(kickCountdown / 60000);
+    const seconds = Math.ceil((kickCountdown % 60000) / 1000);
+    const hasCountdown = kickCooldownEnd && kickCountdown > 0;
+
     return (
       <div className="max-w-md mx-auto px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
-            <span className="text-5xl">🚫</span>
-            <h2 className="text-xl font-bold">Cannot Rejoin</h2>
+            <span className="text-5xl">⏳</span>
+            <h2 className="text-xl font-bold">Temporarily Removed</h2>
             <p className="text-default-500 text-center">
-              You have been removed from this session and cannot rejoin.
+              You were removed from this session.
+              {hasCountdown
+                ? ` You can rejoin in ${minutes}:${seconds.toString().padStart(2, '0')}.`
+                : ' You can try again shortly.'}
             </p>
-            <Button color="primary" onPress={() => router.push('/')}>
-              Go Home
-            </Button>
+            <div className="flex gap-2">
+              <Button color="primary" onPress={() => router.push('/')}>
+                Go Home
+              </Button>
+              {!hasCountdown && (
+                <Button variant="flat" onPress={() => setJoinState('idle')}>
+                  Try Again
+                </Button>
+              )}
+            </div>
           </CardBody>
         </Card>
       </div>

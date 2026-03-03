@@ -26,6 +26,14 @@ const ParticipantSchema = new Schema({
   joinedAt: { type: Date, default: Date.now }
 });
 
+const KickedUserSchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    kickedAt: { type: Date, default: Date.now }
+  },
+  { _id: false }
+);
+
 const PendingParticipantSchema = new Schema({
   displayName: { type: String, required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
@@ -64,7 +72,10 @@ export interface ISession extends Document {
     isAnonymous: boolean;
     requestedAt: Date;
   }[];
-  kickedUserIds: mongoose.Types.ObjectId[];
+  kickedUsers: {
+    userId: mongoose.Types.ObjectId;
+    kickedAt: Date;
+  }[];
   requireApproval: boolean;
   subtotal: number;
   tax: number;
@@ -84,10 +95,7 @@ const SessionSchema = new Schema<ISession>(
     items: { type: [SessionItemSchema], default: [] },
     participants: { type: [ParticipantSchema], default: [] },
     pendingParticipants: { type: [PendingParticipantSchema], default: [] },
-    kickedUserIds: {
-      type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-      default: []
-    },
+    kickedUsers: { type: [KickedUserSchema], default: [] },
     requireApproval: { type: Boolean, default: true },
     subtotal: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true, default: 0 },

@@ -57,17 +57,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     localStorage.removeItem('auth_token');
-    // Clear all participant_* keys so stale session identities don't persist
-    if (typeof window !== 'undefined') {
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith('participant_')) {
+    // Restore guest participant identities and clear logged-in ones
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('participant_')) {
+        const sessionCode = key.replace('participant_', '');
+        const guestId = localStorage.getItem(
+          `guest_participant_${sessionCode}`
+        );
+        if (guestId) {
+          localStorage.setItem(key, guestId);
+          localStorage.removeItem(`guest_participant_${sessionCode}`);
+        } else {
           keysToRemove.push(key);
         }
       }
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
     setUser(null);
   }, []);
 

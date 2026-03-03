@@ -62,7 +62,8 @@ export function SessionItemList({
                 <p className="font-medium truncate">{item.name}</p>
                 {item.quantity > 1 && (
                   <p className="text-xs text-default-400">
-                    {cs}{item.price.toFixed(2)} × {item.quantity}
+                    {cs}
+                    {item.price.toFixed(2)} × {item.quantity}
                   </p>
                 )}
                 {totalClaimers > 0 && (
@@ -90,7 +91,10 @@ export function SessionItemList({
                 )}
               </div>
               <div className="text-right shrink-0">
-                <p className="font-semibold">{cs}{itemTotal.toFixed(2)}</p>
+                <p className="font-semibold">
+                  {cs}
+                  {itemTotal.toFixed(2)}
+                </p>
                 {totalClaimers === 0 && (
                   <p className="text-xs text-warning">unclaimed</p>
                 )}

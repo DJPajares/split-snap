@@ -32,6 +32,11 @@ export interface PendingParticipant {
   requestedAt: string; // ISO date
 }
 
+export interface KickedUser {
+  userId: string;
+  kickedAt: string; // ISO date
+}
+
 export interface Session {
   id: string;
   code: string; // 6-char shareable code
@@ -40,7 +45,7 @@ export interface Session {
   items: SessionItem[];
   participants: Participant[];
   pendingParticipants: PendingParticipant[];
-  kickedUserIds: string[];
+  kickedUsers: KickedUser[];
   requireApproval: boolean;
   subtotal: number;
   tax: number;
@@ -75,6 +80,10 @@ export interface CreateSessionPayload {
   receiptImageUrl?: string | null;
 }
 
+export interface CreateSessionResponse extends Session {
+  participantId?: string | null;
+}
+
 export interface JoinSessionPayload {
   displayName: string;
   userId?: string | null;
@@ -97,6 +106,12 @@ export interface ClaimItemPayload {
 export interface UpgradeParticipantPayload {
   userId: string;
   displayName: string;
+}
+
+export interface MergeParticipantPayload {
+  fromParticipantId: string;
+  toUserId: string;
+  toDisplayName: string;
 }
 
 export interface UpdateSessionSettingsPayload {
