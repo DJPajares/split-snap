@@ -53,12 +53,18 @@ export default function EditSessionPage({
   }) => {
     setSubmitting(true);
     try {
-      // Map items, preserving IDs for existing items by matching name+position
+      // Map items, preserving IDs for existing items by matching name+occurrence
+      const existingItemsByName = new Map<string, Session['items']>();
+      for (const existingItem of session?.items ?? []) {
+        const bucket = existingItemsByName.get(existingItem.name) ?? [];
+        bucket.push(existingItem);
+        existingItemsByName.set(existingItem.name, bucket);
+      }
+
       const itemsWithIds = data.items.map((item) => {
-        // Try to find a matching existing item by name to preserve its ID
-        const existingItem = session?.items.find(
-          (existing) => existing.name === item.name
-        );
+        const bucket = existingItemsByName.get(item.name) ?? [];
+        const existingItem = bucket.shift();
+
         return {
           ...(existingItem ? { id: existingItem.id } : {}),
           name: item.name,
