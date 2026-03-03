@@ -261,8 +261,12 @@ sessionRoutes.post('/:code/join', async (c) => {
     session.createdBy &&
     session.createdBy.toString() === parsed.data.userId;
 
+  // Approval workflow only makes sense if there is a real host account.
+  // Guest-created sessions have no host (createdBy = null), so joins should not be blocked.
+  const hasHost = Boolean(session.createdBy);
+
   // If approval is required and the joiner is not the host, add to pending
-  if (session.requireApproval && !isHost) {
+  if (session.requireApproval && hasHost && !isHost) {
     // Check if already pending
     const alreadyPending = session.pendingParticipants.find(
       (p: { displayName: string }) =>
