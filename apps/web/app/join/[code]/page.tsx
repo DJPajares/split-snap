@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useApiError } from "@/hooks/useApiError";
 
 export default function JoinPage({
   params,
@@ -27,6 +28,7 @@ export default function JoinPage({
   const [checkingStoredParticipant, setCheckingStoredParticipant] = useState(true);
   const [autoJoinError, setAutoJoinError] = useState<string | null>(null);
   const hasAttemptedAutoJoinRef = useRef(false);
+  const { handleError } = useApiError({ redirectTo: '/' });
 
   useEffect(() => {
     const stored = localStorage.getItem(`participant_${code}`);
@@ -56,11 +58,11 @@ export default function JoinPage({
       const message =
         err instanceof Error ? err.message : "Failed to join session";
       setAutoJoinError(message);
-      addToast({ title: "Error", description: message, color: "danger" });
+      handleError(err, "Failed to join session");
     } finally {
       setJoining(false);
     }
-  }, [code, router]);
+  }, [code, router, handleError]);
 
   const handleJoin = async () => {
     if (!name.trim()) return;

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardBody, Spinner, Chip, Button, Link } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useApiError } from '@/hooks/useApiError';
 import type { Session } from '@split-snap/shared';
 import { api } from '@/lib/api';
 import { getCurrencySymbol } from '@split-snap/shared';
@@ -13,6 +14,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
+  const { handleError } = useApiError();
 
   // Redirect if not logged in
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function DashboardPage() {
       api.sessions
         .list()
         .then(setSessions)
-        .catch(console.error)
+        .catch((err) => handleError(err, 'Failed to load sessions'))
         .finally(() => setLoadingSessions(false));
     }
   }, [user]);

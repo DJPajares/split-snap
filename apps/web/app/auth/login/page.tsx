@@ -15,10 +15,12 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useApiError } from "@/hooks/useApiError";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, register } = useAuth();
+  const { handleError } = useApiError();
 
   const [tab, setTab] = useState("login");
   const [email, setEmail] = useState("");
@@ -34,11 +36,7 @@ export default function LoginPage() {
       addToast({ title: "Welcome back!", color: "success" });
       router.push("/dashboard");
     } catch (err) {
-      addToast({
-        title: "Login failed",
-        description: err instanceof Error ? err.message : "Invalid credentials",
-        color: "danger",
-      });
+      handleError(err, "Login failed");
     } finally {
       setLoading(false);
     }
@@ -52,11 +50,7 @@ export default function LoginPage() {
       addToast({ title: "Account created!", color: "success" });
       router.push("/dashboard");
     } catch (err) {
-      addToast({
-        title: "Registration failed",
-        description: err instanceof Error ? err.message : "Try again",
-        color: "danger",
-      });
+      handleError(err, "Registration failed");
     } finally {
       setLoading(false);
     }

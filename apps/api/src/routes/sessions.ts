@@ -2,11 +2,13 @@ import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
 import mongoose from 'mongoose';
+import { ErrorCode } from '@split-snap/shared';
 import { SessionModel } from '../models/index.js';
 import { generateSessionCode } from '../lib/utils.js';
 import { serializeSession } from '../lib/serialize.js';
 import { sseManager } from '../services/sse-manager.js';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import { badRequest, notFound, forbidden, internal } from '../lib/errors.js';
 
 export const sessionRoutes = new Hono();
 
@@ -42,10 +44,7 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
   const body = await c.req.json();
   const parsed = createSessionSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json(
-      { error: 'Validation failed', details: parsed.error.flatten() },
-      400
-    );
+    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
   }
 
   const auth = c.get('auth' as never) as { userId: string } | undefined;
@@ -61,7 +60,7 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
   } while (attempts < 10);
 
   if (attempts >= 10) {
-    return c.json({ error: 'Failed to generate unique session code' }, 500);
+    throw internal(ErrorCode.SESSION_CODE_GENERATION_FAILED);
   }
 
   const session = await SessionModel.create({
@@ -90,7 +89,7 @@ sessionRoutes.get('/:code', async (c) => {
   const code = c.req.param('code').toUpperCase();
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   return c.json(serializeSession(session));
@@ -108,19 +107,16 @@ sessionRoutes.post('/:code/join', async (c) => {
   const body = await c.req.json();
   const parsed = joinSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json(
-      { error: 'Validation failed', details: parsed.error.flatten() },
-      400
-    );
+    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
   }
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   if (session.status === 'settled') {
-    return c.json({ error: 'Session is already settled' }, 400);
+    throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
   // Check if participant with same name already exists
@@ -170,30 +166,27 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
   const body = await c.req.json();
   const parsed = claimSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json(
-      { error: 'Validation failed', details: parsed.error.flatten() },
-      400
-    );
+    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
   }
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   if (session.status === 'settled') {
-    return c.json({ error: 'Session is already settled' }, 400);
+    throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
   const item = session.items.id(itemId);
   if (!item) {
-    return c.json({ error: 'Item not found' }, 404);
+    throw notFound(ErrorCode.ITEM_NOT_FOUND);
   }
 
   // Verify participant exists
   const participant = session.participants.id(parsed.data.participantId);
   if (!participant) {
-    return c.json({ error: 'Participant not found' }, 404);
+    throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
   }
 
   // Toggle: if already claimed by this participant, unclaim
@@ -250,24 +243,21 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
   const body = await c.req.json();
   const parsed = updateItemsSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json(
-      { error: 'Validation failed', details: parsed.error.flatten() },
-      400
-    );
+    throw badRequest(ErrorCode.VALIDATION_FAILED, 'Validation failed', parsed.error.flatten());
   }
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   if (session.status === 'settled') {
-    return c.json({ error: 'Session is already settled' }, 400);
+    throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
   // Only the session creator can edit items
   if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
-    return c.json({ error: 'Only the session creator can edit items' }, 403);
+    throw forbidden(ErrorCode.SESSION_EDIT_FORBIDDEN);
   }
 
   // Build a map of existing items for preserving claims
@@ -342,27 +332,21 @@ sessionRoutes.delete(
 
     const session = await SessionModel.findOne({ code });
     if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
+      throw notFound(ErrorCode.SESSION_NOT_FOUND);
     }
 
     if (session.status !== 'active') {
-      return c.json(
-        { error: 'Can only kick participants in active sessions' },
-        400
-      );
+      throw badRequest(ErrorCode.SESSION_KICK_ACTIVE_ONLY);
     }
 
     // Only the session creator can kick participants
     if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
-      return c.json(
-        { error: 'Only the session creator can kick participants' },
-        403
-      );
+      throw forbidden(ErrorCode.SESSION_KICK_FORBIDDEN);
     }
 
     const participant = session.participants.id(participantId);
     if (!participant) {
-      return c.json({ error: 'Participant not found' }, 404);
+      throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
     }
 
     // Remove all claims by this participant from every item
@@ -395,15 +379,12 @@ sessionRoutes.delete('/:code', requireAuth, async (c) => {
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   // Only the session creator can delete
   if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
-    return c.json(
-      { error: 'Only the session creator can delete the session' },
-      403
-    );
+    throw forbidden(ErrorCode.SESSION_DELETE_FORBIDDEN);
   }
 
   // Broadcast deletion to all connected clients before deleting
@@ -422,18 +403,18 @@ sessionRoutes.patch('/:code/settle', requireAuth, async (c) => {
   const auth = c.get('auth');
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
-    return c.json({ error: 'Only the session creator can settle' }, 403);
+    throw forbidden(ErrorCode.SESSION_SETTLE_FORBIDDEN);
   }
 
   const hasUnclaimedItems = session.items.some(
     (item: { claimedBy: unknown[] }) => item.claimedBy.length === 0
   );
   if (hasUnclaimedItems) {
-    return c.json({ error: 'All items must be claimed before settling' }, 400);
+    throw badRequest(ErrorCode.SESSION_ITEMS_NOT_ALL_CLAIMED);
   }
 
   session.status = 'settled';
@@ -450,15 +431,15 @@ sessionRoutes.patch('/:code/unsettle', requireAuth, async (c) => {
   const auth = c.get('auth');
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
-    return c.json({ error: 'Only the session creator can undo settlement' }, 403);
+    throw forbidden(ErrorCode.SESSION_UNSETTLE_FORBIDDEN);
   }
 
   if (session.status !== 'settled') {
-    return c.json({ error: 'Session is not settled' }, 400);
+    throw badRequest(ErrorCode.SESSION_NOT_SETTLED);
   }
 
   session.status = 'active';
@@ -477,7 +458,7 @@ sessionRoutes.get('/:code/events', async (c) => {
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
   return streamSSE(c, async (stream) => {

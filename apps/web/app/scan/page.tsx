@@ -6,6 +6,7 @@ import { Tabs, Tab, addToast, Spinner } from '@heroui/react';
 import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
 import { ItemEditor } from '@/components/receipt/ItemEditor';
 import { api } from '@/lib/api';
+import { useApiError } from '@/hooks/useApiError';
 import type { ScanResult, ScannedItem } from '@split-snap/shared';
 
 export default function ScanPage() {
@@ -31,6 +32,7 @@ function ScanPageInner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
+  const { handleError } = useApiError();
 
   const handleFileSelected = useCallback(async (file: File) => {
     setScanning(true);
@@ -39,17 +41,15 @@ function ScanPageInner() {
       setScanResult(result);
       setActiveTab('manual'); // Switch to editor after scan
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to scan receipt';
+      handleError(err, 'Scan failed');
       addToast({
-        title: 'Scan failed',
-        description: message + '. You can enter items manually.',
-        color: 'danger'
+        description: 'You can enter items manually.',
+        color: 'warning'
       });
     } finally {
       setScanning(false);
     }
-  }, []);
+  }, [handleError]);
 
   const handleCreateSession = useCallback(
     async (data: {
@@ -72,13 +72,7 @@ function ScanPageInner() {
         });
         router.push(`/session/${session.code}`);
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to create session';
-        addToast({
-          title: 'Error',
-          description: message,
-          color: 'danger'
-        });
+        handleError(err, 'Failed to create session');
       } finally {
         setCreating(false);
       }

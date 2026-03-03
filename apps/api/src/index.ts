@@ -2,8 +2,11 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { createWorker } from 'tesseract.js';
+import { ErrorCode } from '@split-snap/shared';
 
 import { connectDB } from './lib/db.js';
+import { AppError, badRequest, internal } from './lib/errors.js';
+import { errorHandler } from './middleware/error-handler.js';
 
 import { authRoutes } from './routes/auth.js';
 import { sessionRoutes } from './routes/sessions.js';
@@ -22,14 +25,14 @@ app.use('*', logger());
 app.use('*', cors());
 
 // gate all requests behind startup DB check
-app.use('*', async (c, next) => {
+app.use('*', async (_c, next) => {
   try {
     await dbReady;
-    await next();
   } catch (err) {
     console.error('Mongo startup connection failed:', err);
-    return c.json({ error: 'Database unavailable' }, 503);
+    throw new AppError(ErrorCode.DATABASE_UNAVAILABLE, 503);
   }
+  await next();
 });
 
 const welcomeStrings = [
@@ -65,40 +68,40 @@ app.get('/tesseract-test', async (c) => {
 });
 
 app.post('/tesseract-upload-test', async (c) => {
-  try {
-    const contentType = c.req.header('Content-Type') || '';
+  const contentType = c.req.header('Content-Type') || '';
 
-    let imageBase64: string;
-    let mimeType = 'image/jpeg';
+  let imageBase64: string;
+  let mimeType = 'image/jpeg';
 
-    if (contentType.includes('multipart/form-data')) {
-      const formData = await c.req.formData();
-      const file = formData.get('receipt') as File | null;
-      if (!file) {
-        return c.json({ error: 'No receipt image provided' }, 400);
-      }
-
-      mimeType = file.type || 'image/jpeg';
-      const buffer = await file.arrayBuffer();
-      imageBase64 = Buffer.from(buffer).toString('base64');
-    } else {
-      // Expect JSON with base64 image
-      const body = await c.req.json();
-      if (!body.image) {
-        return c.json({ error: 'No image data provided' }, 400);
-      }
-      imageBase64 = body.image;
-      mimeType = body.mimeType || 'image/jpeg';
+  if (contentType.includes('multipart/form-data')) {
+    const formData = await c.req.formData();
+    const file = formData.get('receipt') as File | null;
+    if (!file) {
+      throw badRequest(ErrorCode.RECEIPT_NO_IMAGE, 'No receipt image provided');
     }
 
-    const result = await scanReceiptTest(imageBase64);
+    mimeType = file.type || 'image/jpeg';
+    const buffer = await file.arrayBuffer();
+    imageBase64 = Buffer.from(buffer).toString('base64');
+  } else {
+    // Expect JSON with base64 image
+    const body = await c.req.json();
+    if (!body.image) {
+      throw badRequest(ErrorCode.RECEIPT_NO_IMAGE, 'No image data provided');
+    }
+    imageBase64 = body.image;
+    mimeType = body.mimeType || 'image/jpeg';
+  }
 
+  try {
+    const result = await scanReceiptTest(imageBase64);
     return c.text(result);
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to scan receipt';
     console.error('Receipt scan error:', err);
-    return c.json({ error: message }, 500);
+    throw internal(
+      ErrorCode.RECEIPT_SCAN_FAILED,
+      err instanceof Error ? err.message : undefined
+    );
   }
 });
 
@@ -106,11 +109,11 @@ app.route('/auth', authRoutes);
 app.route('/receipts', receiptRoutes);
 app.route('/sessions', sessionRoutes);
 
-app.notFound((c) => c.json({ error: 'Not found' }, 404));
-
-app.onError((err, c) => {
-  console.error('Unhandled error:', err);
-  return c.json({ error: 'Internal server error' }, 500);
+app.notFound((c) => {
+  const err = new AppError(ErrorCode.NOT_FOUND, 404);
+  return c.json(err.toJSON(), 404);
 });
+
+app.onError(errorHandler);
 
 export default app;

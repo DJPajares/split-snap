@@ -1,0 +1,108 @@
+'use client';
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from '@heroui/react';
+import { useRouter } from 'next/navigation';
+
+// ─── Types ─────────────────────────────────────────────────
+
+interface ErrorModalOptions {
+  /** Where to navigate when the user clicks the action button (default: none/close). */
+  redirectTo?: string;
+  /** Custom label for the action button (default: "OK" or "Go Home" when redirectTo is set). */
+  actionLabel?: string;
+  /** Callback fired when the modal is closed/dismissed. */
+  onClose?: () => void;
+}
+
+interface ErrorModalContextValue {
+  showErrorModal: (title: string, message: string, options?: ErrorModalOptions) => void;
+}
+
+// ─── Context ───────────────────────────────────────────────
+
+const ErrorModalContext = createContext<ErrorModalContextValue | null>(null);
+
+export function useErrorModal() {
+  const ctx = useContext(ErrorModalContext);
+  if (!ctx) throw new Error('useErrorModal must be used within ErrorModalProvider');
+  return ctx;
+}
+
+// ─── Provider ──────────────────────────────────────────────
+
+interface ModalState {
+  title: string;
+  message: string;
+  options?: ErrorModalOptions;
+}
+
+export function ErrorModalProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [modal, setModal] = useState<ModalState | null>(null);
+
+  const showErrorModal = useCallback(
+    (title: string, message: string, options?: ErrorModalOptions) => {
+      setModal({ title, message, options });
+    },
+    []
+  );
+
+  const handleClose = useCallback(() => {
+    const onClose = modal?.options?.onClose;
+    const redirectTo = modal?.options?.redirectTo;
+    setModal(null);
+    onClose?.();
+    if (redirectTo) {
+      router.push(redirectTo);
+    }
+  }, [modal, router]);
+
+  return (
+    <ErrorModalContext.Provider value={{ showErrorModal }}>
+      {children}
+
+      <Modal
+        isOpen={modal !== null}
+        onOpenChange={(open) => {
+          if (!open) handleClose();
+        }}
+        isDismissable={false}
+        hideCloseButton
+      >
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="flex items-center gap-2">
+                <span className="text-danger text-xl">⚠️</span>
+                {modal?.title}
+              </ModalHeader>
+              <ModalBody>
+                <p className="text-default-600">{modal?.message}</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onPress={handleClose}>
+                  {modal?.options?.actionLabel ??
+                    (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </ErrorModalContext.Provider>
+  );
+}

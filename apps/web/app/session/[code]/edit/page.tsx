@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { Session, ScannedItem } from '@split-snap/shared';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { useApiError } from '@/hooks/useApiError';
 import { ItemEditor } from '@/components/receipt/ItemEditor';
 
 export default function EditSessionPage({
@@ -20,6 +21,7 @@ export default function EditSessionPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { handleError } = useApiError({ redirectTo: '/' });
 
   // Fetch existing session
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function EditSessionPage({
         setSession(s);
       })
       .catch((err) => {
+        handleError(err, 'Session error');
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
@@ -85,11 +88,7 @@ export default function EditSessionPage({
       addToast({ title: 'Items updated!', color: 'success' });
       router.push(`/session/${code}`);
     } catch (err) {
-      addToast({
-        title: 'Failed to update items',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        color: 'danger'
-      });
+      handleError(err, 'Failed to update items');
     } finally {
       setSubmitting(false);
     }

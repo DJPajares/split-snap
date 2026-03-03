@@ -18,6 +18,7 @@ import type { Session } from '@split-snap/shared';
 import { api } from '@/lib/api';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
 import { useAuth } from '@/hooks/useAuth';
+import { useApiError } from '@/hooks/useApiError';
 import { SessionItemList } from '@/components/session/SessionItemList';
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
@@ -46,6 +47,7 @@ export default function SessionPage({
   } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
   const { user } = useAuth();
+  const { handleError } = useApiError({ redirectTo: '/' });
 
   // Load initial session data and validate participant
   useEffect(() => {
@@ -66,10 +68,11 @@ export default function SessionPage({
         }
       })
       .catch((err) => {
+        handleError(err, 'Session error');
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code]);
+  }, [code, handleError]);
 
   // Real-time updates via SSE
   const { session: liveSession, connected } = useSessionSSE({
@@ -137,11 +140,7 @@ export default function SessionPage({
             portion: 1
           });
         } catch (err) {
-          addToast({
-            title: 'Failed to update claim',
-            description: err instanceof Error ? err.message : 'Unknown error',
-            color: 'danger'
-          });
+          handleError(err, 'Failed to update claim');
         } finally {
           setClaimingItems((prev) => {
             const next = new Set(prev);
@@ -153,7 +152,7 @@ export default function SessionPage({
 
       debounceTimers.current.set(itemId, timer);
     },
-    [code, participantId, session]
+    [code, participantId, session, handleError]
   );
 
   const handleSettle = useCallback(async () => {
@@ -162,15 +161,11 @@ export default function SessionPage({
       await api.sessions.settle(code);
       addToast({ title: 'Session settled!', color: 'success' });
     } catch (err) {
-      addToast({
-        title: 'Failed to settle',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        color: 'danger'
-      });
+      handleError(err, 'Failed to settle');
     } finally {
       setSettleLoading(false);
     }
-  }, [code]);
+  }, [code, handleError]);
 
   const handleUnsettle = useCallback(async () => {
     setUnsettleLoading(true);
@@ -178,15 +173,11 @@ export default function SessionPage({
       await api.sessions.unsettle(code);
       addToast({ title: 'Settlement undone', color: 'success' });
     } catch (err) {
-      addToast({
-        title: 'Failed to undo settlement',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        color: 'danger'
-      });
+      handleError(err, 'Failed to undo settlement');
     } finally {
       setUnsettleLoading(false);
     }
-  }, [code]);
+  }, [code, handleError]);
 
   const handleKick = useCallback(
     async (targetParticipantId: string) => {
@@ -194,14 +185,10 @@ export default function SessionPage({
         await api.sessions.kick(code, targetParticipantId);
         addToast({ title: 'Participant removed', color: 'success' });
       } catch (err) {
-        addToast({
-          title: 'Failed to remove participant',
-          description: err instanceof Error ? err.message : 'Unknown error',
-          color: 'danger'
-        });
+        handleError(err, 'Failed to remove participant');
       }
     },
-    [code]
+    [code, handleError]
   );
 
   const handleDelete = useCallback(async () => {
@@ -211,15 +198,11 @@ export default function SessionPage({
       addToast({ title: 'Session deleted', color: 'success' });
       router.push('/');
     } catch (err) {
-      addToast({
-        title: 'Failed to delete session',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        color: 'danger'
-      });
+      handleError(err, 'Failed to delete session');
     } finally {
       setDeleteLoading(false);
     }
-  }, [code, router]);
+  }, [code, router, handleError]);
 
   if (loading) {
     return (

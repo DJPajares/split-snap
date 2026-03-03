@@ -1,6 +1,8 @@
 import { createMiddleware } from "hono/factory";
 import jwt from "jsonwebtoken";
+import { ErrorCode } from "@split-snap/shared";
 import { config } from "../lib/config.js";
+import { unauthorized } from "../lib/errors.js";
 
 export interface AuthPayload {
   userId: string;
@@ -15,7 +17,7 @@ export const requireAuth = createMiddleware<{
 }>(async (c, next) => {
   const header = c.req.header("Authorization");
   if (!header?.startsWith("Bearer ")) {
-    return c.json({ error: "Missing or invalid authorization header" }, 401);
+    throw unauthorized(ErrorCode.AUTH_MISSING_TOKEN);
   }
 
   try {
@@ -24,7 +26,7 @@ export const requireAuth = createMiddleware<{
     c.set("auth", payload);
     await next();
   } catch {
-    return c.json({ error: "Invalid or expired token" }, 401);
+    throw unauthorized(ErrorCode.AUTH_INVALID_TOKEN);
   }
 });
 

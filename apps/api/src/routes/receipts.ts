@@ -1,5 +1,7 @@
 import { Hono } from "hono";
+import { ErrorCode } from "@split-snap/shared";
 import { scanReceipt, getActiveProvider } from "../services/receipt-scanner.js";
+import { badRequest, internal } from "../lib/errors.js";
 
 export const receiptRoutes = new Hono();
 
@@ -12,37 +14,39 @@ receiptRoutes.get("/provider", (c) => {
 // ─── Scan receipt image ────────────────────────────────────
 
 receiptRoutes.post("/scan", async (c) => {
-  try {
-    const contentType = c.req.header("Content-Type") || "";
+  const contentType = c.req.header("Content-Type") || "";
 
-    let imageBase64: string;
-    let mimeType = "image/jpeg";
+  let imageBase64: string;
+  let mimeType = "image/jpeg";
 
-    if (contentType.includes("multipart/form-data")) {
-      const formData = await c.req.formData();
-      const file = formData.get("receipt") as File | null;
-      if (!file) {
-        return c.json({ error: "No receipt image provided" }, 400);
-      }
-
-      mimeType = file.type || "image/jpeg";
-      const buffer = await file.arrayBuffer();
-      imageBase64 = Buffer.from(buffer).toString("base64");
-    } else {
-      // Expect JSON with base64 image
-      const body = await c.req.json();
-      if (!body.image) {
-        return c.json({ error: "No image data provided" }, 400);
-      }
-      imageBase64 = body.image;
-      mimeType = body.mimeType || "image/jpeg";
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await c.req.formData();
+    const file = formData.get("receipt") as File | null;
+    if (!file) {
+      throw badRequest(ErrorCode.RECEIPT_NO_IMAGE, "No receipt image provided");
     }
 
+    mimeType = file.type || "image/jpeg";
+    const buffer = await file.arrayBuffer();
+    imageBase64 = Buffer.from(buffer).toString("base64");
+  } else {
+    // Expect JSON with base64 image
+    const body = await c.req.json();
+    if (!body.image) {
+      throw badRequest(ErrorCode.RECEIPT_NO_IMAGE, "No image data provided");
+    }
+    imageBase64 = body.image;
+    mimeType = body.mimeType || "image/jpeg";
+  }
+
+  try {
     const result = await scanReceipt(imageBase64, mimeType);
     return c.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to scan receipt";
     console.error("Receipt scan error:", err);
-    return c.json({ error: message }, 500);
+    throw internal(
+      ErrorCode.RECEIPT_SCAN_FAILED,
+      err instanceof Error ? err.message : undefined
+    );
   }
 });

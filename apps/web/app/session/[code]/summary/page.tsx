@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import type { Session, PersonSummary } from '@split-snap/shared';
 import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
 import { api } from '@/lib/api';
+import { useApiError } from '@/hooks/useApiError';
 
 export default function SummaryPage({
   params
@@ -24,14 +25,15 @@ export default function SummaryPage({
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { handleError } = useApiError({ redirectTo: '/' });
 
   useEffect(() => {
     api.sessions
       .get(code)
       .then(setSession)
-      .catch(() => router.push('/'))
+      .catch((err) => handleError(err, 'Session error'))
       .finally(() => setLoading(false));
-  }, [code, router]);
+  }, [code, handleError]);
 
   if (loading) {
     return (

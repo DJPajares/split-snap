@@ -11,6 +11,7 @@ import type {
   User
 } from '@split-snap/shared';
 import { API_ROUTES } from '@split-snap/shared';
+import { parseApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -39,8 +40,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${res.status}`);
+    throw await parseApiError(res);
   }
 
   return res.json();
@@ -88,8 +88,7 @@ export const api = {
       });
 
       if (!res.ok) {
-        const error = await res.json().catch(() => ({ error: 'Scan failed' }));
-        throw new Error(error.error || `HTTP ${res.status}`);
+        throw await parseApiError(res);
       }
 
       return res.json();
