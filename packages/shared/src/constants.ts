@@ -26,3 +26,7 @@ export const API_ROUTES = {
   AUTH_LOGIN: '/auth/login',
   AUTH_ME: '/auth/me'
 } as const;
+
+export const APP = {
+  NAME: 'Split Snap'
+}

@@ -5,9 +5,10 @@ import './globals.css';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { APP } from '@split-snap/shared';
 
 export const metadata: Metadata = {
-  title: 'Split Snap',
+  title: APP.NAME,
   description:
     'Scan a receipt, share a link, and split the bill fairly with friends.',
   manifest: '/manifest.webmanifest',
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: 'Split Snap'
+    title: APP.NAME
   }
 };
 

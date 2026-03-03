@@ -2,6 +2,7 @@
 
 import { Button, Card, CardBody, Link } from '@heroui/react';
 import Image from 'next/image';
+import { APP } from '@split-snap/shared';
 
 const STEPS = [
   {
@@ -37,14 +38,14 @@ export default function HomePage() {
       <section className="flex flex-col items-center justify-center text-center py-20 md:py-32 px-4">
         <Image
           src="/logo.png"
-          alt="Split Snap logo"
+          alt={`${APP.NAME} logo`}
           width={96}
           height={96}
           className="rounded-2xl mb-6"
           priority
         />
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl">
-          Split bills, <span className="text-primary">not friendships.</span>
+          Split bills, <span className="text-primary">not friendships</span>
         </h1>
         <p className="mt-4 text-lg md:text-xl text-default-500 max-w-2xl">
           Scan a receipt, share a link, and let everyone pick their items. Tax
@@ -93,7 +94,7 @@ export default function HomePage() {
       {/* Features */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Why Split Snap?</h2>
+          <h2 className="text-3xl font-bold mb-8">{`Why ${APP.NAME}?`}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="text-3xl mb-3">⚡</div>

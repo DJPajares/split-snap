@@ -16,6 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useApiError } from "@/hooks/useApiError";
+import { APP } from "@split-snap/shared";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function LoginPage() {
       <Card>
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
           <span className="text-4xl">🔐</span>
-          <h1 className="text-2xl font-bold">Welcome to Split Snap</h1>
+          <h1 className="text-2xl font-bold">{`Welcome to ${APP.NAME}`}</h1>
           <p className="text-default-500 text-sm text-center">
             Sign in to save your sessions and access them later.
           </p>
