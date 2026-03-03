@@ -14,7 +14,11 @@ const HEARTBEAT_TIMEOUT_MS = 45_000; // server sends every 30s, 15s grace
 const INITIAL_RECONNECT_MS = 3_000;
 const MAX_RECONNECT_MS = 30_000;
 
-export function useSessionSSE({ code, onUpdate, onDeleted }: UseSessionSSEOptions) {
+export function useSessionSSE({
+  code,
+  onUpdate,
+  onDeleted
+}: UseSessionSSEOptions) {
   const [session, setSession] = useState<Session | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +77,10 @@ export function useSessionSSE({ code, onUpdate, onDeleted }: UseSessionSSEOption
       'session:updated',
       'participant:joined',
       'participant:kicked',
+      'participant:updated',
+      'participant:pending',
+      'participant:approved',
+      'participant:rejected',
       'item:claimed',
       'item:unclaimed',
       'items:updated',

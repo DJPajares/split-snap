@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Card,
   CardBody,
@@ -11,32 +11,42 @@ import {
   Button,
   Divider,
   Link,
-  addToast,
-} from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { useApiError } from "@/hooks/useApiError";
+  addToast
+} from '@heroui/react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useApiError } from '@/hooks/useApiError';
+import { APP } from '@split-snap/shared';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, register } = useAuth();
   const { handleError } = useApiError();
 
-  const [tab, setTab] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [tab, setTab] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const getPostAuthRedirect = (): string => {
+    const pendingCode = localStorage.getItem('pending_session_code');
+    if (pendingCode) {
+      localStorage.removeItem('pending_session_code');
+      return `/join/${pendingCode}`;
+    }
+    return '/dashboard';
+  };
 
   const handleLogin = async () => {
     if (!email || !password) return;
     setLoading(true);
     try {
       await login(email, password);
-      addToast({ title: "Welcome back!", color: "success" });
-      router.push("/dashboard");
+      addToast({ title: 'Welcome back!', color: 'success' });
+      router.push(getPostAuthRedirect());
     } catch (err) {
-      handleError(err, "Login failed");
+      handleError(err, 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -47,10 +57,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await register(email, password, name);
-      addToast({ title: "Account created!", color: "success" });
-      router.push("/dashboard");
+      addToast({ title: 'Account created!', color: 'success' });
+      router.push(getPostAuthRedirect());
     } catch (err) {
-      handleError(err, "Registration failed");
+      handleError(err, 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -61,7 +71,7 @@ export default function LoginPage() {
       <Card>
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
           <span className="text-4xl">🔐</span>
-          <h1 className="text-2xl font-bold">Welcome to Split Snap</h1>
+          <h1 className="text-2xl font-bold">{`Welcome to ${APP.NAME}`}</h1>
           <p className="text-default-500 text-sm text-center">
             Sign in to save your sessions and access them later.
           </p>
@@ -89,7 +99,7 @@ export default function LoginPage() {
                   placeholder="••••••"
                   value={password}
                   onValueChange={setPassword}
-                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <Button
                   color="primary"
@@ -124,7 +134,7 @@ export default function LoginPage() {
                   placeholder="At least 6 characters"
                   value={password}
                   onValueChange={setPassword}
-                  onKeyDown={(e) => e.key === "Enter" && handleRegister()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
                 />
                 <Button
                   color="primary"
@@ -141,7 +151,7 @@ export default function LoginPage() {
           </Tabs>
 
           <p className="text-xs text-default-400 text-center mt-4">
-            You don&apos;t need an account to join sessions.{" "}
+            You don&apos;t need an account to join sessions.{' '}
             <Link href="/" size="sm">
               Go back
             </Link>

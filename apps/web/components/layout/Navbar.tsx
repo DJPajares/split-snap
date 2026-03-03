@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { APP } from '@split-snap/shared';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,13 +41,13 @@ export function Navbar() {
           >
             <Image
               src="/logo.png"
-              alt="Split Snap logo"
+              alt={`${APP.NAME} logo`}
               width={28}
               height={28}
               className="rounded-md"
               priority
             />
-            <span>Split Snap</span>
+            <span>{APP.NAME}</span>
           </Link>
         </NavbarBrand>
       </NavbarContent>

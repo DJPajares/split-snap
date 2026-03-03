@@ -26,6 +26,13 @@ const ParticipantSchema = new Schema({
   joinedAt: { type: Date, default: Date.now }
 });
 
+const PendingParticipantSchema = new Schema({
+  displayName: { type: String, required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  isAnonymous: { type: Boolean, default: true },
+  requestedAt: { type: Date, default: Date.now }
+});
+
 // ─── Session document ──────────────────────────────────────
 
 export interface ISession extends Document {
@@ -50,6 +57,15 @@ export interface ISession extends Document {
     isAnonymous: boolean;
     joinedAt: Date;
   }[];
+  pendingParticipants: {
+    _id: mongoose.Types.ObjectId;
+    displayName: string;
+    userId: mongoose.Types.ObjectId | null;
+    isAnonymous: boolean;
+    requestedAt: Date;
+  }[];
+  kickedUserIds: mongoose.Types.ObjectId[];
+  requireApproval: boolean;
   subtotal: number;
   tax: number;
   tip: number;
@@ -67,6 +83,12 @@ const SessionSchema = new Schema<ISession>(
     receiptImageUrl: { type: String, default: null },
     items: { type: [SessionItemSchema], default: [] },
     participants: { type: [ParticipantSchema], default: [] },
+    pendingParticipants: { type: [PendingParticipantSchema], default: [] },
+    kickedUserIds: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+      default: []
+    },
+    requireApproval: { type: Boolean, default: true },
     subtotal: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true, default: 0 },
     tip: { type: Number, required: true, default: 0 },

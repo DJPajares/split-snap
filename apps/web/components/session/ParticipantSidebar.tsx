@@ -22,17 +22,23 @@ interface ParticipantSidebarProps {
   currentParticipantId: string | null;
   isCreator?: boolean;
   onKick?: (participantId: string) => Promise<void>;
+  onApprove?: (participantId: string) => Promise<void>;
+  onReject?: (participantId: string) => Promise<void>;
 }
 
 export function ParticipantSidebar({
   session,
   currentParticipantId,
   isCreator = false,
-  onKick
+  onKick,
+  onApprove,
+  onReject
 }: ParticipantSidebarProps) {
   const summaries = calculateSummaries(session);
   const [kickingId, setKickingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const cs = getCurrencySymbol(session.currency);
 
   const handleKick = async (participantId: string) => {
@@ -43,6 +49,26 @@ export function ParticipantSidebar({
       await onKick(participantId);
     } finally {
       setKickingId(null);
+    }
+  };
+
+  const handleApprove = async (participantId: string) => {
+    if (!onApprove) return;
+    setApprovingId(participantId);
+    try {
+      await onApprove(participantId);
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  const handleReject = async (participantId: string) => {
+    if (!onReject) return;
+    setRejectingId(participantId);
+    try {
+      await onReject(participantId);
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -66,6 +92,61 @@ export function ParticipantSidebar({
       </CardHeader>
       <Divider />
       <CardBody className="gap-3">
+        {/* Pending participants (only visible to host) */}
+        {isCreator &&
+          session.pendingParticipants &&
+          session.pendingParticipants.length > 0 && (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-warning">
+                  Pending Requests
+                </p>
+                <Chip size="sm" variant="flat" color="warning">
+                  {session.pendingParticipants.length}
+                </Chip>
+              </div>
+              {session.pendingParticipants.map((pending) => (
+                <div
+                  key={pending.id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-warning/10"
+                >
+                  <UserAvatar
+                    name={pending.displayName}
+                    description={pending.isAnonymous ? 'Guest' : 'Member'}
+                    avatarProps={{
+                      name: pending.displayName[0],
+                      size: 'sm',
+                      color: 'warning'
+                    }}
+                  />
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      onPress={() => handleApprove(pending.id)}
+                      isLoading={approvingId === pending.id}
+                      isDisabled={rejectingId === pending.id}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      onPress={() => handleReject(pending.id)}
+                      isLoading={rejectingId === pending.id}
+                      isDisabled={approvingId === pending.id}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Divider />
+            </>
+          )}
+
         {session.participants.length === 0 ? (
           <p className="text-sm text-default-400 text-center py-4">
             No one has joined yet. Share the link!
@@ -143,15 +224,14 @@ export function ParticipantSidebar({
                     <div className="flex items-center gap-2">
                       <div className="text-right">
                         <p className="font-semibold text-sm">
-                          {cs}{(summary?.total ?? 0).toFixed(2)}
+                          {cs}
+                          {(summary?.total ?? 0).toFixed(2)}
                         </p>
                         <p className="text-xs text-default-400">
                           {summary?.items.length ?? 0} items
                         </p>
                       </div>
-                      {isKicking && (
-                        <Spinner size="sm" color="danger" />
-                      )}
+                      {isKicking && <Spinner size="sm" color="danger" />}
                     </div>
                   </div>
                 </PopoverTrigger>
@@ -194,20 +274,32 @@ export function ParticipantSidebar({
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-default-500">Subtotal</span>
-            <span>{cs}{session.subtotal.toFixed(2)}</span>
+            <span>
+              {cs}
+              {session.subtotal.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-default-500">Tax</span>
-            <span>{cs}{session.tax.toFixed(2)}</span>
+            <span>
+              {cs}
+              {session.tax.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-default-500">Service Charge/Tip</span>
-            <span>{cs}{session.tip.toFixed(2)}</span>
+            <span>
+              {cs}
+              {session.tip.toFixed(2)}
+            </span>
           </div>
           <Divider />
           <div className="flex justify-between font-bold">
             <span>Total</span>
-            <span>{cs}{session.total.toFixed(2)}</span>
+            <span>
+              {cs}
+              {session.total.toFixed(2)}
+            </span>
           </div>
         </div>
       </CardBody>

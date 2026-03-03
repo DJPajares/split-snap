@@ -45,7 +45,11 @@ export default function SessionPage({
     onOpen: onSettleOpen,
     onOpenChange: onSettleOpenChange
   } = useDisclosure();
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onOpenChange: onDeleteOpenChange
+  } = useDisclosure();
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
 
@@ -58,9 +62,15 @@ export default function SessionPage({
         const stored = localStorage.getItem(`participant_${code}`);
         if (stored) {
           // Validate the stored participant still exists in the session
-          const stillExists = s.participants.some((p) => p.id === stored);
-          if (stillExists) {
-            setParticipantId(stored);
+          const participant = s.participants.find((p) => p.id === stored);
+          if (participant) {
+            // If user is logged in, verify this participant belongs to them
+            // (prevents accessing session as a previously logged-in user after logout + new login)
+            if (user && participant.userId && participant.userId !== user.id) {
+              localStorage.removeItem(`participant_${code}`);
+            } else {
+              setParticipantId(stored);
+            }
           } else {
             // Participant was kicked — clear stale data
             localStorage.removeItem(`participant_${code}`);
@@ -72,7 +82,7 @@ export default function SessionPage({
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code, handleError]);
+  }, [code, handleError, user]);
 
   // Real-time updates via SSE
   const { session: liveSession, connected } = useSessionSSE({
@@ -90,10 +100,10 @@ export default function SessionPage({
           setParticipantId(null);
           addToast({
             title: 'You were removed from this session',
-            description: 'You can rejoin using the share link.',
+            description: 'The host removed you from this session.',
             color: 'warning'
           });
-          router.replace(`/join/${code}`);
+          router.replace('/');
         }
       }
     },
@@ -191,6 +201,49 @@ export default function SessionPage({
     [code, handleError]
   );
 
+  const handleApprove = useCallback(
+    async (pendingParticipantId: string) => {
+      try {
+        await api.sessions.approveParticipant(code, pendingParticipantId);
+        addToast({ title: 'Participant approved', color: 'success' });
+      } catch (err) {
+        handleError(err, 'Failed to approve participant');
+      }
+    },
+    [code, handleError]
+  );
+
+  const handleReject = useCallback(
+    async (pendingParticipantId: string) => {
+      try {
+        await api.sessions.rejectParticipant(code, pendingParticipantId);
+        addToast({ title: 'Participant rejected', color: 'success' });
+      } catch (err) {
+        handleError(err, 'Failed to reject participant');
+      }
+    },
+    [code, handleError]
+  );
+
+  // Upgrade guest participant to logged-in user
+  useEffect(() => {
+    if (!user || !participantId || !session) return;
+    const participant = session.participants.find(
+      (p) => p.id === participantId
+    );
+    if (participant && participant.isAnonymous && !participant.userId) {
+      // This participant was created as a guest, but the user is now logged in
+      void api.sessions
+        .upgradeParticipant(code, participantId, {
+          userId: user.id,
+          displayName: user.name
+        })
+        .catch(() => {
+          // Silently fail — not critical
+        });
+    }
+  }, [user, participantId, session, code]);
+
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
     try {
@@ -228,7 +281,6 @@ export default function SessionPage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 relative">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>
@@ -354,6 +406,8 @@ export default function SessionPage({
             currentParticipantId={participantId}
             isCreator={isCreator}
             onKick={handleKick}
+            onApprove={handleApprove}
+            onReject={handleReject}
           />
         </div>
       </div>

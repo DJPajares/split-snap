@@ -1,10 +1,18 @@
 import type { ISession } from '../models/session.js';
-import type { Session, SessionItem, Participant } from '@split-snap/shared';
+import type {
+  Session,
+  SessionItem,
+  Participant,
+  PendingParticipant
+} from '@split-snap/shared';
 
 /**
  * Convert a Mongoose session document into the shared Session type.
  */
-export function serializeSession(doc: ISession): Session {
+export function serializeSession(
+  doc: ISession,
+  opts?: { role?: 'host' | 'participant' }
+): Session {
   return {
     id: doc._id.toString(),
     code: doc.code,
@@ -32,12 +40,24 @@ export function serializeSession(doc: ISession): Session {
         joinedAt: p.joinedAt.toISOString()
       })
     ),
+    pendingParticipants: (doc.pendingParticipants ?? []).map(
+      (p): PendingParticipant => ({
+        id: p._id.toString(),
+        displayName: p.displayName,
+        userId: p.userId?.toString() ?? null,
+        isAnonymous: p.isAnonymous,
+        requestedAt: p.requestedAt.toISOString()
+      })
+    ),
+    kickedUserIds: (doc.kickedUserIds ?? []).map((id) => id.toString()),
+    requireApproval: doc.requireApproval ?? true,
     subtotal: doc.subtotal,
     tax: doc.tax,
     tip: doc.tip,
     total: doc.total,
     currency: doc.currency,
     status: doc.status,
+    ...(opts?.role ? { role: opts.role } : {}),
     createdAt: doc.createdAt.toISOString(),
     expiresAt: doc.expiresAt.toISOString()
   };

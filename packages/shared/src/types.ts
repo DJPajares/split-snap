@@ -24,6 +24,14 @@ export interface Participant {
   joinedAt: string; // ISO date
 }
 
+export interface PendingParticipant {
+  id: string;
+  displayName: string;
+  userId?: string | null;
+  isAnonymous: boolean;
+  requestedAt: string; // ISO date
+}
+
 export interface Session {
   id: string;
   code: string; // 6-char shareable code
@@ -31,12 +39,16 @@ export interface Session {
   receiptImageUrl?: string | null;
   items: SessionItem[];
   participants: Participant[];
+  pendingParticipants: PendingParticipant[];
+  kickedUserIds: string[];
+  requireApproval: boolean;
   subtotal: number;
   tax: number;
   tip: number;
   total: number;
   currency: string;
   status: SessionStatus;
+  role?: 'host' | 'participant'; // populated by API for dashboard
   createdAt: string;
   expiresAt: string;
 }
@@ -82,6 +94,15 @@ export interface ClaimItemPayload {
   portion?: number; // defaults to 1
 }
 
+export interface UpgradeParticipantPayload {
+  userId: string;
+  displayName: string;
+}
+
+export interface UpdateSessionSettingsPayload {
+  requireApproval?: boolean;
+}
+
 export interface RegisterPayload {
   email: string;
   password: string;
@@ -105,6 +126,10 @@ export type SSEEventType =
   | 'session:deleted'
   | 'participant:joined'
   | 'participant:kicked'
+  | 'participant:updated'
+  | 'participant:pending'
+  | 'participant:approved'
+  | 'participant:rejected'
   | 'item:claimed'
   | 'item:unclaimed'
   | 'items:updated'
