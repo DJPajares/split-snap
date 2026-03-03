@@ -42,15 +42,60 @@ export default function JoinPage({
   const hasAttemptedAutoJoinRef = useRef(false);
   const { handleError } = useApiError({ redirectTo: '/' });
 
-  // Check for stored participant — if found, go directly to session
+  // Check for stored participant and validate against auth state
   useEffect(() => {
-    const stored = localStorage.getItem(`participant_${code}`);
-    if (stored) {
+    if (authLoading) return;
+
+    const storedParticipantId = localStorage.getItem(`participant_${code}`);
+    if (!storedParticipantId) {
+      setCheckingStoredParticipant(false);
+      return;
+    }
+
+    if (!user) {
       router.replace(`/session/${code}`);
       return;
     }
-    setCheckingStoredParticipant(false);
-  }, [code, router]);
+
+    let active = true;
+    void api.sessions
+      .get(code)
+      .then((session) => {
+        if (!active) return;
+
+        const participant = session.participants.find(
+          (p) => p.id === storedParticipantId
+        );
+
+        if (
+          participant &&
+          participant.userId === user.id &&
+          !participant.isAnonymous
+        ) {
+          router.replace(`/session/${code}`);
+          return;
+        }
+
+        if (participant && !participant.userId) {
+          localStorage.setItem(
+            `guest_participant_${code}`,
+            storedParticipantId
+          );
+        }
+
+        localStorage.removeItem(`participant_${code}`);
+        setCheckingStoredParticipant(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        localStorage.removeItem(`participant_${code}`);
+        setCheckingStoredParticipant(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, code, router, user]);
 
   const joinSession = useCallback(
     async (displayName: string, userId?: string) => {
@@ -292,7 +337,7 @@ export default function JoinPage({
           {!user && (
             <Input
               label="Your Name"
-              placeholder="e.g. Alex"
+              placeholder="e.g. DJ"
               value={name}
               onValueChange={setName}
               size="lg"
