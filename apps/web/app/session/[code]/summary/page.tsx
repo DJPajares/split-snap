@@ -73,8 +73,14 @@ export default function SummaryPage({
             </p>
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
-                <Chip key={item.id} size="sm" variant="flat" color="warning">
-                  {item.name} ({cs}{(item.price * item.quantity).toFixed(2)})
+                <Chip
+                  key={item.id}
+                  size="sm"
+                  variant="flat"
+                  color="warning"
+                >
+                  {item.name} ({cs}
+                  {(item.price * item.quantity).toFixed(2)})
                 </Chip>
               ))}
             </div>
@@ -84,7 +90,11 @@ export default function SummaryPage({
 
       <div className="space-y-4">
         {summaries.map((summary) => (
-          <PersonSummaryCard key={summary.participantId} summary={summary} currencySymbol={cs} />
+          <PersonSummaryCard
+            key={summary.participantId}
+            summary={summary}
+            currencySymbol={cs}
+          />
         ))}
       </div>
 
@@ -94,7 +104,8 @@ export default function SummaryPage({
           <div className="flex justify-between items-center">
             <span className="text-lg font-bold">Grand Total</span>
             <span className="text-2xl font-bold">
-              {cs}{session.total.toFixed(2)}
+              {cs}
+              {session.total.toFixed(2)}
             </span>
           </div>
         </CardBody>
@@ -103,7 +114,13 @@ export default function SummaryPage({
   );
 }
 
-function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary; currencySymbol: string }) {
+function PersonSummaryCard({
+  summary,
+  currencySymbol
+}: {
+  summary: PersonSummary;
+  currencySymbol: string;
+}) {
   const quantityFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
@@ -121,7 +138,8 @@ function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary
     { value: 0.875, glyph: '⅞' }
   ];
 
-  const isWholeNumber = (value: number) => Math.abs(value - Math.round(value)) < 0.001;
+  const isWholeNumber = (value: number) =>
+    Math.abs(value - Math.round(value)) < 0.001;
 
   const formatFriendlyQuantity = (value: number) => {
     const rounded = Math.round(value * 100) / 100;
@@ -137,20 +155,10 @@ function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary
     return quantityFormatter.format(rounded);
   };
 
-  const getItemQuantityLabel = (
-    claimedQuantity: number,
-    totalQuantity: number
-  ) => {
+  const getItemQuantityLabel = (claimedQuantity: number) => {
     const normalizedClaimed = isWholeNumber(claimedQuantity)
       ? Math.round(claimedQuantity)
       : claimedQuantity;
-    const normalizedTotal = isWholeNumber(totalQuantity)
-      ? Math.round(totalQuantity)
-      : totalQuantity;
-
-    if (normalizedClaimed === 1 && normalizedTotal === 1) {
-      return '';
-    }
 
     if (Number.isInteger(normalizedClaimed)) {
       return ` (x${normalizedClaimed})`;
@@ -165,19 +173,26 @@ function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary
         <div className="flex items-center justify-between w-full">
           <h3 className="font-bold text-lg">{summary.displayName}</h3>
           <span className="text-xl font-bold text-primary">
-            {currencySymbol}{summary.total.toFixed(2)}
+            {currencySymbol}
+            {summary.total.toFixed(2)}
           </span>
         </div>
       </CardHeader>
       <Divider />
       <CardBody className="pt-3 gap-2">
         {summary.items.map((item, i) => (
-          <div key={i} className="flex justify-between text-sm">
+          <div
+            key={i}
+            className="flex justify-between text-sm"
+          >
             <span className="text-default-600">
               {item.name}
-              {getItemQuantityLabel(item.claimedQuantity, item.totalQuantity)}
+              {getItemQuantityLabel(item.claimedQuantity)}
             </span>
-            <span>{currencySymbol}{item.amount.toFixed(2)}</span>
+            <span>
+              {currencySymbol}
+              {item.amount.toFixed(2)}
+            </span>
           </div>
         ))}
 
@@ -185,15 +200,24 @@ function PersonSummaryCard({ summary, currencySymbol }: { summary: PersonSummary
 
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Items subtotal</span>
-          <span>{currencySymbol}{summary.itemsSubtotal.toFixed(2)}</span>
+          <span>
+            {currencySymbol}
+            {summary.itemsSubtotal.toFixed(2)}
+          </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Tax (share)</span>
-          <span>{currencySymbol}{summary.taxShare.toFixed(2)}</span>
+          <span>
+            {currencySymbol}
+            {summary.taxShare.toFixed(2)}
+          </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-default-500">Service Charge/Tip (share)</span>
-          <span>{currencySymbol}{summary.tipShare.toFixed(2)}</span>
+          <span>
+            {currencySymbol}
+            {summary.tipShare.toFixed(2)}
+          </span>
         </div>
       </CardBody>
     </Card>
