@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const getPostAuthRedirect = (): string => {
@@ -110,11 +111,23 @@ export default function LoginPage() {
                 />
                 <Input
                   label="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••"
                   value={password}
                   onValueChange={setPassword}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  endContent={
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  }
                 />
                 <Button
                   color="primary"
@@ -145,11 +158,23 @@ export default function LoginPage() {
                 />
                 <Input
                   label="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="At least 6 characters"
                   value={password}
                   onValueChange={setPassword}
                   onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+                  endContent={
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  }
                 />
                 <Button
                   color="primary"
