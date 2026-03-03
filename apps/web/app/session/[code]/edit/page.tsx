@@ -124,12 +124,14 @@ export default function EditSessionPage({
   }));
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <div className="flex items-center justify-between gap-3 mb-2">
+    <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between gap-3">
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold">Edit Items</h1>
-            <p className="text-default-500 text-base font-semibold">Session {code}</p>
+            <p className="text-default-500 text-base font-semibold">
+              Session {code}
+            </p>
           </div>
           <Button
             variant="flat"

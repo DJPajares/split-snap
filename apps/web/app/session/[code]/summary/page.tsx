@@ -52,11 +52,13 @@ export default function SummaryPage({
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
+    <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <div className="flex justify-between gap-3">
+        <div className="flex flex-col">
           <h1 className="text-2xl font-bold">Bill Summary</h1>
-          <p className="text-default-500">Session {code}</p>
+          <p className="text-default-500 text-base font-semibold">
+            Session {code}
+          </p>
         </div>
         <Button
           variant="flat"
@@ -68,9 +70,9 @@ export default function SummaryPage({
       </div>
 
       {unclaimedItems.length > 0 && (
-        <Card className="mb-6 border-warning border-2">
-          <CardBody className="p-4">
-            <p className="text-warning font-semibold mb-2">
+        <Card className="border-warning border-2">
+          <CardBody className="p-4 flex flex-col gap-2">
+            <p className="text-warning font-semibold">
               ⚠️ {unclaimedItems.length} unclaimed item(s)
             </p>
             <div className="flex flex-wrap gap-2">
@@ -101,7 +103,7 @@ export default function SummaryPage({
       </div>
 
       {/* Grand total */}
-      <Card className="mt-6">
+      <Card>
         <CardBody className="p-4">
           <div className="flex justify-between items-center">
             <span className="text-lg font-bold">Grand Total</span>
@@ -171,7 +173,7 @@ function PersonSummaryCard({
 
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader>
         <div className="flex items-center justify-between w-full">
           <h3 className="font-bold text-lg">{summary.displayName}</h3>
           <span className="text-xl font-bold text-primary">
@@ -181,7 +183,7 @@ function PersonSummaryCard({
         </div>
       </CardHeader>
       <Divider />
-      <CardBody className="pt-3 gap-2">
+      <CardBody className="gap-2">
         {summary.items.map((item, i) => (
           <div
             key={i}
