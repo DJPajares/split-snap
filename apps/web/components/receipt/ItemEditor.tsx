@@ -70,9 +70,9 @@ export function ItemEditor({
                   : item.price
                 ).toString()
               : '',
-          quantity: item.quantity ? item.quantity.toString() : ''
+          quantity: item.quantity ? item.quantity.toString() : '1'
         }))
-      : [{ name: '', amount: '', quantity: '' }]
+      : [{ name: '', amount: '', quantity: '1' }]
   );
   const [tax, setTax] = useState(initialTax ? initialTax.toString() : '');
   const [tip, setTip] = useState(initialTip ? initialTip.toString() : '');
@@ -102,6 +102,12 @@ export function ItemEditor({
   const taxValue = parseNumber(tax);
   const tipValue = parseNumber(tip);
   const total = subtotal + taxValue + tipValue;
+  const isItemComplete = (item: EditableItem) =>
+    Boolean(item.name.trim()) &&
+    parseNumber(item.amount) > 0 &&
+    parseInteger(item.quantity) >= 1;
+
+  const canAddItem = items.every(isItemComplete);
 
   const updateItem = (index: number, field: ItemField, value: string) => {
     setItems((prev) =>
@@ -160,7 +166,8 @@ export function ItemEditor({
   };
 
   const addItem = () => {
-    setItems((prev) => [...prev, { name: '', amount: '', quantity: '' }]);
+    if (!canAddItem) return;
+    setItems((prev) => [...prev, { name: '', amount: '', quantity: '1' }]);
     setItemErrors((prev) => [...prev, {}]);
   };
 
@@ -347,6 +354,7 @@ export function ItemEditor({
           variant="flat"
           size="sm"
           onPress={addItem}
+          isDisabled={!canAddItem}
           className="self-start"
         >
           + Add Item
