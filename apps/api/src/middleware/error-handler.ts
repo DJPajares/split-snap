@@ -14,7 +14,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
       ErrorCode.VALIDATION_FAILED,
       400,
       'Validation failed',
-      err.message
+      err.message,
     );
     return c.json(appErr.toJSON(), 400);
   }
@@ -24,7 +24,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
     const appErr = new AppError(
       ErrorCode.VALIDATION_FAILED,
       400,
-      'Invalid identifier format'
+      'Invalid identifier format',
     );
     return c.json(appErr.toJSON(), 400);
   }
@@ -32,9 +32,6 @@ export const errorHandler: ErrorHandler = (err, c) => {
   // Unknown / unhandled error — log it, return generic 500
   console.error('Unhandled error:', err);
 
-  const appErr = new AppError(
-    ErrorCode.INTERNAL_ERROR,
-    500
-  );
+  const appErr = new AppError(ErrorCode.INTERNAL_ERROR, 500);
   return c.json(appErr.toJSON(), 500);
 };

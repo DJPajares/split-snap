@@ -9,7 +9,7 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   Button,
-  Link
+  Link,
 } from '@heroui/react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,7 +37,7 @@ export function Navbar() {
         <NavbarBrand>
           <Link
             href="/"
-            className="font-bold text-inherit text-xl gap-2 flex items-center"
+            className="flex items-center gap-2 text-xl font-bold text-inherit"
           >
             <Image
               src="/logo.png"
@@ -52,7 +52,7 @@ export function Navbar() {
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+      <NavbarContent className="hidden gap-4 sm:flex" justify="center">
         <NavbarItem>
           <Link href="/scan" color="foreground">
             Scan Receipt
@@ -71,7 +71,7 @@ export function Navbar() {
         {user ? (
           <>
             <NavbarItem className="hidden sm:flex">
-              <span className="text-sm text-default-500">{user.name}</span>
+              <span className="text-default-500 text-sm">{user.name}</span>
             </NavbarItem>
             <NavbarItem>
               <Button

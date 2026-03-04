@@ -17,7 +17,7 @@ const MAX_RECONNECT_MS = 30_000;
 export function useSessionSSE({
   code,
   onUpdate,
-  onDeleted
+  onDeleted,
 }: UseSessionSSEOptions) {
   const [session, setSession] = useState<Session | null>(null);
   const [connected, setConnected] = useState(false);
@@ -51,7 +51,7 @@ export function useSessionSSE({
       }, reconnectDelayRef.current);
       reconnectDelayRef.current = Math.min(
         reconnectDelayRef.current * 2,
-        MAX_RECONNECT_MS
+        MAX_RECONNECT_MS,
       );
     }, HEARTBEAT_TIMEOUT_MS);
   }, []);
@@ -84,7 +84,7 @@ export function useSessionSSE({
       'item:claimed',
       'item:unclaimed',
       'items:updated',
-      'session:settled'
+      'session:settled',
     ];
 
     for (const eventType of eventTypes) {
@@ -126,7 +126,7 @@ export function useSessionSSE({
       }, reconnectDelayRef.current);
       reconnectDelayRef.current = Math.min(
         reconnectDelayRef.current * 2,
-        MAX_RECONNECT_MS
+        MAX_RECONNECT_MS,
       );
     };
   }, [code, resetHeartbeatTimer]);

@@ -5,7 +5,7 @@ import {
   useEffect,
   useCallback,
   createContext,
-  useContext
+  useContext,
 } from 'react';
 import type { User } from '@split-snap/shared';
 import { api } from '@/lib/api';
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('auth_token', res.token);
       setUser(res.user);
     },
-    []
+    [],
   );
 
   const logout = useCallback(() => {
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (key?.startsWith('participant_')) {
         const sessionCode = key.replace('participant_', '');
         const guestId = localStorage.getItem(
-          `guest_participant_${sessionCode}`
+          `guest_participant_${sessionCode}`,
         );
         if (guestId) {
           localStorage.setItem(key, guestId);

@@ -34,7 +34,7 @@ class SSEManager {
       },
       cancel: () => {
         // Cleanup happens below via the returned stream
-      }
+      },
     });
 
     return stream;

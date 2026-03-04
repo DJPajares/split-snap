@@ -9,5 +9,5 @@ export const config = {
     | 'auto'
     | 'gemini'
     | 'openai'
-    | 'tesseract'
+    | 'tesseract',
 } as const;

@@ -8,7 +8,7 @@ import {
   ModalBody,
   Button,
   Input,
-  addToast
+  addToast,
 } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { on } from 'events';
@@ -22,7 +22,7 @@ interface ShareLinkModalProps {
 export function ShareLinkModal({
   isOpen,
   onClose,
-  sessionCode
+  sessionCode,
 }: ShareLinkModalProps) {
   const shareUrl =
     typeof window !== 'undefined'
@@ -43,12 +43,12 @@ export function ShareLinkModal({
     <Modal isOpen={isOpen} onClose={onClose} placement="center">
       <ModalContent>
         <ModalHeader>Share This Session</ModalHeader>
-        <ModalBody className="pb-6 gap-6">
+        <ModalBody className="gap-6 pb-6">
           <div className="flex flex-col items-center gap-4">
-            <div className="bg-white p-4 rounded-xl">
+            <div className="rounded-xl bg-white p-4">
               <QRCodeSVG value={shareUrl} size={200} level="M" />
             </div>
-            <p className="text-sm text-default-500 text-center">
+            <p className="text-default-500 text-center text-sm">
               Scan this QR code or share the link below
             </p>
           </div>
@@ -61,10 +61,10 @@ export function ShareLinkModal({
           </div>
 
           <div className="text-center">
-            <p className="text-lg font-mono font-bold tracking-widest">
+            <p className="font-mono text-lg font-bold tracking-widest">
               {sessionCode}
             </p>
-            <p className="text-xs text-default-400">Session Code</p>
+            <p className="text-default-400 text-xs">Session Code</p>
           </div>
         </ModalBody>
       </ModalContent>
