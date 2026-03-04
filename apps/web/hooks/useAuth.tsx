@@ -7,7 +7,7 @@ import {
   createContext,
   useContext,
 } from 'react';
-import type { User } from '@split-snap/shared';
+import type { User } from '@split-snap/shared/types';
 import { api } from '@/lib/api';
 
 interface AuthContextValue {

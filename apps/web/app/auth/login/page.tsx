@@ -16,7 +16,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useApiError } from '@/hooks/useApiError';
-import { APP } from '@split-snap/shared';
+import { APP } from '@split-snap/shared/constants';
 
 export default function LoginPage() {
   const router = useRouter();

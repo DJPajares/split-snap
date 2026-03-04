@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { APP } from '@split-snap/shared';
+import { APP } from '@split-snap/shared/constants';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

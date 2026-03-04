@@ -13,9 +13,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useApiError } from '@/hooks/useApiError';
-import type { Session } from '@split-snap/shared';
 import { api } from '@/lib/api';
-import { getCurrencySymbol } from '@split-snap/shared';
+import { getCurrencySymbol } from '@split-snap/shared/currency';
+import type { Session } from '@split-snap/shared/types';
 
 type RoleFilter = 'all' | 'host' | 'participant';
 

@@ -14,7 +14,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import type { Session } from '@split-snap/shared';
+import type { Session } from '@split-snap/shared/types';
 import { api } from '@/lib/api';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
 import { useAuth } from '@/hooks/useAuth';

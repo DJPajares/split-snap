@@ -11,8 +11,9 @@ import {
   Chip,
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import type { Session, PersonSummary } from '@split-snap/shared';
-import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
+import { getCurrencySymbol } from '@split-snap/shared/currency';
+import { calculateSummaries } from '@split-snap/shared/tax';
+import type { Session, PersonSummary } from '@split-snap/shared/types';
 import { api } from '@/lib/api';
 import { useApiError } from '@/hooks/useApiError';
 

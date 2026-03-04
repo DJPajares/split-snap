@@ -11,8 +11,8 @@ import {
   Select,
   SelectItem,
 } from '@heroui/react';
-import type { ScannedItem } from '@split-snap/shared';
-import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared';
+import type { ScannedItem } from '@split-snap/shared/types';
+import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];

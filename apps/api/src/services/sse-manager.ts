@@ -1,4 +1,4 @@
-import type { SSEEventType, Session } from '@split-snap/shared';
+import type { SSEEventType, Session } from '@split-snap/shared/types';
 
 type SSEClient = {
   controller: ReadableStreamDefaultController;

@@ -13,8 +13,8 @@ import type {
   UpgradeParticipantPayload,
   MergeParticipantPayload,
   UpdateSessionSettingsPayload,
-} from '@split-snap/shared';
-import { API_ROUTES } from '@split-snap/shared';
+} from '@split-snap/shared/types';
+import { API_ROUTES } from '@split-snap/shared/constants';
 import { parseApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';

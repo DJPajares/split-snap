@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { ErrorCode } from '@split-snap/shared';
+import { ErrorCode } from '@split-snap/shared/errors';
 import { UserModel } from '../models/index.js';
 import { requireAuth, generateToken } from '../middleware/auth.js';
 import type { AuthPayload } from '../middleware/auth.js';

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import type { Session } from '@split-snap/shared';
+import type { Session } from '@split-snap/shared/types';
 import { SessionItemList } from './SessionItemList';
 
 interface MockCardProps {

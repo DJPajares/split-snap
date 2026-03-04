@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { Spinner, Button, addToast } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import type { Session, ScannedItem } from '@split-snap/shared';
+import type { Session, ScannedItem } from '@split-snap/shared/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useApiError } from '@/hooks/useApiError';

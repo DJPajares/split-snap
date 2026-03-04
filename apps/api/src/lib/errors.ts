@@ -2,7 +2,7 @@ import {
   ErrorCode,
   DEFAULT_ERROR_MESSAGES,
   type ApiErrorResponse,
-} from '@split-snap/shared';
+} from '@split-snap/shared/errors';
 
 // ─── AppError ──────────────────────────────────────────────
 

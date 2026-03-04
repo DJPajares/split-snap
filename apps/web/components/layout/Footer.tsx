@@ -1,4 +1,4 @@
-import { APP } from '@split-snap/shared';
+import { APP } from '@split-snap/shared/constants';
 
 export function Footer() {
   return (

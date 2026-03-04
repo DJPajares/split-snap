@@ -1,4 +1,4 @@
-import { SESSION_CODE_LENGTH } from '@split-snap/shared';
+import { SESSION_CODE_LENGTH } from '@split-snap/shared/constants';
 
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0, I/1 to avoid confusion
 

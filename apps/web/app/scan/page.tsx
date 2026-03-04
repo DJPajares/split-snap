@@ -7,7 +7,7 @@ import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
 import { ItemEditor } from '@/components/receipt/ItemEditor';
 import { api } from '@/lib/api';
 import { useApiError } from '@/hooks/useApiError';
-import type { ScanResult, ScannedItem } from '@split-snap/shared';
+import type { ScanResult, ScannedItem } from '@split-snap/shared/types';
 
 export default function ScanPage() {
   return (

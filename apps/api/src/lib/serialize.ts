@@ -5,7 +5,7 @@ import type {
   Participant,
   PendingParticipant,
   KickedUser,
-} from '@split-snap/shared';
+} from '@split-snap/shared/types';
 
 /**
  * Convert a Mongoose session document into the shared Session type.

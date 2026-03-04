@@ -2,7 +2,7 @@ import {
   type ErrorCode,
   isCriticalError,
   DEFAULT_ERROR_MESSAGES,
-} from '@split-snap/shared';
+} from '@split-snap/shared/errors';
 
 /**
  * Structured error thrown by the API client.

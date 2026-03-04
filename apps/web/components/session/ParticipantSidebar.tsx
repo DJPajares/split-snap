@@ -14,8 +14,9 @@ import {
   User as UserAvatar,
   Spinner,
 } from '@heroui/react';
-import type { Session } from '@split-snap/shared';
-import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
+import { getCurrencySymbol } from '@split-snap/shared/currency';
+import { calculateSummaries } from '@split-snap/shared/tax';
+import type { Session } from '@split-snap/shared/types';
 
 interface ParticipantSidebarProps {
   session: Session;

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { ErrorCode } from '@split-snap/shared';
+import { ErrorCode } from '@split-snap/shared/errors';
 import { scanReceipt, getActiveProvider } from '../services/receipt-scanner.js';
 import { badRequest, internal } from '../lib/errors.js';
 
