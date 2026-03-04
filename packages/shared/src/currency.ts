@@ -241,8 +241,8 @@ export const formatCurrency = ({
     currency,
     minimumFractionDigits: decimal,
     maximumFractionDigits: decimal,
-    trailingZeroDisplay: 'stripIfInteger',
     roundingMode: 'ceil',
+    // trailingZeroDisplay: 'stripIfInteger', // Uncomment if you want to remove trailing zeros for whole numbers
   };
 
   return new Intl.NumberFormat(locale, options).format(value);

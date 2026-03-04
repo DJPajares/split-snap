@@ -11,8 +11,8 @@ import {
   Select,
   SelectItem,
 } from '@heroui/react';
-import type { ScannedItem } from '@split-snap/shared/types';
 import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
+import type { ScannedItem } from '@split-snap/shared/types';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -456,6 +456,7 @@ export function ItemEditor({
             <Input
               label="Service Charge/Tip"
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               value={tip}
               onValueChange={(val) => {
