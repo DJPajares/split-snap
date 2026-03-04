@@ -6,6 +6,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "clean": "turbo clean",
+    "test": "turbo test",
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check .",
     "lint-staged": "lint-staged",
@@ -24,7 +25,8 @@
       "prettier --write"
     ],
     "apps/web/**/*.{js,jsx,ts,tsx}": [
-      "pnpm --filter web exec eslint --fix --max-warnings=0"
+      "pnpm --filter web exec eslint --fix --max-warnings=0",
+      "pnpm --filter web exec vitest related --run --passWithNoTests"
     ]
   },
   "packageManager": "pnpm@10.24.0"
