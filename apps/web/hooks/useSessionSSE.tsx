@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Session, SSEEventType } from '@split-snap/shared';
+import type { Session, SSEEventType } from '@split-snap/shared/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { api } from '@/lib/api';
 
 interface UseSessionSSEOptions {

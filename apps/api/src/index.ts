@@ -2,16 +2,15 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { createWorker } from 'tesseract.js';
-import { ErrorCode } from '@split-snap/shared';
+
+import { ErrorCode } from '@split-snap/shared/errors';
 
 import { connectDB } from './lib/db.js';
 import { AppError, badRequest, internal } from './lib/errors.js';
 import { errorHandler } from './middleware/error-handler.js';
-
 import { authRoutes } from './routes/auth.js';
-import { sessionRoutes } from './routes/sessions.js';
 import { receiptRoutes } from './routes/receipts.js';
-
+import { sessionRoutes } from './routes/sessions.js';
 import { scanReceiptTest } from './services/receipt-scanner.js';
 
 const app = new Hono();

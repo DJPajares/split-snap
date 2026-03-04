@@ -1,22 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import {
+  addToast,
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Tabs,
-  Tab,
-  Input,
-  Button,
   Divider,
+  Input,
   Link,
-  addToast,
+  Tab,
+  Tabs,
 } from '@heroui/react';
+import { APP } from '@split-snap/shared/constants';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+
 import { useApiError } from '@/hooks/useApiError';
-import { APP } from '@split-snap/shared';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const router = useRouter();

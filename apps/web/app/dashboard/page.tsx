@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
 import {
+  Button,
+  ButtonGroup,
   Card,
   CardBody,
-  Spinner,
   Chip,
-  Button,
   Link,
-  ButtonGroup,
+  Spinner,
 } from '@heroui/react';
+import { formatCurrency } from '@split-snap/shared/currency';
+import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useMemo, useState } from 'react';
+
 import { useApiError } from '@/hooks/useApiError';
-import type { Session } from '@split-snap/shared';
+import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { getCurrencySymbol } from '@split-snap/shared';
 
 type RoleFilter = 'all' | 'host' | 'participant';
 
@@ -176,8 +177,11 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">
-                    {getCurrencySymbol(session.currency)}
-                    {session.total.toFixed(2)}
+                    {formatCurrency({
+                      value: session.total,
+                      currency: session.currency,
+                      decimal: 2,
+                    })}
                   </p>
                   <p className="text-default-400 text-xs">{session.currency}</p>
                 </div>

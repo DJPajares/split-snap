@@ -52,7 +52,6 @@ export function calculateSummaries(session: Session): PersonSummary[] {
   );
 
   const taxBase = claimedSubtotal > 0 ? claimedSubtotal : subtotal;
-  const tipBase = claimedSubtotal > 0 ? claimedSubtotal : subtotal;
 
   let taxRemainder = tax;
   let tipRemainder = tip;

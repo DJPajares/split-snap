@@ -1,27 +1,28 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, use } from 'react';
 import {
+  addToast,
   Button,
   Chip,
-  Spinner,
-  addToast,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
+  Spinner,
   useDisclosure,
 } from '@heroui/react';
+import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import type { Session } from '@split-snap/shared';
-import { api } from '@/lib/api';
-import { useSessionSSE } from '@/hooks/useSessionSSE';
-import { useAuth } from '@/hooks/useAuth';
-import { useApiError } from '@/hooks/useApiError';
-import { SessionItemList } from '@/components/session/SessionItemList';
+import { use, useCallback, useEffect, useRef, useState } from 'react';
+
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
+import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
+import { useApiError } from '@/hooks/useApiError';
+import { useAuth } from '@/hooks/useAuth';
+import { useSessionSSE } from '@/hooks/useSessionSSE';
+import { api } from '@/lib/api';
 
 export default function SessionPage({
   params,

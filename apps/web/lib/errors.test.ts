@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseApiError, ApiError } from './errors';
+
+import { ApiError, parseApiError } from './errors';
 
 describe('parseApiError', () => {
   it('parses structured API error responses', async () => {

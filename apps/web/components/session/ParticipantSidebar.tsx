@@ -1,21 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Divider,
   Chip,
-  Button,
+  Divider,
   Popover,
-  PopoverTrigger,
   PopoverContent,
-  User as UserAvatar,
+  PopoverTrigger,
   Spinner,
+  User as UserAvatar,
 } from '@heroui/react';
-import type { Session } from '@split-snap/shared';
-import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
+import { formatCurrency } from '@split-snap/shared/currency';
+import { calculateSummaries } from '@split-snap/shared/tax';
+import type { Session } from '@split-snap/shared/types';
+import { useState } from 'react';
 
 interface ParticipantSidebarProps {
   session: Session;
@@ -39,7 +40,6 @@ export function ParticipantSidebar({
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
-  const cs = getCurrencySymbol(session.currency);
 
   const handleKick = async (participantId: string) => {
     if (!onKick) return;
@@ -224,8 +224,11 @@ export function ParticipantSidebar({
                     <div className="flex items-center gap-2">
                       <div className="text-right">
                         <p className="text-sm font-semibold">
-                          {cs}
-                          {(summary?.total ?? 0).toFixed(2)}
+                          {formatCurrency({
+                            value: summary?.total ?? 0,
+                            currency: session.currency,
+                            decimal: 2,
+                          })}
                         </p>
                         <p className="text-default-400 text-xs">
                           {summary?.items.length ?? 0} items
@@ -275,30 +278,42 @@ export function ParticipantSidebar({
           <div className="flex justify-between">
             <span className="text-default-500">Subtotal</span>
             <span>
-              {cs}
-              {session.subtotal.toFixed(2)}
+              {formatCurrency({
+                value: session.subtotal,
+                currency: session.currency,
+                decimal: 2,
+              })}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-default-500">Tax</span>
             <span>
-              {cs}
-              {session.tax.toFixed(2)}
+              {formatCurrency({
+                value: session.tax,
+                currency: session.currency,
+                decimal: 2,
+              })}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-default-500">Service Charge/Tip</span>
             <span>
-              {cs}
-              {session.tip.toFixed(2)}
+              {formatCurrency({
+                value: session.tip,
+                currency: session.currency,
+                decimal: 2,
+              })}
             </span>
           </div>
           <Divider />
           <div className="flex justify-between font-bold">
             <span>Total</span>
             <span>
-              {cs}
-              {session.total.toFixed(2)}
+              {formatCurrency({
+                value: session.total,
+                currency: session.currency,
+                decimal: 2,
+              })}
             </span>
           </div>
         </div>

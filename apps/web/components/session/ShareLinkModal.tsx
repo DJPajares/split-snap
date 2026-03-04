@@ -1,13 +1,13 @@
 'use client';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
+  addToast,
   Button,
   Input,
-  addToast,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
 } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
 

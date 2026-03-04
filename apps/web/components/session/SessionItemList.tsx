@@ -1,8 +1,8 @@
 'use client';
 
-import { Card, CardBody, Chip, Checkbox } from '@heroui/react';
-import type { Session } from '@split-snap/shared';
-import { getCurrencySymbol } from '@split-snap/shared';
+import { Card, CardBody, Checkbox, Chip } from '@heroui/react';
+import { formatCurrency } from '@split-snap/shared/currency';
+import type { Session } from '@split-snap/shared/types';
 
 interface SessionItemListProps {
   session: Session;
@@ -18,7 +18,6 @@ export function SessionItemList({
   claimingItems = new Set(),
 }: SessionItemListProps) {
   const isSettled = session.status === 'settled';
-  const cs = getCurrencySymbol(session.currency);
 
   const handleClaimToggle = (itemId: string) => {
     if (isSettled || !participantId) return;
@@ -62,8 +61,12 @@ export function SessionItemList({
                 <p className="truncate font-medium">{item.name}</p>
                 {item.quantity > 1 && (
                   <p className="text-default-400 text-xs">
-                    {cs}
-                    {item.price.toFixed(2)} × {item.quantity}
+                    {formatCurrency({
+                      value: item.price,
+                      currency: session.currency,
+                      decimal: 2,
+                    })}{' '}
+                    × {item.quantity}
                   </p>
                 )}
                 {totalClaimers > 0 && (
@@ -92,8 +95,11 @@ export function SessionItemList({
               </div>
               <div className="shrink-0 text-right">
                 <p className="font-semibold">
-                  {cs}
-                  {itemTotal.toFixed(2)}
+                  {formatCurrency({
+                    value: itemTotal,
+                    currency: session.currency,
+                    decimal: 2,
+                  })}
                 </p>
                 {totalClaimers === 0 && (
                   <p className="text-warning text-xs">unclaimed</p>

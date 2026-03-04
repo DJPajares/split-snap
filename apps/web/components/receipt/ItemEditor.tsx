@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Button,
-  Input,
   Card,
   CardBody,
   CardHeader,
   Divider,
+  Input,
   Select,
   SelectItem,
 } from '@heroui/react';
-import type { ScannedItem } from '@split-snap/shared';
-import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared';
+import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
+import type { ScannedItem } from '@split-snap/shared/types';
+import { useState } from 'react';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -271,8 +271,8 @@ export function ItemEditor({
           size="sm"
         >
           {CURRENCIES.map((c) => (
-            <SelectItem key={c.code} textValue={`${c.code} (${c.symbol})`}>
-              {c.symbol} — {c.code} ({c.name})
+            <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
+              {c.code} ({c.name})
             </SelectItem>
           ))}
         </Select>
@@ -456,6 +456,7 @@ export function ItemEditor({
             <Input
               label="Service Charge/Tip"
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               value={tip}
               onValueChange={(val) => {

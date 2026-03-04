@@ -1,21 +1,22 @@
 'use client';
 
 import {
+  Button,
+  Link,
   Navbar as HeroNavbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Button,
-  Link,
+  NavbarMenuToggle,
 } from '@heroui/react';
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
-import { APP } from '@split-snap/shared';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { useAuth } from '@/hooks/useAuth';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

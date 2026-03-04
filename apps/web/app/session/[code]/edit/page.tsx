@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { Spinner, Button, addToast } from '@heroui/react';
+import { addToast, Button, Spinner } from '@heroui/react';
+import type { ScannedItem, Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import type { Session, ScannedItem } from '@split-snap/shared';
-import { api } from '@/lib/api';
-import { useAuth } from '@/hooks/useAuth';
-import { useApiError } from '@/hooks/useApiError';
+import { use, useEffect, useState } from 'react';
+
 import { ItemEditor } from '@/components/receipt/ItemEditor';
+import { useApiError } from '@/hooks/useApiError';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 export default function EditSessionPage({
   params,

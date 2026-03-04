@@ -1,11 +1,12 @@
-import type { ISession } from '../models/session.js';
 import type {
-  Session,
-  SessionItem,
+  KickedUser,
   Participant,
   PendingParticipant,
-  KickedUser,
-} from '@split-snap/shared';
+  Session,
+  SessionItem,
+} from '@split-snap/shared/types';
+
+import type { ISession } from '../models/session.js';
 
 /**
  * Convert a Mongoose session document into the shared Session type.

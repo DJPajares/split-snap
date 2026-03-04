@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
-import { Card, CardBody, Button, Spinner } from '@heroui/react';
+import { Button, Card, CardBody, Spinner } from '@heroui/react';
+import { useCallback, useRef, useState } from 'react';
 
 interface ReceiptUploaderProps {
   onFileSelected: (file: File) => void;
@@ -43,7 +43,7 @@ export function ReceiptUploader({
       }`}
     >
       <CardBody
-        className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 p-8"
+        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();

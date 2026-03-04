@@ -1,5 +1,7 @@
 import type { ErrorHandler } from 'hono';
-import { ErrorCode } from '@split-snap/shared';
+
+import { ErrorCode } from '@split-snap/shared/errors';
+
 import { AppError } from '../lib/errors.js';
 
 export const errorHandler: ErrorHandler = (err, c) => {
