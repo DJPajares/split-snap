@@ -35,7 +35,7 @@ export default function EditSessionPage({
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code]);
+  }, [code, handleError]);
 
   // Guard: redirect if not the creator
   useEffect(() => {

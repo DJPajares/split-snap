@@ -43,7 +43,7 @@ export default function DashboardPage() {
         .catch((err) => handleError(err, 'Failed to load sessions'))
         .finally(() => setLoadingSessions(false));
     }
-  }, [user]);
+  }, [user, handleError]);
 
   const filteredSessions = useMemo(() => {
     if (roleFilter === 'all') return sessions;

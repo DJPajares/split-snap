@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Modal,
   ModalContent,
@@ -11,7 +10,6 @@ import {
   addToast,
 } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
-import { on } from 'events';
 
 interface ShareLinkModalProps {
   isOpen: boolean;

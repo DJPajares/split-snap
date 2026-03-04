@@ -41,7 +41,7 @@ async function request<T>(
   path: string,
   options?: RequestInit & { rawResponse?: boolean },
 ): Promise<T> {
-  const { rawResponse, ...fetchOptions } = options ?? {};
+  const { ...fetchOptions } = options ?? {};
   const res = await fetch(`${API_URL}${path}`, {
     headers: getHeaders(),
     ...fetchOptions,

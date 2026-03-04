@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardBody, Chip, Checkbox, Spinner } from '@heroui/react';
+import { Card, CardBody, Chip, Checkbox } from '@heroui/react';
 import type { Session } from '@split-snap/shared';
 import { getCurrencySymbol } from '@split-snap/shared';
 

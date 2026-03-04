@@ -32,14 +32,12 @@ function ScanPageInner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError();
 
   const handleFileSelected = useCallback(
     async (file: File) => {
       setScanning(true);
-      setReceiptFile(file);
       setReceiptImageUrl(URL.createObjectURL(file));
       try {
         const result = await api.receipts.scan(file);
@@ -93,7 +91,7 @@ function ScanPageInner() {
         setCreating(false);
       }
     },
-    [router],
+    [router, handleError],
   );
 
   return (
