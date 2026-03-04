@@ -39,7 +39,7 @@ export const ErrorCode = {
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   DATABASE_UNAVAILABLE: 'DATABASE_UNAVAILABLE',
   NOT_FOUND: 'NOT_FOUND',
-  INTERNAL_ERROR: 'INTERNAL_ERROR'
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -66,7 +66,7 @@ export const CRITICAL_ERROR_CODES: ReadonlySet<ErrorCode> = new Set([
   ErrorCode.SESSION_JOIN_REJECTED,
   ErrorCode.SESSION_SETTINGS_FORBIDDEN,
   ErrorCode.SESSION_APPROVE_FORBIDDEN,
-  ErrorCode.DATABASE_UNAVAILABLE
+  ErrorCode.DATABASE_UNAVAILABLE,
 ]);
 
 export function isCriticalError(code: string): boolean {
@@ -131,7 +131,7 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.DATABASE_UNAVAILABLE]:
     'The service is temporarily unavailable. Please try again later.',
   [ErrorCode.NOT_FOUND]: 'The requested resource was not found.',
-  [ErrorCode.INTERNAL_ERROR]: 'Something went wrong. Please try again later.'
+  [ErrorCode.INTERNAL_ERROR]: 'Something went wrong. Please try again later.',
 };
 
 // ─── API Error Response Shape ──────────────────────────────

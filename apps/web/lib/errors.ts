@@ -1,4 +1,8 @@
-import { type ErrorCode, isCriticalError, DEFAULT_ERROR_MESSAGES } from '@split-snap/shared';
+import {
+  type ErrorCode,
+  isCriticalError,
+  DEFAULT_ERROR_MESSAGES,
+} from '@split-snap/shared';
 
 /**
  * Structured error thrown by the API client.
@@ -10,7 +14,12 @@ export class ApiError extends Error {
   public readonly statusCode: number;
   public readonly details?: unknown;
 
-  constructor(code: ErrorCode, message: string, statusCode: number, details?: unknown) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    statusCode: number,
+    details?: unknown,
+  ) {
     super(message);
     this.name = 'ApiError';
     this.code = code;
@@ -37,9 +46,11 @@ export async function parseApiError(res: Response): Promise<ApiError> {
     if (body?.error?.code) {
       return new ApiError(
         body.error.code as ErrorCode,
-        body.error.message || DEFAULT_ERROR_MESSAGES[body.error.code as ErrorCode] || 'Request failed',
+        body.error.message ||
+          DEFAULT_ERROR_MESSAGES[body.error.code as ErrorCode] ||
+          'Request failed',
         res.status,
-        body.error.details
+        body.error.details,
       );
     }
 
@@ -48,12 +59,20 @@ export async function parseApiError(res: Response): Promise<ApiError> {
       return new ApiError(
         'INTERNAL_ERROR' as ErrorCode,
         body.error,
-        res.status
+        res.status,
       );
     }
 
-    return new ApiError('INTERNAL_ERROR' as ErrorCode, `HTTP ${res.status}`, res.status);
+    return new ApiError(
+      'INTERNAL_ERROR' as ErrorCode,
+      `HTTP ${res.status}`,
+      res.status,
+    );
   } catch {
-    return new ApiError('INTERNAL_ERROR' as ErrorCode, `HTTP ${res.status}`, res.status);
+    return new ApiError(
+      'INTERNAL_ERROR' as ErrorCode,
+      `HTTP ${res.status}`,
+      res.status,
+    );
   }
 }

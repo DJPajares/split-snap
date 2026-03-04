@@ -1,31 +1,29 @@
-"use client";
+'use client';
 
-import { useRef, useState, useCallback } from "react";
-import {
-  Card,
-  CardBody,
-  Button,
-  Spinner,
-} from "@heroui/react";
+import { useRef, useState, useCallback } from 'react';
+import { Card, CardBody, Button, Spinner } from '@heroui/react';
 
 interface ReceiptUploaderProps {
   onFileSelected: (file: File) => void;
   isLoading: boolean;
 }
 
-export function ReceiptUploader({ onFileSelected, isLoading }: ReceiptUploaderProps) {
+export function ReceiptUploader({
+  onFileSelected,
+  isLoading,
+}: ReceiptUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = useCallback(
     (file: File) => {
-      if (!file.type.startsWith("image/")) return;
+      if (!file.type.startsWith('image/')) return;
       const url = URL.createObjectURL(file);
       setPreview(url);
       onFileSelected(file);
     },
-    [onFileSelected]
+    [onFileSelected],
   );
 
   const handleDrop = useCallback(
@@ -35,17 +33,17 @@ export function ReceiptUploader({ onFileSelected, isLoading }: ReceiptUploaderPr
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   return (
     <Card
       className={`border-2 border-dashed transition-colors ${
-        isDragging ? "border-primary bg-primary/10" : "border-default-300"
+        isDragging ? 'border-primary bg-primary/10' : 'border-default-300'
       }`}
     >
       <CardBody
-        className="flex flex-col items-center justify-center p-8 gap-4 min-h-[200px] cursor-pointer"
+        className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 p-8"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -78,19 +76,15 @@ export function ReceiptUploader({ onFileSelected, isLoading }: ReceiptUploaderPr
               alt="Receipt preview"
               className="max-h-48 rounded-lg object-contain"
             />
-            <p className="text-sm text-default-500">
-              Click or drop to replace
-            </p>
+            <p className="text-default-500 text-sm">Click or drop to replace</p>
           </>
         ) : (
           <>
             <span className="text-5xl">📸</span>
-            <p className="font-semibold text-lg">
+            <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>
-            <p className="text-sm text-default-500">
-              Supports JPEG, PNG, HEIC
-            </p>
+            <p className="text-default-500 text-sm">Supports JPEG, PNG, HEIC</p>
             <Button
               color="primary"
               variant="flat"

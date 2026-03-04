@@ -8,7 +8,7 @@ import {
   Divider,
   Spinner,
   Button,
-  Chip
+  Chip,
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import type { Session, PersonSummary } from '@split-snap/shared';
@@ -17,7 +17,7 @@ import { api } from '@/lib/api';
 import { useApiError } from '@/hooks/useApiError';
 
 export default function SummaryPage({
-  params
+  params,
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -37,7 +37,7 @@ export default function SummaryPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -48,11 +48,11 @@ export default function SummaryPage({
   const summaries = calculateSummaries(session);
   const cs = getCurrencySymbol(session.currency);
   const unclaimedItems = session.items.filter(
-    (item) => item.claimedBy.length === 0
+    (item) => item.claimedBy.length === 0,
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
       <div className="flex justify-between gap-3">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">Bill Summary</h1>
@@ -71,18 +71,13 @@ export default function SummaryPage({
 
       {unclaimedItems.length > 0 && (
         <Card className="border-warning border-2">
-          <CardBody className="p-4 flex flex-col gap-2">
+          <CardBody className="flex flex-col gap-2 p-4">
             <p className="text-warning font-semibold">
               ⚠️ {unclaimedItems.length} unclaimed item(s)
             </p>
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
-                <Chip
-                  key={item.id}
-                  size="sm"
-                  variant="flat"
-                  color="warning"
-                >
+                <Chip key={item.id} size="sm" variant="flat" color="warning">
                   {item.name} ({cs}
                   {(item.price * item.quantity).toFixed(2)})
                 </Chip>
@@ -105,7 +100,7 @@ export default function SummaryPage({
       {/* Grand total */}
       <Card>
         <CardBody className="p-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span className="text-lg font-bold">Grand Total</span>
             <span className="text-2xl font-bold">
               {cs}
@@ -120,14 +115,14 @@ export default function SummaryPage({
 
 function PersonSummaryCard({
   summary,
-  currencySymbol
+  currencySymbol,
 }: {
   summary: PersonSummary;
   currencySymbol: string;
 }) {
   const quantityFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 
   const fractionGlyphs = [
@@ -139,7 +134,7 @@ function PersonSummaryCard({
     { value: 0.625, glyph: '⅝' },
     { value: 0.667, glyph: '⅔' },
     { value: 0.75, glyph: '¾' },
-    { value: 0.875, glyph: '⅞' }
+    { value: 0.875, glyph: '⅞' },
   ];
 
   const isWholeNumber = (value: number) =>
@@ -174,9 +169,9 @@ function PersonSummaryCard({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between w-full">
-          <h3 className="font-bold text-lg">{summary.displayName}</h3>
-          <span className="text-xl font-bold text-primary">
+        <div className="flex w-full items-center justify-between">
+          <h3 className="text-lg font-bold">{summary.displayName}</h3>
+          <span className="text-primary text-xl font-bold">
             {currencySymbol}
             {summary.total.toFixed(2)}
           </span>
@@ -185,10 +180,7 @@ function PersonSummaryCard({
       <Divider />
       <CardBody className="gap-2">
         {summary.items.map((item, i) => (
-          <div
-            key={i}
-            className="flex justify-between text-sm"
-          >
+          <div key={i} className="flex justify-between text-sm">
             <span className="text-default-600">
               {item.name}
               {getItemQuantityLabel(item.claimedQuantity)}

@@ -47,7 +47,7 @@ function toProperCase(str: string): string {
 
 function sanitizeResult(
   parsed: ScanResult,
-  opts?: { properCaseNames?: boolean }
+  opts?: { properCaseNames?: boolean },
 ): ScanResult {
   return {
     items: (parsed.items || []).map((item) => {
@@ -55,13 +55,13 @@ function sanitizeResult(
       return {
         name: opts?.properCaseNames ? toProperCase(name) : name,
         price: Math.max(0, Number(item.price) || 0),
-        quantity: Math.max(1, Math.round(Number(item.quantity) || 1))
+        quantity: Math.max(1, Math.round(Number(item.quantity) || 1)),
       };
     }),
     subtotal: Math.max(0, Number(parsed.subtotal) || 0),
     tax: Math.max(0, Number(parsed.tax) || 0),
     tip: Math.max(0, Number(parsed.tip) || 0),
-    total: Math.max(0, Number(parsed.total) || 0)
+    total: Math.max(0, Number(parsed.total) || 0),
   };
 }
 
@@ -93,10 +93,10 @@ const geminiProvider: ScanProvider = {
           role: 'user',
           parts: [
             { text: SCAN_PROMPT },
-            { inlineData: { data: imageBase64, mimeType } }
-          ]
-        }
-      ]
+            { inlineData: { data: imageBase64, mimeType } },
+          ],
+        },
+      ],
     });
 
     const content = response.text;
@@ -105,7 +105,7 @@ const geminiProvider: ScanProvider = {
     }
 
     return sanitizeResult(extractJSON(content));
-  }
+  },
 };
 
 // ─── OpenAI provider ─────────────────────────────────────────
@@ -132,14 +132,14 @@ const openaiProvider: ScanProvider = {
               type: 'image_url',
               image_url: {
                 url: `data:${mimeType};base64,${imageBase64}`,
-                detail: 'high'
-              }
-            }
-          ]
-        }
+                detail: 'high',
+              },
+            },
+          ],
+        },
       ],
       max_tokens: 2000,
-      temperature: 0
+      temperature: 0,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -148,7 +148,7 @@ const openaiProvider: ScanProvider = {
     }
 
     return sanitizeResult(extractJSON(content));
-  }
+  },
 };
 
 // ─── Tesseract OCR provider ──────────────────────────────────
@@ -172,7 +172,7 @@ const tesseractProvider: ScanProvider = {
     }
 
     return sanitizeResult(parseReceiptText(text), { properCaseNames: true });
-  }
+  },
 };
 
 // ─── Receipt text parser (for Tesseract) ─────────────────────
@@ -197,7 +197,7 @@ const CURRENCY_SYMBOLS = [
   '£',
   '¥',
   '฿',
-  '\\$'
+  '\\$',
 ];
 const CURRENCY_PATTERN = `(?:${CURRENCY_SYMBOLS.join('|')})`;
 
@@ -224,7 +224,7 @@ function parseReceiptText(text: string): ScanResult {
 
   const subtotalPattern = new RegExp(
     `^(?:sub\\s*-?\\s*total|subtotal)\\s*[:\\s]*${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})`,
-    'i'
+    'i',
   );
 
   // Tax: GST, SST, VAT, HST, PST, QST, sales tax, goods & services tax, consumption tax,
@@ -234,7 +234,7 @@ function parseReceiptText(text: string): ScanResult {
       `|sales\\s*tax|goods\\s*(?:&|and)\\s*services?\\s*tax|consumption\\s*tax` +
       `|tax\\s*(?:incl(?:uded)?|excl(?:uded)?|amt|amount)?|incl\\.?\\s*tax|excl\\.?\\s*tax` +
       `)\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
-    'i'
+    'i',
   );
 
   // Tip/service charge: service, svc, svc chg, svc charge, service chg, s/c, sc, serv. charge,
@@ -243,7 +243,7 @@ function parseReceiptText(text: string): ScanResult {
     `^(?:svc\\s*ch(?:a?r)?g(?:e)?|service\\s*ch(?:a?r)?g(?:e)?|service\\s*fee|serv\\.?\\s*ch(?:a?r)?g(?:e)?` +
       `|srv\\s*ch(?:a?r)?g(?:e)?|s\\/c|sc\\b|auto\\s*grat(?:uity)?|gratuity|grat\\b|tip|service)` +
       `\\s*[:\\s]*(?:\\(?\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)?\\s*(?:${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))?|${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2}))`,
-    'i'
+    'i',
   );
 
   // Total: total, grand total, amount due, balance due, net total, total due, total amount,
@@ -251,7 +251,7 @@ function parseReceiptText(text: string): ScanResult {
   const totalPattern = new RegExp(
     `^(?:grand\\s*total|total\\s*(?:due|amount|amt)?|amount\\s*due|balance\\s*due|net\\s*total|bill\\s*total|amt\\s*due)` +
       `\\s*[:\\s]*${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})`,
-    'i'
+    'i',
   );
 
   // ── Item line detection ───────────────────────────────────
@@ -259,7 +259,7 @@ function parseReceiptText(text: string): ScanResult {
   // A number with a currency symbol or decimal places → treat as amount
   const amountInLine = new RegExp(
     `(?:${CURRENCY_PATTERN})\\s*([\\d]+[.,]\\d{1,2})|([\\d]+[.,]\\d{1,2})\\s*$`,
-    'i'
+    'i',
   );
 
   // A standalone whole number (not attached to currency or decimal) → quantity candidate
@@ -267,7 +267,7 @@ function parseReceiptText(text: string): ScanResult {
 
   // Classic pattern: "[Qty x] Name $Price" or "Qty Name Price"
   const classicItemPattern = new RegExp(
-    `^(?:(\\d+)\\s*[xX×]\\s*)?(.+?)\\s+${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})\\s*$`
+    `^(?:(\\d+)\\s*[xX×]\\s*)?(.+?)\\s+${CURRENCY_PATTERN}?\\s*([\\d]+[.,]\\d{1,2})\\s*$`,
   );
 
   // Non-item keywords to filter out
@@ -358,7 +358,7 @@ function parseReceiptText(text: string): ScanResult {
               items.push({
                 name: qtyInName[1].trim(),
                 price,
-                quantity: possibleQty
+                quantity: possibleQty,
               });
               lastAmountLine = { lineIndex, amount: price };
               continue;
@@ -380,7 +380,7 @@ function parseReceiptText(text: string): ScanResult {
         let remaining = line
           .replace(
             new RegExp(`${CURRENCY_PATTERN}\\s*[\\d]+[.,]\\d{1,2}`, 'i'),
-            ''
+            '',
           )
           .replace(/[\d]+[.,]\d{1,2}\s*$/, '')
           .trim();
@@ -450,13 +450,13 @@ function parseReceiptText(text: string): ScanResult {
 const providers: Record<string, ScanProvider> = {
   gemini: geminiProvider,
   openai: openaiProvider,
-  tesseract: tesseractProvider
+  tesseract: tesseractProvider,
 };
 
 const autoOrder: ScanProvider[] = [
   geminiProvider,
   openaiProvider,
-  tesseractProvider
+  tesseractProvider,
 ];
 
 // ─── Public API ──────────────────────────────────────────────
@@ -479,7 +479,7 @@ export function getActiveProvider(): string {
 
 export async function scanReceipt(
   imageBase64: string,
-  mimeType: string = 'image/jpeg'
+  mimeType: string = 'image/jpeg',
 ): Promise<ScanResult & { provider: string }> {
   const setting = config.RECEIPT_SCANNER_PROVIDER;
 
@@ -491,7 +491,7 @@ export async function scanReceipt(
     }
     if (!provider.isAvailable()) {
       throw new Error(
-        `Scanner provider "${setting}" is not available. Check your API keys.`
+        `Scanner provider "${setting}" is not available. Check your API keys.`,
       );
     }
 
@@ -515,14 +515,14 @@ export async function scanReceipt(
       const cause =
         err instanceof Error && err.cause ? ` (cause: ${err.cause})` : '';
       console.warn(
-        `⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`
+        `⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`,
       );
       errors.push(`${provider.name}: ${msg}${cause}`);
     }
   }
 
   throw new Error(
-    `All scan providers failed.\n${errors.join('\n')}\nPlease enter items manually.`
+    `All scan providers failed.\n${errors.join('\n')}\nPlease enter items manually.`,
   );
 }
 

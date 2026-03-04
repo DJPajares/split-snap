@@ -18,7 +18,7 @@ export function calculateSummaries(session: Session): PersonSummary[] {
       itemsSubtotal: 0,
       taxShare: 0,
       tipShare: 0,
-      total: 0
+      total: 0,
     });
   }
 
@@ -39,7 +39,7 @@ export function calculateSummaries(session: Session): PersonSummary[] {
         name: item.name,
         claimedQuantity: round(claimedQuantity),
         totalQuantity: item.quantity,
-        amount: round(amount)
+        amount: round(amount),
       });
       summary.itemsSubtotal += amount;
     }
@@ -48,7 +48,7 @@ export function calculateSummaries(session: Session): PersonSummary[] {
   // Distribute tax and tip proportionally
   const claimedSubtotal = Array.from(summaryMap.values()).reduce(
     (sum, s) => sum + s.itemsSubtotal,
-    0
+    0,
   );
 
   const taxBase = claimedSubtotal > 0 ? claimedSubtotal : subtotal;
@@ -78,7 +78,7 @@ export function calculateSummaries(session: Session): PersonSummary[] {
   // Compute totals
   for (const summary of summaries) {
     summary.total = round(
-      summary.itemsSubtotal + summary.taxShare + summary.tipShare
+      summary.itemsSubtotal + summary.taxShare + summary.tipShare,
     );
   }
 

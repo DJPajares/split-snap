@@ -4,7 +4,7 @@ import type {
   SessionItem,
   Participant,
   PendingParticipant,
-  KickedUser
+  KickedUser,
 } from '@split-snap/shared';
 
 /**
@@ -12,7 +12,7 @@ import type {
  */
 export function serializeSession(
   doc: ISession,
-  opts?: { role?: 'host' | 'participant' }
+  opts?: { role?: 'host' | 'participant' },
 ): Session {
   return {
     id: doc._id.toString(),
@@ -28,9 +28,9 @@ export function serializeSession(
         claimedBy: item.claimedBy.map((c) => ({
           participantId: c.participantId,
           displayName: c.displayName,
-          portion: c.portion
-        }))
-      })
+          portion: c.portion,
+        })),
+      }),
     ),
     participants: doc.participants.map(
       (p): Participant => ({
@@ -38,8 +38,8 @@ export function serializeSession(
         displayName: p.displayName,
         userId: p.userId?.toString() ?? null,
         isAnonymous: p.isAnonymous,
-        joinedAt: p.joinedAt.toISOString()
-      })
+        joinedAt: p.joinedAt.toISOString(),
+      }),
     ),
     pendingParticipants: (doc.pendingParticipants ?? []).map(
       (p): PendingParticipant => ({
@@ -47,14 +47,14 @@ export function serializeSession(
         displayName: p.displayName,
         userId: p.userId?.toString() ?? null,
         isAnonymous: p.isAnonymous,
-        requestedAt: p.requestedAt.toISOString()
-      })
+        requestedAt: p.requestedAt.toISOString(),
+      }),
     ),
     kickedUsers: (doc.kickedUsers ?? []).map(
       (k): KickedUser => ({
         userId: k.userId.toString(),
-        kickedAt: k.kickedAt.toISOString()
-      })
+        kickedAt: k.kickedAt.toISOString(),
+      }),
     ),
     requireApproval: doc.requireApproval ?? true,
     subtotal: doc.subtotal,
@@ -65,6 +65,6 @@ export function serializeSession(
     status: doc.status,
     ...(opts?.role ? { role: opts.role } : {}),
     createdAt: doc.createdAt.toISOString(),
-    expiresAt: doc.expiresAt.toISOString()
+    expiresAt: doc.expiresAt.toISOString(),
   };
 }

@@ -1,11 +1,11 @@
-import { Hono } from "hono";
-import { z } from "zod";
-import bcrypt from "bcryptjs";
-import { ErrorCode } from "@split-snap/shared";
-import { UserModel } from "../models/index.js";
-import { requireAuth, generateToken } from "../middleware/auth.js";
-import type { AuthPayload } from "../middleware/auth.js";
-import { badRequest, unauthorized, notFound, conflict } from "../lib/errors.js";
+import { Hono } from 'hono';
+import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import { ErrorCode } from '@split-snap/shared';
+import { UserModel } from '../models/index.js';
+import { requireAuth, generateToken } from '../middleware/auth.js';
+import type { AuthPayload } from '../middleware/auth.js';
+import { badRequest, unauthorized, notFound, conflict } from '../lib/errors.js';
 
 export const authRoutes = new Hono();
 
@@ -17,11 +17,15 @@ const registerSchema = z.object({
   name: z.string().min(1).max(50),
 });
 
-authRoutes.post("/register", async (c) => {
+authRoutes.post('/register', async (c) => {
   const body = await c.req.json();
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, "Validation failed", parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten(),
+    );
   }
 
   const { email, password, name } = parsed.data;
@@ -55,11 +59,15 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
-authRoutes.post("/login", async (c) => {
+authRoutes.post('/login', async (c) => {
   const body = await c.req.json();
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {
-    throw badRequest(ErrorCode.VALIDATION_FAILED, "Validation failed", parsed.error.flatten());
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten(),
+    );
   }
 
   const { email, password } = parsed.data;
@@ -89,8 +97,8 @@ authRoutes.post("/login", async (c) => {
 
 // ─── Get current user ──────────────────────────────────────
 
-authRoutes.get("/me", requireAuth, async (c) => {
-  const { userId } = c.get("auth") as AuthPayload;
+authRoutes.get('/me', requireAuth, async (c) => {
+  const { userId } = c.get('auth') as AuthPayload;
   const user = await UserModel.findById(userId);
   if (!user) {
     throw notFound(ErrorCode.AUTH_USER_NOT_FOUND);

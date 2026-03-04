@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardBody, Chip, Checkbox, Spinner } from '@heroui/react';
+import { Card, CardBody, Chip, Checkbox } from '@heroui/react';
 import type { Session } from '@split-snap/shared';
 import { getCurrencySymbol } from '@split-snap/shared';
 
@@ -15,7 +15,7 @@ export function SessionItemList({
   session,
   participantId,
   onClaimToggle,
-  claimingItems = new Set()
+  claimingItems = new Set(),
 }: SessionItemListProps) {
   const isSettled = session.status === 'settled';
   const cs = getCurrencySymbol(session.currency);
@@ -40,12 +40,12 @@ export function SessionItemList({
             key={item.id}
             isPressable={!isSettled && !!participantId && !isLoading}
             onPress={() => handleClaimToggle(item.id)}
-            className={`transition-all w-full ${
+            className={`w-full transition-all ${
               isLoading
                 ? 'opacity-70'
                 : isClaimed
-                  ? 'border-primary border-2 bg-primary/5'
-                  : 'border-transparent border-2'
+                  ? 'border-primary bg-primary/5 border-2'
+                  : 'border-2 border-transparent'
             }`}
           >
             <CardBody className="flex flex-row items-center gap-3 p-3">
@@ -58,16 +58,16 @@ export function SessionItemList({
                   color="primary"
                 />
               )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{item.name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{item.name}</p>
                 {item.quantity > 1 && (
-                  <p className="text-xs text-default-400">
+                  <p className="text-default-400 text-xs">
                     {cs}
                     {item.price.toFixed(2)} × {item.quantity}
                   </p>
                 )}
                 {totalClaimers > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="mt-1 flex flex-wrap gap-1">
                     {item.claimedBy.map((claim) => (
                       <Chip
                         key={claim.participantId}
@@ -90,13 +90,13 @@ export function SessionItemList({
                   </div>
                 )}
               </div>
-              <div className="text-right shrink-0">
+              <div className="shrink-0 text-right">
                 <p className="font-semibold">
                   {cs}
                   {itemTotal.toFixed(2)}
                 </p>
                 {totalClaimers === 0 && (
-                  <p className="text-xs text-warning">unclaimed</p>
+                  <p className="text-warning text-xs">unclaimed</p>
                 )}
               </div>
             </CardBody>

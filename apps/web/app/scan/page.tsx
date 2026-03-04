@@ -32,14 +32,12 @@ function ScanPageInner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
   const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError();
 
   const handleFileSelected = useCallback(
     async (file: File) => {
       setScanning(true);
-      setReceiptFile(file);
       setReceiptImageUrl(URL.createObjectURL(file));
       try {
         const result = await api.receipts.scan(file);
@@ -49,13 +47,13 @@ function ScanPageInner() {
         handleError(err, 'Scan failed');
         addToast({
           description: 'You can enter items manually.',
-          color: 'warning'
+          color: 'warning',
         });
       } finally {
         setScanning(false);
       }
     },
-    [handleError]
+    [handleError],
   );
 
   const handleCreateSession = useCallback(
@@ -75,14 +73,14 @@ function ScanPageInner() {
           tax: data.tax,
           tip: data.tip,
           total: data.total,
-          currency: data.currency
+          currency: data.currency,
         });
 
         // If the host was auto-joined, store participant ID to skip join page
         if (session.participantId) {
           localStorage.setItem(
             `participant_${session.code}`,
-            session.participantId
+            session.participantId,
           );
         }
 
@@ -93,12 +91,12 @@ function ScanPageInner() {
         setCreating(false);
       }
     },
-    [router]
+    [router, handleError],
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-2">New Split</h1>
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <h1 className="mb-2 text-3xl font-bold">New Split</h1>
       <p className="text-default-500 mb-6">
         Scan a receipt or enter items manually to start splitting.
       </p>

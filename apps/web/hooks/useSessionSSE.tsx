@@ -17,7 +17,7 @@ const MAX_RECONNECT_MS = 30_000;
 export function useSessionSSE({
   code,
   onUpdate,
-  onDeleted
+  onDeleted,
 }: UseSessionSSEOptions) {
   const [session, setSession] = useState<Session | null>(null);
   const [connected, setConnected] = useState(false);
@@ -25,6 +25,7 @@ export function useSessionSSE({
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectRef = useRef<() => void>(() => {});
   const onUpdateRef = useRef(onUpdate);
   const onDeletedRef = useRef(onDeleted);
   const reconnectDelayRef = useRef(INITIAL_RECONNECT_MS);
@@ -47,11 +48,11 @@ export function useSessionSSE({
       eventSourceRef.current?.close();
       // Trigger reconnect
       reconnectTimeoutRef.current = setTimeout(() => {
-        connect();
+        connectRef.current();
       }, reconnectDelayRef.current);
       reconnectDelayRef.current = Math.min(
         reconnectDelayRef.current * 2,
-        MAX_RECONNECT_MS
+        MAX_RECONNECT_MS,
       );
     }, HEARTBEAT_TIMEOUT_MS);
   }, []);
@@ -84,7 +85,7 @@ export function useSessionSSE({
       'item:claimed',
       'item:unclaimed',
       'items:updated',
-      'session:settled'
+      'session:settled',
     ];
 
     for (const eventType of eventTypes) {
@@ -122,14 +123,18 @@ export function useSessionSSE({
 
       // Auto-reconnect with exponential backoff
       reconnectTimeoutRef.current = setTimeout(() => {
-        connect();
+        connectRef.current();
       }, reconnectDelayRef.current);
       reconnectDelayRef.current = Math.min(
         reconnectDelayRef.current * 2,
-        MAX_RECONNECT_MS
+        MAX_RECONNECT_MS,
       );
     };
   }, [code, resetHeartbeatTimer]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   useEffect(() => {
     connect();

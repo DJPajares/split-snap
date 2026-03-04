@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   User as UserAvatar,
-  Spinner
+  Spinner,
 } from '@heroui/react';
 import type { Session } from '@split-snap/shared';
 import { calculateSummaries, getCurrencySymbol } from '@split-snap/shared';
@@ -32,7 +32,7 @@ export function ParticipantSidebar({
   isCreator = false,
   onKick,
   onApprove,
-  onReject
+  onReject,
 }: ParticipantSidebarProps) {
   const summaries = calculateSummaries(session);
   const [kickingId, setKickingId] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export function ParticipantSidebar({
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-1">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <h3 className="font-bold">Participants</h3>
           <Chip size="sm" variant="flat">
             {session.participants.length}
@@ -98,7 +98,7 @@ export function ParticipantSidebar({
           session.pendingParticipants.length > 0 && (
             <>
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-warning">
+                <p className="text-warning text-sm font-semibold">
                   Pending Requests
                 </p>
                 <Chip size="sm" variant="flat" color="warning">
@@ -108,7 +108,7 @@ export function ParticipantSidebar({
               {session.pendingParticipants.map((pending) => (
                 <div
                   key={pending.id}
-                  className="flex items-center justify-between p-2 rounded-lg bg-warning/10"
+                  className="bg-warning/10 flex items-center justify-between rounded-lg p-2"
                 >
                   <UserAvatar
                     name={pending.displayName}
@@ -116,7 +116,7 @@ export function ParticipantSidebar({
                     avatarProps={{
                       name: pending.displayName[0],
                       size: 'sm',
-                      color: 'warning'
+                      color: 'warning',
                     }}
                   />
                   <div className="flex gap-1">
@@ -148,13 +148,13 @@ export function ParticipantSidebar({
           )}
 
         {session.participants.length === 0 ? (
-          <p className="text-sm text-default-400 text-center py-4">
+          <p className="text-default-400 py-4 text-center text-sm">
             No one has joined yet. Share the link!
           </p>
         ) : (
           session.participants.map((participant) => {
             const summary = summaries.find(
-              (s) => s.participantId === participant.id
+              (s) => s.participantId === participant.id,
             );
             const isCurrentUser = participant.id === currentParticipantId;
             const isParticipantInitiator = isInitiator(participant);
@@ -173,7 +173,7 @@ export function ParticipantSidebar({
               >
                 <PopoverTrigger>
                   <div
-                    className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
+                    className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
                       isCurrentUser
                         ? 'bg-primary/10'
                         : canKickThis
@@ -217,17 +217,17 @@ export function ParticipantSidebar({
                             ? 'warning'
                             : isCurrentUser
                               ? 'primary'
-                              : 'default'
+                              : 'default',
                         }}
                       />
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-right">
-                        <p className="font-semibold text-sm">
+                        <p className="text-sm font-semibold">
                           {cs}
                           {(summary?.total ?? 0).toFixed(2)}
                         </p>
-                        <p className="text-xs text-default-400">
+                        <p className="text-default-400 text-xs">
                           {summary?.items.length ?? 0} items
                         </p>
                       </div>
@@ -237,14 +237,14 @@ export function ParticipantSidebar({
                 </PopoverTrigger>
                 {canKickThis && (
                   <PopoverContent>
-                    <div className="p-3 space-y-2">
+                    <div className="space-y-2 p-3">
                       <p className="text-sm font-medium">
                         Remove {participant.displayName}?
                       </p>
-                      <p className="text-xs text-default-400">
+                      <p className="text-default-400 text-xs">
                         All their claims will be removed.
                       </p>
-                      <div className="flex gap-2 justify-end">
+                      <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
                           variant="flat"

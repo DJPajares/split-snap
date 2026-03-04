@@ -24,14 +24,14 @@ sessionRoutes.get('/', requireAuth, async (c) => {
   } else if (roleFilter === 'participant') {
     query = {
       'participants.userId': new mongoose.Types.ObjectId(auth.userId),
-      createdBy: { $ne: new mongoose.Types.ObjectId(auth.userId) }
+      createdBy: { $ne: new mongoose.Types.ObjectId(auth.userId) },
     };
   } else {
     query = {
       $or: [
         { createdBy: auth.userId },
-        { 'participants.userId': new mongoose.Types.ObjectId(auth.userId) }
-      ]
+        { 'participants.userId': new mongoose.Types.ObjectId(auth.userId) },
+      ],
     };
   }
 
@@ -39,9 +39,9 @@ sessionRoutes.get('/', requireAuth, async (c) => {
   return c.json(
     sessions.map((s) =>
       serializeSession(s, {
-        role: s.createdBy?.toString() === auth.userId ? 'host' : 'participant'
-      })
-    )
+        role: s.createdBy?.toString() === auth.userId ? 'host' : 'participant',
+      }),
+    ),
   );
 });
 
@@ -52,15 +52,15 @@ const createSessionSchema = z.object({
     z.object({
       name: z.string().min(1),
       price: z.number().min(0),
-      quantity: z.number().int().min(1).default(1)
-    })
+      quantity: z.number().int().min(1).default(1),
+    }),
   ),
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
   total: z.number().min(0),
   currency: z.string().default('SGD'),
-  receiptImageUrl: z.string().nullable().optional()
+  receiptImageUrl: z.string().nullable().optional(),
 });
 
 sessionRoutes.post('/', optionalAuth, async (c) => {
@@ -70,7 +70,7 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -97,14 +97,14 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
       name: item.name,
       price: item.price,
       quantity: item.quantity,
-      claimedBy: []
+      claimedBy: [],
     })),
     subtotal: parsed.data.subtotal,
     tax: parsed.data.tax,
     tip: parsed.data.tip,
     total: parsed.data.total,
     currency: parsed.data.currency,
-    receiptImageUrl: parsed.data.receiptImageUrl ?? null
+    receiptImageUrl: parsed.data.receiptImageUrl ?? null,
   });
 
   // Auto-join the host as a participant
@@ -116,7 +116,7 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
         displayName: hostUser.name,
         userId: new mongoose.Types.ObjectId(auth.userId),
         isAnonymous: false,
-        joinedAt: new Date()
+        joinedAt: new Date(),
       } as never);
       await session.save();
       const newParticipant =
@@ -127,7 +127,7 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
 
   return c.json(
     { ...serializeSession(session), participantId: hostParticipantId },
-    201
+    201,
   );
 });
 
@@ -147,7 +147,7 @@ sessionRoutes.get('/:code', async (c) => {
 
 const joinSchema = z.object({
   displayName: z.string().min(1).max(30),
-  userId: z.string().nullable().optional()
+  userId: z.string().nullable().optional(),
 });
 
 sessionRoutes.post('/:code/join', async (c) => {
@@ -158,7 +158,7 @@ sessionRoutes.post('/:code/join', async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -175,7 +175,7 @@ sessionRoutes.post('/:code/join', async (c) => {
   if (parsed.data.userId && session.kickedUsers?.length) {
     const kickedEntry = session.kickedUsers.find(
       (k: { userId: mongoose.Types.ObjectId; kickedAt: Date }) =>
-        k.userId.toString() === parsed.data.userId
+        k.userId.toString() === parsed.data.userId,
     );
     if (kickedEntry) {
       const elapsed = Date.now() - kickedEntry.kickedAt.getTime();
@@ -187,15 +187,15 @@ sessionRoutes.post('/:code/join', async (c) => {
           {
             remainingMs,
             cooldownEndsAt: new Date(
-              kickedEntry.kickedAt.getTime() + KICK_COOLDOWN_MS
-            ).toISOString()
-          }
+              kickedEntry.kickedAt.getTime() + KICK_COOLDOWN_MS,
+            ).toISOString(),
+          },
         );
       }
       // Cooldown expired — remove from kicked list and allow rejoin
       session.kickedUsers = session.kickedUsers.filter(
         (k: { userId: mongoose.Types.ObjectId }) =>
-          k.userId.toString() !== parsed.data.userId
+          k.userId.toString() !== parsed.data.userId,
       ) as typeof session.kickedUsers;
       await session.save();
     }
@@ -204,7 +204,7 @@ sessionRoutes.post('/:code/join', async (c) => {
   // Check if participant with same name already exists (rejoin)
   const existingParticipant = session.participants.find(
     (p: { displayName: string }) =>
-      p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase()
+      p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase(),
   );
 
   if (existingParticipant) {
@@ -215,7 +215,7 @@ sessionRoutes.post('/:code/join', async (c) => {
       !existingParticipant.userId
     ) {
       existingParticipant.userId = new mongoose.Types.ObjectId(
-        parsed.data.userId
+        parsed.data.userId,
       );
       existingParticipant.isAnonymous = false;
       existingParticipant.displayName = parsed.data.displayName;
@@ -237,7 +237,7 @@ sessionRoutes.post('/:code/join', async (c) => {
     // Return existing participant (rejoin)
     return c.json({
       session: serializeSession(session),
-      participantId: existingParticipant._id.toString()
+      participantId: existingParticipant._id.toString(),
     });
   }
 
@@ -245,12 +245,12 @@ sessionRoutes.post('/:code/join', async (c) => {
   if (parsed.data.userId) {
     const existingByUserId = session.participants.find(
       (p: { userId: mongoose.Types.ObjectId | null }) =>
-        p.userId && p.userId.toString() === parsed.data.userId
+        p.userId && p.userId.toString() === parsed.data.userId,
     );
     if (existingByUserId) {
       return c.json({
         session: serializeSession(session),
-        participantId: existingByUserId._id.toString()
+        participantId: existingByUserId._id.toString(),
       });
     }
   }
@@ -270,16 +270,16 @@ sessionRoutes.post('/:code/join', async (c) => {
     // Check if already pending
     const alreadyPending = session.pendingParticipants.find(
       (p: { displayName: string }) =>
-        p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase()
+        p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase(),
     );
     if (alreadyPending) {
       return c.json(
         {
           status: 'pending' as const,
           session: serializeSession(session),
-          pendingParticipantId: alreadyPending._id.toString()
+          pendingParticipantId: alreadyPending._id.toString(),
         },
-        202
+        202,
       );
     }
 
@@ -289,7 +289,7 @@ sessionRoutes.post('/:code/join', async (c) => {
         ? new mongoose.Types.ObjectId(parsed.data.userId)
         : null,
       isAnonymous: !parsed.data.userId,
-      requestedAt: new Date()
+      requestedAt: new Date(),
     } as never);
 
     await session.save();
@@ -304,9 +304,9 @@ sessionRoutes.post('/:code/join', async (c) => {
       {
         status: 'pending' as const,
         session: serialized,
-        pendingParticipantId: newPending._id.toString()
+        pendingParticipantId: newPending._id.toString(),
       },
-      202
+      202,
     );
   }
 
@@ -316,7 +316,7 @@ sessionRoutes.post('/:code/join', async (c) => {
       ? new mongoose.Types.ObjectId(parsed.data.userId)
       : null,
     isAnonymous: !parsed.data.userId,
-    joinedAt: new Date()
+    joinedAt: new Date(),
   } as never);
 
   await session.save();
@@ -328,7 +328,7 @@ sessionRoutes.post('/:code/join', async (c) => {
 
   return c.json({
     session: serialized,
-    participantId: newParticipant._id.toString()
+    participantId: newParticipant._id.toString(),
   });
 });
 
@@ -336,7 +336,7 @@ sessionRoutes.post('/:code/join', async (c) => {
 
 const claimSchema = z.object({
   participantId: z.string(),
-  portion: z.number().min(0).max(1).default(1)
+  portion: z.number().min(0).max(1).default(1),
 });
 
 sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
@@ -348,7 +348,7 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -375,7 +375,7 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
   // Toggle: if already claimed by this participant, unclaim
   const existingClaimIndex = item.claimedBy.findIndex(
     (c: { participantId: string }) =>
-      c.participantId === parsed.data.participantId
+      c.participantId === parsed.data.participantId,
   );
 
   let eventType: 'item:claimed' | 'item:unclaimed';
@@ -389,7 +389,7 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
     item.claimedBy.push({
       participantId: parsed.data.participantId,
       displayName: participant.displayName,
-      portion: parsed.data.portion
+      portion: parsed.data.portion,
     });
     eventType = 'item:claimed';
   }
@@ -410,14 +410,14 @@ const updateItemsSchema = z.object({
       id: z.string().optional(),
       name: z.string().min(1),
       price: z.number().min(0),
-      quantity: z.number().int().min(1).default(1)
-    })
+      quantity: z.number().int().min(1).default(1),
+    }),
   ),
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
   total: z.number().min(0),
-  currency: z.string().optional()
+  currency: z.string().optional(),
 });
 
 sessionRoutes.put('/:code/items', requireAuth, async (c) => {
@@ -429,7 +429,7 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -477,7 +477,7 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
           name: incoming.name,
           price: incoming.price,
           quantity: incoming.quantity,
-          claimedBy: priceChanged || quantityChanged ? [] : existing.claimedBy
+          claimedBy: priceChanged || quantityChanged ? [] : existing.claimedBy,
         };
       }
     }
@@ -486,7 +486,7 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
       name: incoming.name,
       price: incoming.price,
       quantity: incoming.quantity,
-      claimedBy: []
+      claimedBy: [],
     };
   });
 
@@ -544,25 +544,25 @@ sessionRoutes.delete(
       // Remove any existing entry for this user first (in case of re-kick)
       session.kickedUsers = session.kickedUsers.filter(
         (k: { userId: mongoose.Types.ObjectId }) =>
-          k.userId.toString() !== participant.userId!.toString()
+          k.userId.toString() !== participant.userId!.toString(),
       ) as typeof session.kickedUsers;
       session.kickedUsers.push({
         userId: participant.userId,
-        kickedAt: new Date()
+        kickedAt: new Date(),
       } as never);
     }
 
     // Remove all claims by this participant from every item
     for (const item of session.items) {
       item.claimedBy = item.claimedBy.filter(
-        (c: { participantId: string }) => c.participantId !== participantId
+        (c: { participantId: string }) => c.participantId !== participantId,
       ) as typeof item.claimedBy;
     }
 
     // Remove participant
     session.participants = session.participants.filter(
       (p: { _id: mongoose.Types.ObjectId }) =>
-        p._id.toString() !== participantId
+        p._id.toString() !== participantId,
     ) as typeof session.participants;
 
     await session.save();
@@ -571,14 +571,14 @@ sessionRoutes.delete(
     sseManager.broadcast(code, 'participant:kicked', serialized);
 
     return c.json(serialized);
-  }
+  },
 );
 
 // ─── Upgrade participant (guest → logged-in) ───────────────
 
 const upgradeSchema = z.object({
   userId: z.string().min(1),
-  displayName: z.string().min(1).max(30)
+  displayName: z.string().min(1).max(30),
 });
 
 sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
@@ -590,7 +590,7 @@ sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -634,7 +634,7 @@ sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
 const mergeSchema = z.object({
   fromParticipantId: z.string().min(1),
   toUserId: z.string().min(1),
-  toDisplayName: z.string().min(1).max(30)
+  toDisplayName: z.string().min(1).max(30),
 });
 
 sessionRoutes.post('/:code/participants/merge', async (c) => {
@@ -645,7 +645,7 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -655,7 +655,7 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
   }
 
   const guestParticipant = session.participants.id(
-    parsed.data.fromParticipantId
+    parsed.data.fromParticipantId,
   );
   if (!guestParticipant) {
     throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
@@ -669,7 +669,7 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
     }) =>
       p.userId &&
       p.userId.toString() === parsed.data.toUserId &&
-      p._id.toString() !== parsed.data.fromParticipantId
+      p._id.toString() !== parsed.data.fromParticipantId,
   );
 
   let survivingParticipantId: string;
@@ -679,13 +679,13 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
     for (const item of session.items) {
       const guestClaimIndex = item.claimedBy.findIndex(
         (c: { participantId: string }) =>
-          c.participantId === parsed.data.fromParticipantId
+          c.participantId === parsed.data.fromParticipantId,
       );
       if (guestClaimIndex >= 0) {
         // Check if logged-in user already claims this item
         const loggedInClaim = item.claimedBy.find(
           (c: { participantId: string }) =>
-            c.participantId === existingLoggedIn._id.toString()
+            c.participantId === existingLoggedIn._id.toString(),
         );
         if (!loggedInClaim) {
           // Transfer the claim
@@ -703,7 +703,7 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
     // Remove the guest participant
     session.participants = session.participants.filter(
       (p: { _id: mongoose.Types.ObjectId }) =>
-        p._id.toString() !== parsed.data.fromParticipantId
+        p._id.toString() !== parsed.data.fromParticipantId,
     ) as typeof session.participants;
 
     survivingParticipantId = existingLoggedIn._id.toString();
@@ -736,7 +736,7 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
 
   return c.json({
     session: serialized,
-    participantId: survivingParticipantId
+    participantId: survivingParticipantId,
   });
 });
 
@@ -761,7 +761,7 @@ sessionRoutes.post(
 
     const pendingIndex = session.pendingParticipants.findIndex(
       (p: { _id: mongoose.Types.ObjectId }) =>
-        p._id.toString() === participantId
+        p._id.toString() === participantId,
     );
     if (pendingIndex === -1) {
       throw notFound(ErrorCode.PENDING_PARTICIPANT_NOT_FOUND);
@@ -774,7 +774,7 @@ sessionRoutes.post(
       displayName: pending.displayName,
       userId: pending.userId,
       isAnonymous: pending.isAnonymous,
-      joinedAt: new Date()
+      joinedAt: new Date(),
     } as never);
 
     session.pendingParticipants.splice(pendingIndex, 1);
@@ -788,9 +788,9 @@ sessionRoutes.post(
 
     return c.json({
       session: serialized,
-      participantId: newParticipant._id.toString()
+      participantId: newParticipant._id.toString(),
     });
-  }
+  },
 );
 
 // ─── Reject pending participant ────────────────────────────
@@ -814,7 +814,7 @@ sessionRoutes.post(
 
     const pendingIndex = session.pendingParticipants.findIndex(
       (p: { _id: mongoose.Types.ObjectId }) =>
-        p._id.toString() === participantId
+        p._id.toString() === participantId,
     );
     if (pendingIndex === -1) {
       throw notFound(ErrorCode.PENDING_PARTICIPANT_NOT_FOUND);
@@ -827,13 +827,13 @@ sessionRoutes.post(
     sseManager.broadcast(code, 'participant:rejected', serialized);
 
     return c.json(serialized);
-  }
+  },
 );
 
 // ─── Update session settings ───────────────────────────────
 
 const settingsSchema = z.object({
-  requireApproval: z.boolean().optional()
+  requireApproval: z.boolean().optional(),
 });
 
 sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
@@ -845,7 +845,7 @@ sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
     throw badRequest(
       ErrorCode.VALIDATION_FAILED,
       'Validation failed',
-      parsed.error.flatten()
+      parsed.error.flatten(),
     );
   }
 
@@ -910,7 +910,7 @@ sessionRoutes.patch('/:code/settle', requireAuth, async (c) => {
   }
 
   const hasUnclaimedItems = session.items.some(
-    (item: { claimedBy: unknown[] }) => item.claimedBy.length === 0
+    (item: { claimedBy: unknown[] }) => item.claimedBy.length === 0,
   );
   if (hasUnclaimedItems) {
     throw badRequest(ErrorCode.SESSION_ITEMS_NOT_ALL_CLAIMED);
@@ -965,7 +965,7 @@ sessionRoutes.get('/:code/events', async (c) => {
     const serialized = serializeSession(session);
     await stream.writeSSE({
       event: 'session:updated',
-      data: JSON.stringify(serialized)
+      data: JSON.stringify(serialized),
     });
 
     // Register with SSE manager for future broadcasts
