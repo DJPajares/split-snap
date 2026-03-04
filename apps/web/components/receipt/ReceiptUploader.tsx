@@ -43,7 +43,7 @@ export function ReceiptUploader({
       }`}
     >
       <CardBody
-        className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 p-8"
+        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
