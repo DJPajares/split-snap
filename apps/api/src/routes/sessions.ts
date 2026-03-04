@@ -2,9 +2,11 @@ import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import mongoose from 'mongoose';
 import { z } from 'zod';
+
 import { KICK_COOLDOWN_MS } from '@split-snap/shared/constants';
 import { ErrorCode } from '@split-snap/shared/errors';
-import { badRequest, notFound, forbidden, internal } from '../lib/errors.js';
+
+import { badRequest, forbidden, internal, notFound } from '../lib/errors.js';
 import { serializeSession } from '../lib/serialize.js';
 import { generateSessionCode } from '../lib/utils.js';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';

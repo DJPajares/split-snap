@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+
 import {
-  SESSION_EXPIRY_DAYS,
   DEFAULT_CURRENCY,
+  SESSION_EXPIRY_DAYS,
 } from '@split-snap/shared/constants';
 
 // ─── Sub-schemas ───────────────────────────────────────────

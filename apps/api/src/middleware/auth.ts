@@ -1,6 +1,8 @@
 import { createMiddleware } from 'hono/factory';
 import jwt from 'jsonwebtoken';
+
 import { ErrorCode } from '@split-snap/shared/errors';
+
 import { config } from '../lib/config.js';
 import { unauthorized } from '../lib/errors.js';
 

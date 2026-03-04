@@ -1,10 +1,11 @@
 import type {
-  Session,
-  SessionItem,
+  KickedUser,
   Participant,
   PendingParticipant,
-  KickedUser,
+  Session,
+  SessionItem,
 } from '@split-snap/shared/types';
+
 import type { ISession } from '../models/session.js';
 
 /**

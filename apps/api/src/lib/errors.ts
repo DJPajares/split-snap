@@ -1,7 +1,7 @@
 import {
-  ErrorCode,
-  DEFAULT_ERROR_MESSAGES,
   type ApiErrorResponse,
+  DEFAULT_ERROR_MESSAGES,
+  ErrorCode,
 } from '@split-snap/shared/errors';
 
 // ─── AppError ──────────────────────────────────────────────

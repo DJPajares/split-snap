@@ -1,10 +1,12 @@
 import bcrypt from 'bcryptjs';
 import { Hono } from 'hono';
 import { z } from 'zod';
+
 import { ErrorCode } from '@split-snap/shared/errors';
-import { badRequest, unauthorized, notFound, conflict } from '../lib/errors.js';
-import { requireAuth, generateToken } from '../middleware/auth.js';
+
+import { badRequest, conflict, notFound, unauthorized } from '../lib/errors.js';
 import type { AuthPayload } from '../middleware/auth.js';
+import { generateToken, requireAuth } from '../middleware/auth.js';
 import { UserModel } from '../models/index.js';
 
 export const authRoutes = new Hono();

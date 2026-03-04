@@ -8,6 +8,8 @@
     "build": "tsc",
     "start": "node --env-file=../../.env dist/dev.js",
     "start:prod": "node dist/dev.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -25,6 +27,10 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.19.13",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^9.39.3",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
