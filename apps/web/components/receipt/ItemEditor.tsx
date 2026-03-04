@@ -271,8 +271,8 @@ export function ItemEditor({
           size="sm"
         >
           {CURRENCIES.map((c) => (
-            <SelectItem key={c.code} textValue={`${c.code} (${c.symbol})`}>
-              {c.symbol} — {c.code} ({c.name})
+            <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
+              {c.code} ({c.name})
             </SelectItem>
           ))}
         </Select>

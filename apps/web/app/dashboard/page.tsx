@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useApiError } from '@/hooks/useApiError';
 import { api } from '@/lib/api';
-import { getCurrencySymbol } from '@split-snap/shared/currency';
+import { formatCurrency } from '@split-snap/shared/currency';
 import type { Session } from '@split-snap/shared/types';
 
 type RoleFilter = 'all' | 'host' | 'participant';
@@ -176,8 +176,11 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">
-                    {getCurrencySymbol(session.currency)}
-                    {session.total.toFixed(2)}
+                    {formatCurrency({
+                      value: session.total,
+                      currency: session.currency,
+                      decimal: 2,
+                    })}
                   </p>
                   <p className="text-default-400 text-xs">{session.currency}</p>
                 </div>
