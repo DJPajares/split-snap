@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { Card, CardBody, Spinner, Button, Chip } from '@heroui/react';
-import { useRouter } from 'next/navigation';
+import { Button, Card, CardBody, Chip, Spinner } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
-import { api } from '@/lib/api';
-import { useApiError } from '@/hooks/useApiError';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
+
 import PersonSummaryCard from '@/components/shared/PersonSummaryCard';
+import { useApiError } from '@/hooks/useApiError';
+import { api } from '@/lib/api';
 
 export default function SummaryPage({
   params,

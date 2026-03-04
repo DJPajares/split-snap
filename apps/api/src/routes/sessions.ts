@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { z } from 'zod';
 import mongoose from 'mongoose';
-import { ErrorCode } from '@split-snap/shared/errors';
+import { z } from 'zod';
 import { KICK_COOLDOWN_MS } from '@split-snap/shared/constants';
-import { SessionModel, UserModel } from '../models/index.js';
-import { generateSessionCode } from '../lib/utils.js';
-import { serializeSession } from '../lib/serialize.js';
-import { sseManager } from '../services/sse-manager.js';
-import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import { ErrorCode } from '@split-snap/shared/errors';
 import { badRequest, notFound, forbidden, internal } from '../lib/errors.js';
+import { serializeSession } from '../lib/serialize.js';
+import { generateSessionCode } from '../lib/utils.js';
+import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import { SessionModel, UserModel } from '../models/index.js';
+import { sseManager } from '../services/sse-manager.js';
 
 export const sessionRoutes = new Hono();
 

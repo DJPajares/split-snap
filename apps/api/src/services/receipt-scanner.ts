@@ -1,6 +1,6 @@
+import { createWorker } from 'tesseract.js';
 import type { ScanResult } from '@split-snap/shared/types';
 import { config } from '../lib/config.js';
-import { createWorker } from 'tesseract.js';
 
 // ─── Shared prompt for AI providers ─────────────────────────
 

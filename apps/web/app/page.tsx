@@ -1,8 +1,8 @@
 'use client';
 
 import { Button, Card, CardBody, Link } from '@heroui/react';
-import Image from 'next/image';
 import { APP } from '@split-snap/shared/constants';
+import Image from 'next/image';
 
 const STEPS = [
   {

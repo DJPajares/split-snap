@@ -1,22 +1,23 @@
 'use client';
 
-import { useState, use, useEffect, useCallback } from 'react';
 import {
+  addToast,
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Input,
-  Button,
   Divider,
+  Input,
   Spinner,
-  addToast,
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
-import { ApiError } from '@/lib/errors';
+import { use, useCallback, useEffect, useState } from 'react';
+
+import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
-import { useApiError } from '@/hooks/useApiError';
+import { api } from '@/lib/api';
+import { ApiError } from '@/lib/errors';
 
 type JoinState = 'idle' | 'joining' | 'pending' | 'rejected' | 'kicked';
 

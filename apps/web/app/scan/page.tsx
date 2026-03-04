@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useCallback, Suspense } from 'react';
+import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
+import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Tabs, Tab, addToast, Spinner } from '@heroui/react';
-import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
+import { Suspense, useCallback, useState } from 'react';
+
 import { ItemEditor } from '@/components/receipt/ItemEditor';
-import { api } from '@/lib/api';
+import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
 import { useApiError } from '@/hooks/useApiError';
-import type { ScanResult, ScannedItem } from '@split-snap/shared/types';
+import { api } from '@/lib/api';
 
 export default function ScanPage() {
   return (

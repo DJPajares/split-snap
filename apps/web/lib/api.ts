@@ -1,20 +1,21 @@
+import { API_ROUTES } from '@split-snap/shared/constants';
 import type {
-  Session,
+  AuthResponse,
+  ClaimItemPayload,
   CreateSessionPayload,
   CreateSessionResponse,
-  UpdateItemsPayload,
   JoinSessionPayload,
-  ClaimItemPayload,
-  AuthResponse,
-  RegisterPayload,
   LoginPayload,
-  ScanResult,
-  User,
-  UpgradeParticipantPayload,
   MergeParticipantPayload,
+  RegisterPayload,
+  ScanResult,
+  Session,
+  UpdateItemsPayload,
   UpdateSessionSettingsPayload,
+  UpgradeParticipantPayload,
+  User,
 } from '@split-snap/shared/types';
-import { API_ROUTES } from '@split-snap/shared/constants';
+
 import { parseApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';

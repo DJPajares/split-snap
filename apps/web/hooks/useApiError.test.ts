@@ -1,6 +1,9 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ApiError } from '@/lib/errors';
+
+import { useApiError } from './useApiError';
 
 const { addToastMock, showErrorModalMock } = vi.hoisted(() => ({
   addToastMock: vi.fn(),
@@ -16,8 +19,6 @@ vi.mock('@/components/error/error-modal-context', () => ({
     showErrorModal: showErrorModalMock,
   }),
 }));
-
-import { useApiError } from './useApiError';
 
 describe('useApiError', () => {
   beforeEach(() => {

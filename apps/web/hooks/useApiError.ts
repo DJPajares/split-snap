@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback } from 'react';
 import { addToast } from '@heroui/react';
+import { useCallback } from 'react';
+
 import { useErrorModal } from '@/components/error/error-modal-context';
 import { ApiError } from '@/lib/errors';
 

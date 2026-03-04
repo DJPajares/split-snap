@@ -1,13 +1,14 @@
 'use client';
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  createContext,
-  useContext,
-} from 'react';
 import type { User } from '@split-snap/shared/types';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
 import { api } from '@/lib/api';
 
 interface AuthContextValue {

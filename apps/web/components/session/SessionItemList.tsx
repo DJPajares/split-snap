@@ -1,8 +1,8 @@
 'use client';
 
-import { Card, CardBody, Chip, Checkbox } from '@heroui/react';
-import type { Session } from '@split-snap/shared/types';
+import { Card, CardBody, Checkbox, Chip } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
+import type { Session } from '@split-snap/shared/types';
 
 interface SessionItemListProps {
   session: Session;

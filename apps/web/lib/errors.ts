@@ -1,7 +1,7 @@
 import {
+  DEFAULT_ERROR_MESSAGES,
   type ErrorCode,
   isCriticalError,
-  DEFAULT_ERROR_MESSAGES,
 } from '@split-snap/shared/errors';
 
 /**

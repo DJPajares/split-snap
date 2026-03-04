@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Divider,
   Chip,
-  Button,
+  Divider,
   Popover,
-  PopoverTrigger,
   PopoverContent,
-  User as UserAvatar,
+  PopoverTrigger,
   Spinner,
+  User as UserAvatar,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
+import { useState } from 'react';
 
 interface ParticipantSidebarProps {
   session: Session;

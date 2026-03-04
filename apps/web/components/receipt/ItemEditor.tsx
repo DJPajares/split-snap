@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Button,
-  Input,
   Card,
   CardBody,
   CardHeader,
   Divider,
+  Input,
   Select,
   SelectItem,
 } from '@heroui/react';
 import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
 import type { ScannedItem } from '@split-snap/shared/types';
+import { useState } from 'react';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];

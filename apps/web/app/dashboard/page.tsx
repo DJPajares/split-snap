@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
 import {
+  Button,
+  ButtonGroup,
   Card,
   CardBody,
-  Spinner,
   Chip,
-  Button,
   Link,
-  ButtonGroup,
+  Spinner,
 } from '@heroui/react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { useApiError } from '@/hooks/useApiError';
-import { api } from '@/lib/api';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { Session } from '@split-snap/shared/types';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import { useApiError } from '@/hooks/useApiError';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 type RoleFilter = 'all' | 'host' | 'participant';
 
