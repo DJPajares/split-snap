@@ -1,4 +1,4 @@
-import { defineConfig } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -32,4 +32,5 @@ export default defineConfig([
       'simple-import-sort/exports': 'error',
     },
   },
+  globalIgnores(['dist/**', 'node_modules/**']),
 ]);
