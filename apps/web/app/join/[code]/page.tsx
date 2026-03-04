@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use, useEffect, useCallback, useRef } from 'react';
+import { useState, use, useEffect, useCallback } from 'react';
 import {
   Card,
   CardBody,
@@ -38,7 +38,6 @@ export default function JoinPage({
   const [pendingParticipantId, setPendingParticipantId] = useState<
     string | null
   >(null);
-  const hasAttemptedAutoJoinRef = useRef(false);
   const { handleError } = useApiError({ redirectTo: '/' });
 
   // Check for stored participant and validate against auth state
@@ -47,7 +46,9 @@ export default function JoinPage({
 
     const storedParticipantId = localStorage.getItem(`participant_${code}`);
     if (!storedParticipantId) {
-      setCheckingStoredParticipant(false);
+      queueMicrotask(() => {
+        setCheckingStoredParticipant(false);
+      });
       return;
     }
 
@@ -151,7 +152,7 @@ export default function JoinPage({
   };
 
   // SSE subscription when pending — listen for approval/rejection
-  const { session: liveSession } = useSessionSSE({
+  useSessionSSE({
     code,
     onUpdate: (updated) => {
       if (joinState !== 'pending' || !pendingParticipantId) return;
@@ -184,13 +185,6 @@ export default function JoinPage({
     },
   });
 
-  // Auto-join for logged-in users (but not auto — show confirmation)
-  // Only pre-fill name, don't auto-submit to avoid kicked-user loop
-  useEffect(() => {
-    if (checkingStoredParticipant || authLoading || !user) return;
-    setName(user.name);
-  }, [checkingStoredParticipant, authLoading, user]);
-
   // Auto-join after login redirect (user came from handleLoginRedirect)
   useEffect(() => {
     if (checkingStoredParticipant || authLoading || !user) return;
@@ -198,7 +192,9 @@ export default function JoinPage({
     if (pendingCode === code) {
       localStorage.removeItem('pending_session_code');
       // Auto-submit join for the logged-in user
-      void joinSession(user.name, user.id);
+      queueMicrotask(() => {
+        void joinSession(user.name, user.id);
+      });
     }
   }, [checkingStoredParticipant, authLoading, user, code, joinSession]);
 
