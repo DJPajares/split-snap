@@ -47,7 +47,7 @@ function toProperCase(str: string): string {
 
 // ─── Sanitize parsed result ──────────────────────────────────
 
-function sanitizeResult(
+export function sanitizeResult(
   parsed: ScanResult,
   opts?: { properCaseNames?: boolean },
 ): ScanResult {
@@ -208,7 +208,7 @@ function parseAmount(str: string): number {
   return parseFloat(str.replace(/,/g, '.'));
 }
 
-function parseReceiptText(text: string): ScanResult {
+export function parseReceiptText(text: string): ScanResult {
   const lines = text
     .split('\n')
     .map((l) => l.trim())
@@ -345,30 +345,42 @@ function parseReceiptText(text: string): ScanResult {
     // Try classic pattern first: "2x Chicken Rice $12.50" or "Chicken Rice $12.50"
     match = line.match(classicItemPattern);
     if (match) {
-      const quantity = match[1] ? parseInt(match[1], 10) : 1;
-      const name = match[2].replace(/[.\s]+$/, '').trim();
-      const price = parseAmount(match[3]);
+      let quantity = match[1] ? parseInt(match[1], 10) : 1;
+      let name = match[2].replace(/[.\s]+$/, '').trim();
+      const rawPrice = parseAmount(match[3]);
 
-      if (name.length >= 2 && price > 0) {
-        // If no explicit "Nx" prefix, look for a standalone whole number in the name
-        // e.g. "Chicken Rice 2 $12.50" → qty=2
+      if (name.length >= 2 && rawPrice > 0) {
+        // If no explicit "Nx" prefix, look for quantity in the name
         if (!match[1]) {
-          const qtyInName = name.match(/^(.+?)\s+(\d{1,3})$/);
-          if (qtyInName) {
-            const possibleQty = parseInt(qtyInName[2], 10);
-            if (possibleQty >= 1 && possibleQty <= 999) {
-              items.push({
-                name: qtyInName[1].trim(),
-                price,
-                quantity: possibleQty,
-              });
-              lastAmountLine = { lineIndex, amount: price };
-              continue;
+          // Leading plain number as quantity: "1 Tacos Del Mal Shrimp $14.98"
+          // Guard: remaining name must be >= 3 chars to avoid false positives (e.g. "7 Up")
+          const leadingQtyInName = name.match(/^(\d{1,2})\s+(.+)$/);
+          if (
+            leadingQtyInName &&
+            leadingQtyInName[2].trim().length >= 3 &&
+            !nonItemKeywords.test(leadingQtyInName[2].trim())
+          ) {
+            quantity = parseInt(leadingQtyInName[1], 10);
+            name = leadingQtyInName[2].trim();
+          } else {
+            // Trailing whole number as quantity: "Chicken Rice 2 $12.50"
+            const trailingQtyInName = name.match(/^(.+?)\s+(\d{1,3})$/);
+            if (trailingQtyInName) {
+              const possibleQty = parseInt(trailingQtyInName[2], 10);
+              if (possibleQty >= 1 && possibleQty <= 999) {
+                quantity = possibleQty;
+                name = trailingQtyInName[1].trim();
+              }
             }
           }
         }
+        // Convert line-total to unit price when quantity > 1
+        const price =
+          quantity > 1
+            ? Math.round((rawPrice / quantity) * 100) / 100
+            : rawPrice;
         items.push({ name, price, quantity });
-        lastAmountLine = { lineIndex, amount: price };
+        lastAmountLine = { lineIndex, amount: rawPrice };
         continue;
       }
     }
@@ -376,8 +388,8 @@ function parseReceiptText(text: string): ScanResult {
     // Fallback: smart detection — find amount (decimal/currency) and optional whole number qty
     const amountMatch = line.match(amountInLine);
     if (amountMatch) {
-      const price = parseAmount(amountMatch[1] || amountMatch[2]);
-      if (price > 0) {
+      const rawPrice = parseAmount(amountMatch[1] || amountMatch[2]);
+      if (rawPrice > 0) {
         // Remove the amount portion to get name + possible quantity
         let remaining = line
           .replace(
@@ -389,11 +401,12 @@ function parseReceiptText(text: string): ScanResult {
 
         let quantity = 1;
         // Check for leading whole number as quantity: "2 Chicken Rice"
+        // Guard: remaining name must be >= 3 chars to avoid false positives
         const leadingQty = remaining.match(/^(\d{1,3})\s+(.+)$/);
-        if (leadingQty) {
+        if (leadingQty && leadingQty[2].trim().length >= 3) {
           quantity = parseInt(leadingQty[1], 10);
           remaining = leadingQty[2].trim();
-        } else {
+        } else if (!leadingQty || leadingQty[2].trim().length < 3) {
           // Check for trailing whole number as quantity: "Chicken Rice 2"
           const trailingQty = remaining.match(/^(.+?)\s+(\d{1,3})$/);
           if (trailingQty) {
@@ -403,12 +416,17 @@ function parseReceiptText(text: string): ScanResult {
         }
 
         const name = remaining.replace(/[.\s]+$/, '').trim();
+        // Convert line-total to unit price when quantity > 1
+        const price =
+          quantity > 1
+            ? Math.round((rawPrice / quantity) * 100) / 100
+            : rawPrice;
 
         if (name.length >= 2 && quantity >= 1 && !nonItemKeywords.test(name)) {
           items.push({ name, price, quantity });
-          lastAmountLine = { lineIndex, amount: price };
+          lastAmountLine = { lineIndex, amount: rawPrice };
         } else {
-          lastAmountLine = { lineIndex, amount: price };
+          lastAmountLine = { lineIndex, amount: rawPrice };
         }
       }
     }

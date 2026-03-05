@@ -11,7 +11,8 @@
     "./tax": "./dist/tax.js",
     "./currency": "./dist/currency.js",
     "./errors": "./dist/errors.js",
-    "./utilities": "./dist/utilities.js"
+    "./utilities": "./dist/utilities.js",
+    "./schemas": "./dist/schemas.js"
   },
   "files": [
     "dist"
@@ -23,5 +24,8 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }

@@ -61,6 +61,8 @@ export function serializeSession(
     subtotal: doc.subtotal,
     tax: doc.tax,
     tip: doc.tip,
+    taxMode: doc.taxMode,
+    tipMode: doc.tipMode,
     total: doc.total,
     currency: doc.currency,
     status: doc.status,

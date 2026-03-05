@@ -38,7 +38,12 @@ authRoutes.post('/register', async (c) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await UserModel.create({ email, name, passwordHash });
+  const user = await UserModel.create({
+    email,
+    name,
+    passwordHash,
+    loginAt: new Date(),
+  });
 
   const token = generateToken({ userId: user._id.toString(), email });
 
@@ -49,6 +54,7 @@ authRoutes.post('/register', async (c) => {
       email: user.email,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      loginAt: user.loginAt?.toISOString() ?? null,
       createdAt: user.createdAt.toISOString(),
     },
   });
@@ -83,6 +89,10 @@ authRoutes.post('/login', async (c) => {
     throw unauthorized(ErrorCode.AUTH_INVALID_CREDENTIALS);
   }
 
+  // Update loginAt timestamp
+  user.loginAt = new Date();
+  await user.save();
+
   const token = generateToken({ userId: user._id.toString(), email });
 
   return c.json({
@@ -92,6 +102,7 @@ authRoutes.post('/login', async (c) => {
       email: user.email,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      loginAt: user.loginAt?.toISOString() ?? null,
       createdAt: user.createdAt.toISOString(),
     },
   });
@@ -111,6 +122,7 @@ authRoutes.get('/me', requireAuth, async (c) => {
     email: user.email,
     name: user.name,
     avatarUrl: user.avatarUrl,
+    loginAt: user.loginAt?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
   });
 });

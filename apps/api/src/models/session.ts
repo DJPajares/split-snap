@@ -84,6 +84,8 @@ export interface ISession extends Document {
   subtotal: number;
   tax: number;
   tip: number;
+  taxMode: '$' | '%';
+  tipMode: '$' | '%';
   total: number;
   currency: string;
   status: 'draft' | 'active' | 'settled';
@@ -104,6 +106,8 @@ const SessionSchema = new Schema<ISession>(
     subtotal: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true, default: 0 },
     tip: { type: Number, required: true, default: 0 },
+    taxMode: { type: String, enum: ['$', '%'], default: '$' },
+    tipMode: { type: String, enum: ['$', '%'], default: '$' },
     total: { type: Number, required: true, default: 0 },
     currency: { type: String, default: DEFAULT_CURRENCY },
     status: {

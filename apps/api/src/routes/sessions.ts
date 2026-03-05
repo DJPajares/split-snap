@@ -1,19 +1,51 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
+import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { z } from 'zod';
 
 import { KICK_COOLDOWN_MS } from '@split-snap/shared/constants';
 import { ErrorCode } from '@split-snap/shared/errors';
 
+import { config } from '../lib/config.js';
 import { badRequest, forbidden, internal, notFound } from '../lib/errors.js';
 import { serializeSession } from '../lib/serialize.js';
 import { generateSessionCode } from '../lib/utils.js';
-import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import type { AuthPayload } from '../middleware/auth.js';
+import {
+  generateHostToken,
+  optionalAuth,
+  optionalHostToken,
+  requireAuth,
+} from '../middleware/auth.js';
 import { SessionModel, UserModel } from '../models/index.js';
 import { sseManager } from '../services/sse-manager.js';
 
 export const sessionRoutes = new Hono();
+
+/**
+ * Helper: check if the request is from the host of a session.
+ * Works for both authenticated users (createdBy match) and guest hosts (host token match).
+ */
+function isSessionHost(
+  session: { createdBy?: { toString(): string } | null; code: string },
+  auth?: AuthPayload | null,
+  hostSessionCode?: string,
+): boolean {
+  // Authenticated host: session.createdBy matches the auth userId
+  if (
+    auth?.userId &&
+    session.createdBy &&
+    session.createdBy.toString() === auth.userId
+  ) {
+    return true;
+  }
+  // Guest host: valid host token for this session code
+  if (hostSessionCode && hostSessionCode === session.code) {
+    return true;
+  }
+  return false;
+}
 
 // ─── List my sessions ──────────────────────────────────────
 
@@ -61,6 +93,8 @@ const createSessionSchema = z.object({
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
+  taxMode: z.enum(['$', '%']).default('$'),
+  tipMode: z.enum(['$', '%']).default('$'),
   total: z.number().min(0),
   currency: z.string().default('SGD'),
   receiptImageUrl: z.string().nullable().optional(),
@@ -105,6 +139,8 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
     subtotal: parsed.data.subtotal,
     tax: parsed.data.tax,
     tip: parsed.data.tip,
+    taxMode: parsed.data.taxMode,
+    tipMode: parsed.data.tipMode,
     total: parsed.data.total,
     currency: parsed.data.currency,
     receiptImageUrl: parsed.data.receiptImageUrl ?? null,
@@ -129,7 +165,12 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
   }
 
   return c.json(
-    { ...serializeSession(session), participantId: hostParticipantId },
+    {
+      ...serializeSession(session),
+      participantId: hostParticipantId,
+      // For guest-created sessions, provide a host token for future host actions
+      hostToken: auth?.userId ? null : generateHostToken(session.code),
+    },
     201,
   );
 });
@@ -171,6 +212,56 @@ sessionRoutes.post('/:code/join', async (c) => {
   }
 
   if (session.status === 'settled') {
+    // Allow the host to rejoin a settled session (read-only) by returning existing participant
+    const isHost =
+      parsed.data.userId &&
+      session.createdBy &&
+      session.createdBy.toString() === parsed.data.userId;
+
+    // Also allow guest host with a valid host token
+    let isGuestHost = false;
+    const hostTokenHeader = c.req.header('X-Host-Token');
+    if (hostTokenHeader && !isHost) {
+      try {
+        const decoded = jwt.verify(hostTokenHeader, config.JWT_SECRET) as {
+          sessionCode?: string;
+          role?: string;
+        };
+        if (decoded.sessionCode === code && decoded.role === 'host') {
+          isGuestHost = true;
+        }
+      } catch {
+        // Invalid token, ignore
+      }
+    }
+
+    if (isHost) {
+      const existingByUserId = session.participants.find(
+        (p: { userId: mongoose.Types.ObjectId | null }) =>
+          p.userId && p.userId.toString() === parsed.data.userId,
+      );
+      if (existingByUserId) {
+        return c.json({
+          session: serializeSession(session),
+          participantId: existingByUserId._id.toString(),
+        });
+      }
+    }
+
+    if (isGuestHost) {
+      // For guest hosts, find by display name match or return first participant (the creator)
+      const existingByName = session.participants.find(
+        (p: { displayName: string }) =>
+          p.displayName.toLowerCase() === parsed.data.displayName.toLowerCase(),
+      );
+      if (existingByName) {
+        return c.json({
+          session: serializeSession(session),
+          participantId: existingByName._id.toString(),
+        });
+      }
+    }
+
     throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
@@ -419,13 +510,18 @@ const updateItemsSchema = z.object({
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
+  taxMode: z.enum(['$', '%']).default('$'),
+  tipMode: z.enum(['$', '%']).default('$'),
   total: z.number().min(0),
   currency: z.string().optional(),
 });
 
-sessionRoutes.put('/:code/items', requireAuth, async (c) => {
+sessionRoutes.put('/:code/items', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
-  const auth = c.get('auth');
+  const auth = c.get('auth' as never) as AuthPayload | undefined;
+  const hostSessionCode = c.get('hostSessionCode' as never) as
+    | string
+    | undefined;
   const body = await c.req.json();
   const parsed = updateItemsSchema.safeParse(body);
   if (!parsed.success) {
@@ -445,8 +541,8 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
     throw badRequest(ErrorCode.SESSION_SETTLED);
   }
 
-  // Only the session creator can edit items
-  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+  // Only the session host can edit items
+  if (!isSessionHost(session, auth, hostSessionCode)) {
     throw forbidden(ErrorCode.SESSION_EDIT_FORBIDDEN);
   }
 
@@ -497,6 +593,8 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
   session.subtotal = parsed.data.subtotal;
   session.tax = parsed.data.tax;
   session.tip = parsed.data.tip;
+  session.taxMode = parsed.data.taxMode;
+  session.tipMode = parsed.data.tipMode;
   session.total = parsed.data.total;
   if (parsed.data.currency) {
     session.currency = parsed.data.currency;
@@ -514,11 +612,14 @@ sessionRoutes.put('/:code/items', requireAuth, async (c) => {
 
 sessionRoutes.delete(
   '/:code/participants/:participantId',
-  requireAuth,
+  optionalHostToken,
   async (c) => {
     const code = c.req.param('code').toUpperCase();
     const participantId = c.req.param('participantId');
-    const auth = c.get('auth');
+    const auth = c.get('auth' as never) as AuthPayload | undefined;
+    const hostSessionCode = c.get('hostSessionCode' as never) as
+      | string
+      | undefined;
 
     const session = await SessionModel.findOne({ code });
     if (!session) {
@@ -529,8 +630,8 @@ sessionRoutes.delete(
       throw badRequest(ErrorCode.SESSION_KICK_ACTIVE_ONLY);
     }
 
-    // Only the session creator can kick participants
-    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    // Only the session host can kick participants
+    if (!isSessionHost(session, auth, hostSessionCode)) {
       throw forbidden(ErrorCode.SESSION_KICK_FORBIDDEN);
     }
 
@@ -747,18 +848,21 @@ sessionRoutes.post('/:code/participants/merge', async (c) => {
 
 sessionRoutes.post(
   '/:code/participants/:participantId/approve',
-  requireAuth,
+  optionalHostToken,
   async (c) => {
     const code = c.req.param('code').toUpperCase();
     const participantId = c.req.param('participantId');
-    const auth = c.get('auth');
+    const auth = c.get('auth' as never) as AuthPayload | undefined;
+    const hostSessionCode = c.get('hostSessionCode' as never) as
+      | string
+      | undefined;
 
     const session = await SessionModel.findOne({ code });
     if (!session) {
       throw notFound(ErrorCode.SESSION_NOT_FOUND);
     }
 
-    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    if (!isSessionHost(session, auth, hostSessionCode)) {
       throw forbidden(ErrorCode.SESSION_APPROVE_FORBIDDEN);
     }
 
@@ -800,18 +904,21 @@ sessionRoutes.post(
 
 sessionRoutes.post(
   '/:code/participants/:participantId/reject',
-  requireAuth,
+  optionalHostToken,
   async (c) => {
     const code = c.req.param('code').toUpperCase();
     const participantId = c.req.param('participantId');
-    const auth = c.get('auth');
+    const auth = c.get('auth' as never) as AuthPayload | undefined;
+    const hostSessionCode = c.get('hostSessionCode' as never) as
+      | string
+      | undefined;
 
     const session = await SessionModel.findOne({ code });
     if (!session) {
       throw notFound(ErrorCode.SESSION_NOT_FOUND);
     }
 
-    if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+    if (!isSessionHost(session, auth, hostSessionCode)) {
       throw forbidden(ErrorCode.SESSION_APPROVE_FORBIDDEN);
     }
 
@@ -839,9 +946,12 @@ const settingsSchema = z.object({
   requireApproval: z.boolean().optional(),
 });
 
-sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
+sessionRoutes.patch('/:code/settings', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
-  const auth = c.get('auth');
+  const auth = c.get('auth' as never) as AuthPayload | undefined;
+  const hostSessionCode = c.get('hostSessionCode' as never) as
+    | string
+    | undefined;
   const body = await c.req.json();
   const parsed = settingsSchema.safeParse(body);
   if (!parsed.success) {
@@ -857,7 +967,7 @@ sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
     throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
-  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+  if (!isSessionHost(session, auth, hostSessionCode)) {
     throw forbidden(ErrorCode.SESSION_SETTINGS_FORBIDDEN);
   }
 
@@ -875,9 +985,12 @@ sessionRoutes.patch('/:code/settings', requireAuth, async (c) => {
 
 // ─── Delete session ────────────────────────────────────────
 
-sessionRoutes.delete('/:code', requireAuth, async (c) => {
+sessionRoutes.delete('/:code', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
-  const auth = c.get('auth');
+  const auth = c.get('auth' as never) as AuthPayload | undefined;
+  const hostSessionCode = c.get('hostSessionCode' as never) as
+    | string
+    | undefined;
 
   const session = await SessionModel.findOne({ code });
   if (!session) {
@@ -885,7 +998,7 @@ sessionRoutes.delete('/:code', requireAuth, async (c) => {
   }
 
   // Only the session creator can delete
-  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+  if (!isSessionHost(session, auth, hostSessionCode)) {
     throw forbidden(ErrorCode.SESSION_DELETE_FORBIDDEN);
   }
 
@@ -900,15 +1013,18 @@ sessionRoutes.delete('/:code', requireAuth, async (c) => {
 
 // ─── Settle session ────────────────────────────────────────
 
-sessionRoutes.patch('/:code/settle', requireAuth, async (c) => {
+sessionRoutes.patch('/:code/settle', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
-  const auth = c.get('auth');
+  const auth = c.get('auth' as never) as AuthPayload | undefined;
+  const hostSessionCode = c.get('hostSessionCode' as never) as
+    | string
+    | undefined;
   const session = await SessionModel.findOne({ code });
   if (!session) {
     throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
-  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+  if (!isSessionHost(session, auth, hostSessionCode)) {
     throw forbidden(ErrorCode.SESSION_SETTLE_FORBIDDEN);
   }
 
@@ -928,15 +1044,18 @@ sessionRoutes.patch('/:code/settle', requireAuth, async (c) => {
   return c.json(serialized);
 });
 
-sessionRoutes.patch('/:code/unsettle', requireAuth, async (c) => {
+sessionRoutes.patch('/:code/unsettle', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
-  const auth = c.get('auth');
+  const auth = c.get('auth' as never) as AuthPayload | undefined;
+  const hostSessionCode = c.get('hostSessionCode' as never) as
+    | string
+    | undefined;
   const session = await SessionModel.findOne({ code });
   if (!session) {
     throw notFound(ErrorCode.SESSION_NOT_FOUND);
   }
 
-  if (!session.createdBy || session.createdBy.toString() !== auth.userId) {
+  if (!isSessionHost(session, auth, hostSessionCode)) {
     throw forbidden(ErrorCode.SESSION_UNSETTLE_FORBIDDEN);
   }
 

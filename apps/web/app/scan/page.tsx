@@ -40,6 +40,22 @@ function ScanPageInner() {
     async (file: File) => {
       setScanning(true);
       setReceiptImageUrl(URL.createObjectURL(file));
+
+      // Store receipt image as base64 in sessionStorage for persistence across routes
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          // Only store if under 4MB (sessionStorage limit ~5MB)
+          if (base64.length < 4 * 1024 * 1024) {
+            sessionStorage.setItem('receipt_image', base64);
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch {
+        // Ignore storage errors silently
+      }
+
       try {
         const result = await api.receipts.scan(file);
         setScanResult(result);
@@ -63,6 +79,8 @@ function ScanPageInner() {
       subtotal: number;
       tax: number;
       tip: number;
+      taxMode: '$' | '%';
+      tipMode: '$' | '%';
       total: number;
       currency: string;
     }) => {
@@ -73,6 +91,8 @@ function ScanPageInner() {
           subtotal: data.subtotal,
           tax: data.tax,
           tip: data.tip,
+          taxMode: data.taxMode,
+          tipMode: data.tipMode,
           total: data.total,
           currency: data.currency,
         });
@@ -83,6 +103,11 @@ function ScanPageInner() {
             `participant_${session.code}`,
             session.participantId,
           );
+        }
+
+        // Store guest host token for non-authenticated session creators
+        if (session.hostToken) {
+          localStorage.setItem(`host_token_${session.code}`, session.hostToken);
         }
 
         router.push(`/session/${session.code}`);
