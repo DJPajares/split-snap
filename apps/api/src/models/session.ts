@@ -1,5 +1,9 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { SESSION_EXPIRY_DAYS, DEFAULT_CURRENCY } from '@split-snap/shared';
+import mongoose, { Document, Schema } from 'mongoose';
+
+import {
+  DEFAULT_CURRENCY,
+  SESSION_EXPIRY_DAYS,
+} from '@split-snap/shared/constants';
 
 // ─── Sub-schemas ───────────────────────────────────────────
 
@@ -7,38 +11,38 @@ const ItemClaimSchema = new Schema(
   {
     participantId: { type: String, required: true },
     displayName: { type: String, required: true },
-    portion: { type: Number, required: true, default: 1 }
+    portion: { type: Number, required: true, default: 1 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const SessionItemSchema = new Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, default: 1 },
-  claimedBy: { type: [ItemClaimSchema], default: [] }
+  claimedBy: { type: [ItemClaimSchema], default: [] },
 });
 
 const ParticipantSchema = new Schema({
   displayName: { type: String, required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   isAnonymous: { type: Boolean, default: true },
-  joinedAt: { type: Date, default: Date.now }
+  joinedAt: { type: Date, default: Date.now },
 });
 
 const KickedUserSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    kickedAt: { type: Date, default: Date.now }
+    kickedAt: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const PendingParticipantSchema = new Schema({
   displayName: { type: String, required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   isAnonymous: { type: Boolean, default: true },
-  requestedAt: { type: Date, default: Date.now }
+  requestedAt: { type: Date, default: Date.now },
 });
 
 // ─── Session document ──────────────────────────────────────
@@ -105,16 +109,16 @@ const SessionSchema = new Schema<ISession>(
     status: {
       type: String,
       enum: ['draft', 'active', 'settled'],
-      default: 'active'
+      default: 'active',
     },
     expiresAt: {
       type: Date,
       default: () =>
         new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
-      index: { expires: 0 } // TTL index: auto-delete at expiresAt
-    }
+      index: { expires: 0 }, // TTL index: auto-delete at expiresAt
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const SessionModel =

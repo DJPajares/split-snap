@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@plugin "../hero.ts";
+@plugin '../hero.ts';
 
-@source "../node_modules/@heroui/theme/dist/**/*.{js,ts}";
+@source '../node_modules/@heroui/theme/dist/**/*.{js,ts}';
 
 @theme inline {
   --font-sans: var(--font-geist-sans);

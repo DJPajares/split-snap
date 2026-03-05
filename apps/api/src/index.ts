@@ -2,16 +2,15 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { createWorker } from 'tesseract.js';
-import { ErrorCode } from '@split-snap/shared';
+
+import { ErrorCode } from '@split-snap/shared/errors';
 
 import { connectDB } from './lib/db.js';
 import { AppError, badRequest, internal } from './lib/errors.js';
 import { errorHandler } from './middleware/error-handler.js';
-
 import { authRoutes } from './routes/auth.js';
-import { sessionRoutes } from './routes/sessions.js';
 import { receiptRoutes } from './routes/receipts.js';
-
+import { sessionRoutes } from './routes/sessions.js';
 import { scanReceiptTest } from './services/receipt-scanner.js';
 
 const app = new Hono();
@@ -37,7 +36,7 @@ app.use('*', async (_c, next) => {
 
 const welcomeStrings = [
   'Hello Hono!',
-  'To learn more about Hono on Vercel, visit https://vercel.com/docs/frameworks/backend/hono'
+  'To learn more about Hono on Vercel, visit https://vercel.com/docs/frameworks/backend/hono',
 ];
 
 app.get('/', (c) => {
@@ -49,16 +48,16 @@ app.get('/health', (c) => {
     {
       ok: true,
       service: 'split-snap-api',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     },
-    200
+    200,
   );
 });
 
 app.get('/tesseract-test', async (c) => {
   const worker = await createWorker('eng');
   const ret = await worker.recognize(
-    'https://tesseract.projectnaptha.com/img/eng_bw.png'
+    'https://tesseract.projectnaptha.com/img/eng_bw.png',
   );
 
   const text = ret.data.text;
@@ -100,7 +99,7 @@ app.post('/tesseract-upload-test', async (c) => {
     console.error('Receipt scan error:', err);
     throw internal(
       ErrorCode.RECEIPT_SCAN_FAILED,
-      err instanceof Error ? err.message : undefined
+      err instanceof Error ? err.message : undefined,
     );
   }
 });

@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
 import {
+  Button,
+  ButtonGroup,
   Card,
   CardBody,
-  Spinner,
   Chip,
-  Button,
   Link,
-  ButtonGroup
+  Spinner,
 } from '@heroui/react';
+import { formatCurrency } from '@split-snap/shared/currency';
+import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useMemo, useState } from 'react';
+
 import { useApiError } from '@/hooks/useApiError';
-import type { Session } from '@split-snap/shared';
+import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { getCurrencySymbol } from '@split-snap/shared';
 
 type RoleFilter = 'all' | 'host' | 'participant';
 
@@ -43,7 +44,7 @@ export default function DashboardPage() {
         .catch((err) => handleError(err, 'Failed to load sessions'))
         .finally(() => setLoadingSessions(false));
     }
-  }, [user]);
+  }, [user, handleError]);
 
   const filteredSessions = useMemo(() => {
     if (roleFilter === 'all') return sessions;
@@ -52,7 +53,7 @@ export default function DashboardPage() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -61,8 +62,8 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
           <p className="text-default-500">
@@ -109,7 +110,7 @@ export default function DashboardPage() {
         </div>
       ) : filteredSessions.length === 0 ? (
         <Card>
-          <CardBody className="flex flex-col items-center justify-center py-16 gap-4">
+          <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
             <span className="text-5xl">📋</span>
             <p className="text-lg font-semibold">
               {roleFilter === 'all'
@@ -118,7 +119,7 @@ export default function DashboardPage() {
                   ? 'No hosted sessions'
                   : 'No joined sessions'}
             </p>
-            <p className="text-default-500 text-center max-w-sm">
+            <p className="text-default-500 max-w-sm text-center">
               {roleFilter === 'all'
                 ? 'Start by scanning a receipt or entering items manually. Your sessions will appear here.'
                 : roleFilter === 'host'
@@ -144,7 +145,7 @@ export default function DashboardPage() {
               <CardBody className="flex flex-row items-center justify-between gap-4 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg">{session.code}</span>
+                    <span className="text-lg font-bold">{session.code}</span>
                     <Chip
                       size="sm"
                       color={session.role === 'host' ? 'warning' : 'primary'}
@@ -166,7 +167,7 @@ export default function DashboardPage() {
                       {session.status}
                     </Chip>
                   </div>
-                  <p className="text-sm text-default-500">
+                  <p className="text-default-500 text-sm">
                     {session.items.length} item
                     {session.items.length !== 1 ? 's' : ''} ·{' '}
                     {session.participants.length} participant
@@ -176,10 +177,13 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">
-                    {getCurrencySymbol(session.currency)}
-                    {session.total.toFixed(2)}
+                    {formatCurrency({
+                      value: session.total,
+                      currency: session.currency,
+                      decimal: 2,
+                    })}
                   </p>
-                  <p className="text-xs text-default-400">{session.currency}</p>
+                  <p className="text-default-400 text-xs">{session.currency}</p>
                 </div>
               </CardBody>
             </Card>

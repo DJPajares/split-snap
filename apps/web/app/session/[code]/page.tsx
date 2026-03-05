@@ -1,30 +1,31 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, use } from 'react';
 import {
+  addToast,
   Button,
   Chip,
-  Spinner,
-  addToast,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalBody,
+  ModalContent,
   ModalFooter,
-  useDisclosure
+  ModalHeader,
+  Spinner,
+  useDisclosure,
 } from '@heroui/react';
+import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import type { Session } from '@split-snap/shared';
-import { api } from '@/lib/api';
-import { useSessionSSE } from '@/hooks/useSessionSSE';
-import { useAuth } from '@/hooks/useAuth';
-import { useApiError } from '@/hooks/useApiError';
-import { SessionItemList } from '@/components/session/SessionItemList';
+import { use, useCallback, useEffect, useRef, useState } from 'react';
+
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
+import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
+import { useApiError } from '@/hooks/useApiError';
+import { useAuth } from '@/hooks/useAuth';
+import { useSessionSSE } from '@/hooks/useSessionSSE';
+import { api } from '@/lib/api';
 
 export default function SessionPage({
-  params
+  params,
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -43,12 +44,12 @@ export default function SessionPage({
   const {
     isOpen: isSettleOpen,
     onOpen: onSettleOpen,
-    onOpenChange: onSettleOpenChange
+    onOpenChange: onSettleOpenChange,
   } = useDisclosure();
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
-    onOpenChange: onDeleteOpenChange
+    onOpenChange: onDeleteOpenChange,
   } = useDisclosure();
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
@@ -99,7 +100,7 @@ export default function SessionPage({
       // Detect if current user was kicked
       if (participantId && updated.participants) {
         const stillInSession = updated.participants.some(
-          (p) => p.id === participantId
+          (p) => p.id === participantId,
         );
         if (!stillInSession) {
           localStorage.removeItem(`participant_${code}`);
@@ -107,7 +108,7 @@ export default function SessionPage({
           addToast({
             title: 'You were removed from this session',
             description: 'The host removed you from this session.',
-            color: 'warning'
+            color: 'warning',
           });
           router.replace('/');
         }
@@ -117,26 +118,26 @@ export default function SessionPage({
       addToast({
         title: 'Session deleted',
         description: 'This session was deleted by the host.',
-        color: 'warning'
+        color: 'warning',
       });
       localStorage.removeItem(`participant_${code}`);
       router.replace('/');
-    }
+    },
   });
 
   const session = liveSession ?? initialSession;
   const currentParticipant = session?.participants.find(
-    (participant) => participant.id === participantId
+    (participant) => participant.id === participantId,
   );
   const hasUnclaimedItems = Boolean(
-    session?.items.some((item) => item.claimedBy.length === 0)
+    session?.items.some((item) => item.claimedBy.length === 0),
   );
   const isCreator = Boolean(
     user &&
     session?.createdBy &&
     session.createdBy === user.id &&
     currentParticipant?.userId === user.id &&
-    !currentParticipant.isAnonymous
+    !currentParticipant.isAnonymous,
   );
 
   useEffect(() => {
@@ -160,7 +161,7 @@ export default function SessionPage({
         try {
           await api.sessions.claimItem(code, itemId, {
             participantId,
-            portion: 1
+            portion: 1,
           });
         } catch (err) {
           handleError(err, 'Failed to update claim');
@@ -175,7 +176,7 @@ export default function SessionPage({
 
       debounceTimers.current.set(itemId, timer);
     },
-    [code, participantId, session, handleError]
+    [code, participantId, session, handleError],
   );
 
   const handleSettle = useCallback(async () => {
@@ -211,7 +212,7 @@ export default function SessionPage({
         handleError(err, 'Failed to remove participant');
       }
     },
-    [code, handleError]
+    [code, handleError],
   );
 
   const handleApprove = useCallback(
@@ -223,7 +224,7 @@ export default function SessionPage({
         handleError(err, 'Failed to approve participant');
       }
     },
-    [code, handleError]
+    [code, handleError],
   );
 
   const handleReject = useCallback(
@@ -235,7 +236,7 @@ export default function SessionPage({
         handleError(err, 'Failed to reject participant');
       }
     },
-    [code, handleError]
+    [code, handleError],
   );
 
   const handleDelete = useCallback(async () => {
@@ -253,7 +254,7 @@ export default function SessionPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -261,8 +262,8 @@ export default function SessionPage({
 
   if (error || !session) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-xl text-danger">{error || 'Session not found'}</p>
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+        <p className="text-danger text-xl">{error || 'Session not found'}</p>
         <Button onPress={() => router.push('/')}>Go Home</Button>
       </div>
     );
@@ -274,9 +275,9 @@ export default function SessionPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 relative">
+    <div className="relative mx-auto max-w-6xl px-4 py-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+      <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Session {code}</h1>
@@ -319,7 +320,7 @@ export default function SessionPage({
 
       {/* Creator CTA actions */}
       {isCreator && session.status === 'active' && (
-        <div className="flex flex-wrap gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap gap-3">
           <Button
             color="success"
             variant="solid"
@@ -352,7 +353,7 @@ export default function SessionPage({
         </div>
       )}
       {isCreator && session.status === 'settled' && (
-        <div className="flex flex-wrap gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap gap-3">
           <Button
             color="warning"
             variant="flat"
@@ -375,15 +376,15 @@ export default function SessionPage({
         </div>
       )}
       {session.status === 'active' && hasUnclaimedItems && isCreator && (
-        <p className="text-sm text-warning mb-4">
+        <p className="text-warning mb-4 text-sm">
           Claim all items before finalizing settlement.
         </p>
       )}
 
       {/* Main content: items + sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <h2 className="text-lg font-semibold mb-3">
+          <h2 className="mb-3 text-lg font-semibold">
             Items ({session.items.length})
           </h2>
           <SessionItemList
@@ -420,7 +421,7 @@ export default function SessionPage({
               <ModalHeader>Settle Session</ModalHeader>
               <ModalBody>
                 <p>Finalize this session now?</p>
-                <p className="text-sm text-default-500">
+                <p className="text-default-500 text-sm">
                   Participants will no longer be able to claim or unclaim items
                   until you undo settlement.
                 </p>
@@ -453,7 +454,7 @@ export default function SessionPage({
               <ModalHeader>Delete Session</ModalHeader>
               <ModalBody>
                 <p>Are you sure you want to delete this session?</p>
-                <p className="text-sm text-default-500">
+                <p className="text-default-500 text-sm">
                   This will permanently remove the session and disconnect all
                   participants. This action cannot be undone.
                 </p>

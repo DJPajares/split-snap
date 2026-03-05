@@ -1,28 +1,28 @@
 'use client';
 
-import { useState, use, useEffect, useCallback, useRef } from 'react';
 import {
+  addToast,
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Input,
-  Button,
   Divider,
+  Input,
   Spinner,
-  addToast,
-  Link
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
-import { ApiError } from '@/lib/errors';
+import { use, useCallback, useEffect, useState } from 'react';
+
+import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
-import { useApiError } from '@/hooks/useApiError';
+import { api } from '@/lib/api';
+import { ApiError } from '@/lib/errors';
 
 type JoinState = 'idle' | 'joining' | 'pending' | 'rejected' | 'kicked';
 
 export default function JoinPage({
-  params
+  params,
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -39,7 +39,6 @@ export default function JoinPage({
   const [pendingParticipantId, setPendingParticipantId] = useState<
     string | null
   >(null);
-  const hasAttemptedAutoJoinRef = useRef(false);
   const { handleError } = useApiError({ redirectTo: '/' });
 
   // Check for stored participant and validate against auth state
@@ -48,7 +47,9 @@ export default function JoinPage({
 
     const storedParticipantId = localStorage.getItem(`participant_${code}`);
     if (!storedParticipantId) {
-      setCheckingStoredParticipant(false);
+      queueMicrotask(() => {
+        setCheckingStoredParticipant(false);
+      });
       return;
     }
 
@@ -64,7 +65,7 @@ export default function JoinPage({
         if (!active) return;
 
         const participant = session.participants.find(
-          (p) => p.id === storedParticipantId
+          (p) => p.id === storedParticipantId,
         );
 
         if (
@@ -79,7 +80,7 @@ export default function JoinPage({
         if (participant && !participant.userId) {
           localStorage.setItem(
             `guest_participant_${code}`,
-            storedParticipantId
+            storedParticipantId,
           );
         }
 
@@ -105,7 +106,7 @@ export default function JoinPage({
       try {
         const result = await api.sessions.join(code, {
           displayName,
-          userId: userId ?? null
+          userId: userId ?? null,
         });
 
         if (result.status === 'pending') {
@@ -143,7 +144,7 @@ export default function JoinPage({
         handleError(err, 'Failed to join session');
       }
     },
-    [code, router, handleError]
+    [code, router, handleError],
   );
 
   const handleJoin = async () => {
@@ -152,14 +153,14 @@ export default function JoinPage({
   };
 
   // SSE subscription when pending — listen for approval/rejection
-  const { session: liveSession } = useSessionSSE({
+  useSessionSSE({
     code,
     onUpdate: (updated) => {
       if (joinState !== 'pending' || !pendingParticipantId) return;
 
       // Check if we've been approved (moved from pending to participants)
       const isStillPending = updated.pendingParticipants?.some(
-        (p) => p.id === pendingParticipantId
+        (p) => p.id === pendingParticipantId,
       );
       const approvedParticipant = updated.participants.find((p) => {
         // Match by userId or displayName since the id changes when moved
@@ -182,15 +183,8 @@ export default function JoinPage({
         setJoinState('rejected');
         addToast({ title: 'Your join request was rejected', color: 'danger' });
       }
-    }
+    },
   });
-
-  // Auto-join for logged-in users (but not auto — show confirmation)
-  // Only pre-fill name, don't auto-submit to avoid kicked-user loop
-  useEffect(() => {
-    if (checkingStoredParticipant || authLoading || !user) return;
-    setName(user.name);
-  }, [checkingStoredParticipant, authLoading, user]);
 
   // Auto-join after login redirect (user came from handleLoginRedirect)
   useEffect(() => {
@@ -199,7 +193,9 @@ export default function JoinPage({
     if (pendingCode === code) {
       localStorage.removeItem('pending_session_code');
       // Auto-submit join for the logged-in user
-      void joinSession(user.name, user.id);
+      queueMicrotask(() => {
+        void joinSession(user.name, user.id);
+      });
     }
   }, [checkingStoredParticipant, authLoading, user, code, joinSession]);
 
@@ -241,7 +237,7 @@ export default function JoinPage({
     const hasCountdown = kickCooldownEnd && kickCountdown > 0;
 
     return (
-      <div className="max-w-md mx-auto px-4 py-16">
+      <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <span className="text-5xl">⏳</span>
@@ -271,7 +267,7 @@ export default function JoinPage({
   // Rejected state
   if (joinState === 'rejected') {
     return (
-      <div className="max-w-md mx-auto px-4 py-16">
+      <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <span className="text-5xl">❌</span>
@@ -291,7 +287,7 @@ export default function JoinPage({
   // Pending state
   if (joinState === 'pending') {
     return (
-      <div className="max-w-md mx-auto px-4 py-16">
+      <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <Spinner size="lg" />
@@ -299,7 +295,7 @@ export default function JoinPage({
             <p className="text-default-500 text-center">
               The host needs to approve your request to join this session.
             </p>
-            <div className="font-mono text-lg tracking-widest font-bold text-primary">
+            <div className="text-primary font-mono text-lg font-bold tracking-widest">
               {code.toUpperCase()}
             </div>
             <Button
@@ -318,7 +314,7 @@ export default function JoinPage({
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
+    <div className="mx-auto max-w-md px-4 py-16">
       <Card>
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
           <span className="text-5xl">👋</span>
@@ -328,12 +324,12 @@ export default function JoinPage({
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
           </p>
-          <div className="font-mono text-lg tracking-widest font-bold text-primary">
+          <div className="text-primary font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
           </div>
         </CardHeader>
         <Divider />
-        <CardBody className="gap-4 pb-8 px-6">
+        <CardBody className="gap-4 px-6 pb-8">
           {!user && (
             <Input
               label="Your Name"
@@ -362,7 +358,7 @@ export default function JoinPage({
             {user ? 'Join as Account' : 'Join & Start Picking'}
           </Button>
           {autoJoinError && (
-            <p className="text-xs text-danger text-center">{autoJoinError}</p>
+            <p className="text-danger text-center text-xs">{autoJoinError}</p>
           )}
           {!user && (
             <>
@@ -372,7 +368,7 @@ export default function JoinPage({
               </Button>
             </>
           )}
-          <p className="text-xs text-default-400 text-center">
+          <p className="text-default-400 text-center text-xs">
             No account needed — just pick a name.
           </p>
         </CardBody>

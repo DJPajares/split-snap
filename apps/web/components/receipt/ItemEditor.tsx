@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Button,
-  Input,
   Card,
   CardBody,
   CardHeader,
   Divider,
+  Input,
   Select,
-  SelectItem
+  SelectItem,
 } from '@heroui/react';
-import type { ScannedItem } from '@split-snap/shared';
-import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared';
+import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
+import type { ScannedItem } from '@split-snap/shared/types';
+import { useState } from 'react';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -57,7 +57,7 @@ export function ItemEditor({
   onSubmit,
   isSubmitting,
   submitLabel = 'Create Session',
-  receiptImageUrl
+  receiptImageUrl,
 }: ItemEditorProps) {
   const [currency, setCurrency] = useState(initialCurrency);
   const currencySymbol = getCurrencySymbol(currency);
@@ -72,17 +72,17 @@ export function ItemEditor({
                   : item.price
                 ).toString()
               : '',
-          quantity: item.quantity ? item.quantity.toString() : '1'
+          quantity: item.quantity ? item.quantity.toString() : '1',
         }))
-      : [{ name: '', amount: '', quantity: '1' }]
+      : [{ name: '', amount: '', quantity: '1' }],
   );
   const [tax, setTax] = useState(initialTax ? initialTax.toString() : '');
   const [tip, setTip] = useState(initialTip ? initialTip.toString() : '');
   const [itemErrors, setItemErrors] = useState<ItemErrors[]>(() =>
     Array.from(
       { length: initialItems.length > 0 ? initialItems.length : 1 },
-      () => ({})
-    )
+      () => ({}),
+    ),
   );
   const [taxError, setTaxError] = useState<string | undefined>();
   const [tipError, setTipError] = useState<string | undefined>();
@@ -101,7 +101,7 @@ export function ItemEditor({
 
   const subtotal = items.reduce(
     (sum, item) => sum + parseNumber(item.amount),
-    0
+    0,
   );
   const taxValue = parseNumber(tax);
   const tipValue = parseNumber(tip);
@@ -115,14 +115,14 @@ export function ItemEditor({
 
   const updateItem = (index: number, field: ItemField, value: string) => {
     setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
 
     if (field === 'amount' || field === 'quantity') {
       setItemErrors((prev) =>
         prev.map((error, i) =>
-          i === index ? { ...error, [field]: undefined } : error
-        )
+          i === index ? { ...error, [field]: undefined } : error,
+        ),
       );
     }
   };
@@ -147,8 +147,8 @@ export function ItemEditor({
 
     setItemErrors((prev) =>
       prev.map((itemError, i) =>
-        i === index ? { ...itemError, [field]: error } : itemError
-      )
+        i === index ? { ...itemError, [field]: error } : itemError,
+      ),
     );
 
     return !error;
@@ -222,12 +222,12 @@ export function ItemEditor({
       .map((item) => ({
         name: item.name.trim(),
         quantity: parseInteger(item.quantity),
-        amount: parseNumber(item.amount)
+        amount: parseNumber(item.amount),
       }))
       .map((item) => ({
         name: item.name,
         quantity: item.quantity,
-        price: item.quantity > 0 ? item.amount / item.quantity : 0
+        price: item.quantity > 0 ? item.amount / item.quantity : 0,
       }))
       .filter((item) => item.name && item.price > 0 && item.quantity >= 1);
 
@@ -239,7 +239,7 @@ export function ItemEditor({
       tax: taxValue,
       tip: tipValue,
       total,
-      currency
+      currency,
     });
   };
 
@@ -248,7 +248,7 @@ export function ItemEditor({
       (item) =>
         item.name.trim() &&
         parseNumber(item.amount) > 0 &&
-        parseInteger(item.quantity) >= 1
+        parseInteger(item.quantity) >= 1,
     ) &&
     itemErrors.every((error) => !error.amount && !error.quantity) &&
     !taxError &&
@@ -258,7 +258,7 @@ export function ItemEditor({
     <Card>
       <CardHeader className="flex flex-col items-start gap-2">
         <h2 className="text-xl font-bold">Review Items</h2>
-        <p className="text-sm text-default-500">
+        <p className="text-default-500 text-sm">
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
         <Select
@@ -271,8 +271,8 @@ export function ItemEditor({
           size="sm"
         >
           {CURRENCIES.map((c) => (
-            <SelectItem key={c.code} textValue={`${c.code} (${c.symbol})`}>
-              {c.symbol} — {c.code} ({c.name})
+            <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
+              {c.code} ({c.name})
             </SelectItem>
           ))}
         </Select>
@@ -283,14 +283,14 @@ export function ItemEditor({
         {receiptImageUrl && (
           <div className="space-y-2">
             <button
-              className="flex items-center gap-2 w-full text-left"
+              className="flex w-full items-center gap-2 text-left"
               onClick={() => setReceiptExpanded(!receiptExpanded)}
             >
               <span className="text-lg">🧾</span>
-              <span className="text-sm font-medium flex-1">
+              <span className="flex-1 text-sm font-medium">
                 Receipt Reference
               </span>
-              <span className="text-xs text-default-400">
+              <span className="text-default-400 text-xs">
                 {receiptExpanded ? 'Hide' : 'Show'}
               </span>
             </button>
@@ -308,7 +308,7 @@ export function ItemEditor({
                   >
                     −
                   </Button>
-                  <span className="text-xs text-default-500 w-12 text-center">
+                  <span className="text-default-500 w-12 text-center text-xs">
                     {Math.round(receiptZoom * 100)}%
                   </span>
                   <Button
@@ -330,7 +330,7 @@ export function ItemEditor({
                     </Button>
                   )}
                 </div>
-                <div className="overflow-auto max-h-80 rounded-lg border border-default-200">
+                <div className="border-default-200 max-h-80 overflow-auto rounded-lg border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={receiptImageUrl}
@@ -348,9 +348,9 @@ export function ItemEditor({
         <div className="space-y-4">
           {items.map((item, i) => (
             <div key={i} className="space-y-1.5">
-              <div className="rounded-2xl border border-default-200 bg-content1/90 p-3 sm:p-4 flex flex-col gap-2">
+              <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium uppercase tracking-wide text-default-500">
+                  <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
                     Item {i + 1}
                   </p>
                   <Button
@@ -406,7 +406,7 @@ export function ItemEditor({
                 </div>
                 {parseInteger(item.quantity) > 1 &&
                   parseNumber(item.amount) > 0 && (
-                    <p className="text-xs text-default-500">
+                    <p className="text-default-500 text-xs">
                       {currencySymbol}
                       {(
                         parseNumber(item.amount) / parseInteger(item.quantity)
@@ -433,7 +433,7 @@ export function ItemEditor({
 
         {/* Totals */}
         <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Input
               label="Tax"
               type="number"
@@ -456,6 +456,7 @@ export function ItemEditor({
             <Input
               label="Service Charge/Tip"
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               value={tip}
               onValueChange={(val) => {
@@ -473,8 +474,8 @@ export function ItemEditor({
               errorMessage={tipError}
             />
           </div>
-          <div className="w-full bg-content2 rounded-lg px-3 py-2 text-center">
-            <p className="text-xs text-default-500">Total</p>
+          <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
+            <p className="text-default-500 text-xs">Total</p>
             <p className="text-lg font-bold">
               {currencySymbol}
               {total.toFixed(2)}

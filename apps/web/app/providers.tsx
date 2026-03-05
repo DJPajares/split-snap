@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
 import { HeroUIProvider } from '@heroui/react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+import { ErrorModalProvider } from '@/components/error/error-modal-context';
 import { AuthProvider } from '@/hooks/useAuth';
-import { ErrorModalProvider } from '@/app/error-modal-context';
 import { api } from '@/lib/api';
 
 export function Providers({ children }: { children: React.ReactNode }) {

@@ -1,22 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import {
+  addToast,
+  Button,
   Card,
   CardBody,
   CardHeader,
-  Tabs,
-  Tab,
-  Input,
-  Button,
   Divider,
+  Input,
   Link,
-  addToast
+  Tab,
+  Tabs,
 } from '@heroui/react';
+import { APP } from '@split-snap/shared/constants';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+
 import { useApiError } from '@/hooks/useApiError';
-import { APP } from '@split-snap/shared';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,13 +36,13 @@ export default function LoginPage() {
     if (pendingCode) {
       // Restore guest participantId if it was preserved before login redirect
       const pendingParticipantId = localStorage.getItem(
-        'pending_participant_id'
+        'pending_participant_id',
       );
       if (pendingParticipantId) {
         // Save the guest participantId separately so it can be restored on logout
         localStorage.setItem(
           `guest_participant_${pendingCode}`,
-          pendingParticipantId
+          pendingParticipantId,
         );
         localStorage.removeItem('pending_participant_id');
       }
@@ -83,12 +84,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
+    <div className="mx-auto max-w-md px-4 py-16">
       <Card>
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
           <span className="text-4xl">🔐</span>
           <h1 className="text-2xl font-bold">{`Welcome to ${APP.NAME}`}</h1>
-          <p className="text-default-500 text-sm text-center">
+          <p className="text-default-500 text-center text-sm">
             Sign in to save your sessions and access them later.
           </p>
         </CardHeader>
@@ -101,7 +102,7 @@ export default function LoginPage() {
             className="mb-4"
           >
             <Tab key="login" title="Log In">
-              <div className="flex flex-col gap-4 mt-4">
+              <div className="mt-4 flex flex-col gap-4">
                 <Input
                   label="Email"
                   type="email"
@@ -142,7 +143,7 @@ export default function LoginPage() {
               </div>
             </Tab>
             <Tab key="register" title="Sign Up">
-              <div className="flex flex-col gap-4 mt-4">
+              <div className="mt-4 flex flex-col gap-4">
                 <Input
                   label="Name"
                   placeholder="Your name"
@@ -190,7 +191,7 @@ export default function LoginPage() {
             </Tab>
           </Tabs>
 
-          <p className="text-xs text-default-400 text-center mt-4">
+          <p className="text-default-400 mt-4 text-center text-xs">
             You don&apos;t need an account to join sessions.{' '}
             <Link href="/" size="sm">
               Go back

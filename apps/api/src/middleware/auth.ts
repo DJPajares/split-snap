@@ -1,8 +1,10 @@
-import { createMiddleware } from "hono/factory";
-import jwt from "jsonwebtoken";
-import { ErrorCode } from "@split-snap/shared";
-import { config } from "../lib/config.js";
-import { unauthorized } from "../lib/errors.js";
+import { createMiddleware } from 'hono/factory';
+import jwt from 'jsonwebtoken';
+
+import { ErrorCode } from '@split-snap/shared/errors';
+
+import { config } from '../lib/config.js';
+import { unauthorized } from '../lib/errors.js';
 
 export interface AuthPayload {
   userId: string;
@@ -15,15 +17,15 @@ export interface AuthPayload {
 export const requireAuth = createMiddleware<{
   Variables: { auth: AuthPayload };
 }>(async (c, next) => {
-  const header = c.req.header("Authorization");
-  if (!header?.startsWith("Bearer ")) {
+  const header = c.req.header('Authorization');
+  if (!header?.startsWith('Bearer ')) {
     throw unauthorized(ErrorCode.AUTH_MISSING_TOKEN);
   }
 
   try {
     const token = header.slice(7);
     const payload = jwt.verify(token, config.JWT_SECRET) as AuthPayload;
-    c.set("auth", payload);
+    c.set('auth', payload);
     await next();
   } catch {
     throw unauthorized(ErrorCode.AUTH_INVALID_TOKEN);
@@ -36,12 +38,12 @@ export const requireAuth = createMiddleware<{
 export const optionalAuth = createMiddleware<{
   Variables: { auth?: AuthPayload };
 }>(async (c, next) => {
-  const header = c.req.header("Authorization");
-  if (header?.startsWith("Bearer ")) {
+  const header = c.req.header('Authorization');
+  if (header?.startsWith('Bearer ')) {
     try {
       const token = header.slice(7);
       const payload = jwt.verify(token, config.JWT_SECRET) as AuthPayload;
-      c.set("auth", payload);
+      c.set('auth', payload);
     } catch {
       // Token invalid, proceed without auth
     }
@@ -53,5 +55,5 @@ export const optionalAuth = createMiddleware<{
  * Generate a JWT token for a user.
  */
 export function generateToken(payload: AuthPayload): string {
-  return jwt.sign(payload, config.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, config.JWT_SECRET, { expiresIn: '7d' });
 }

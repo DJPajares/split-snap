@@ -1,20 +1,21 @@
+import { API_ROUTES } from '@split-snap/shared/constants';
 import type {
-  Session,
+  AuthResponse,
+  ClaimItemPayload,
   CreateSessionPayload,
   CreateSessionResponse,
-  UpdateItemsPayload,
   JoinSessionPayload,
-  ClaimItemPayload,
-  AuthResponse,
-  RegisterPayload,
   LoginPayload,
-  ScanResult,
-  User,
-  UpgradeParticipantPayload,
   MergeParticipantPayload,
-  UpdateSessionSettingsPayload
-} from '@split-snap/shared';
-import { API_ROUTES } from '@split-snap/shared';
+  RegisterPayload,
+  ScanResult,
+  Session,
+  UpdateItemsPayload,
+  UpdateSessionSettingsPayload,
+  UpgradeParticipantPayload,
+  User,
+} from '@split-snap/shared/types';
+
 import { parseApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -23,7 +24,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function getHeaders(): HeadersInit {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
   if (typeof window !== 'undefined') {
@@ -39,12 +40,12 @@ function getHeaders(): HeadersInit {
 
 async function request<T>(
   path: string,
-  options?: RequestInit & { rawResponse?: boolean }
+  options?: RequestInit & { rawResponse?: boolean },
 ): Promise<T> {
-  const { rawResponse, ...fetchOptions } = options ?? {};
+  const { ...fetchOptions } = options ?? {};
   const res = await fetch(`${API_URL}${path}`, {
     headers: getHeaders(),
-    ...fetchOptions
+    ...fetchOptions,
   });
 
   if (!res.ok) {
@@ -59,21 +60,21 @@ async function request<T>(
 export const api = {
   health: {
     check: () =>
-      request<{ ok: boolean; service: string; timestamp: string }>('/health')
+      request<{ ok: boolean; service: string; timestamp: string }>('/health'),
   },
 
   auth: {
     register: (data: RegisterPayload) =>
       request<AuthResponse>(API_ROUTES.AUTH_REGISTER, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
     login: (data: LoginPayload) =>
       request<AuthResponse>(API_ROUTES.AUTH_LOGIN, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
-    me: () => request<User>(API_ROUTES.AUTH_ME)
+    me: () => request<User>(API_ROUTES.AUTH_ME),
   },
 
   // ─── Receipts ──────────────────────────────────────────
@@ -91,8 +92,8 @@ export const api = {
           ...(typeof window !== 'undefined' &&
           localStorage.getItem('auth_token')
             ? { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
-            : {})
-        }
+            : {}),
+        },
       });
 
       if (!res.ok) {
@@ -100,7 +101,7 @@ export const api = {
       }
 
       return res.json();
-    }
+    },
   },
 
   // ─── Sessions ──────────────────────────────────────────
@@ -114,7 +115,7 @@ export const api = {
     create: (data: CreateSessionPayload) =>
       request<CreateSessionResponse>(API_ROUTES.SESSIONS, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
 
     get: (code: string) => request<Session>(API_ROUTES.SESSION(code)),
@@ -127,13 +128,13 @@ export const api = {
         pendingParticipantId?: string;
       }>(API_ROUTES.SESSION_JOIN(code), {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
 
     claimItem: (code: string, itemId: string, data: ClaimItemPayload) =>
       request<Session>(API_ROUTES.SESSION_CLAIM(code, itemId), {
         method: 'PATCH',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
 
     settle: (code: string) =>
@@ -145,25 +146,25 @@ export const api = {
     updateItems: (code: string, data: UpdateItemsPayload) =>
       request<Session>(API_ROUTES.SESSION_UPDATE_ITEMS(code), {
         method: 'PUT',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
 
     kick: (code: string, participantId: string) =>
       request<Session>(API_ROUTES.SESSION_KICK(code, participantId), {
-        method: 'DELETE'
+        method: 'DELETE',
       }),
 
     upgradeParticipant: (
       code: string,
       participantId: string,
-      data: UpgradeParticipantPayload
+      data: UpgradeParticipantPayload,
     ) =>
       request<Session>(
         API_ROUTES.SESSION_UPGRADE_PARTICIPANT(code, participantId),
         {
           method: 'POST',
-          body: JSON.stringify(data)
-        }
+          body: JSON.stringify(data),
+        },
       ),
 
     mergeParticipants: (code: string, data: MergeParticipantPayload) =>
@@ -171,37 +172,37 @@ export const api = {
         API_ROUTES.SESSION_MERGE_PARTICIPANTS(code),
         {
           method: 'POST',
-          body: JSON.stringify(data)
-        }
+          body: JSON.stringify(data),
+        },
       ),
 
     approveParticipant: (code: string, participantId: string) =>
       request<{ session: Session; participantId: string }>(
         API_ROUTES.SESSION_APPROVE_PARTICIPANT(code, participantId),
         {
-          method: 'POST'
-        }
+          method: 'POST',
+        },
       ),
 
     rejectParticipant: (code: string, participantId: string) =>
       request<Session>(
         API_ROUTES.SESSION_REJECT_PARTICIPANT(code, participantId),
         {
-          method: 'POST'
-        }
+          method: 'POST',
+        },
       ),
 
     updateSettings: (code: string, data: UpdateSessionSettingsPayload) =>
       request<Session>(API_ROUTES.SESSION_SETTINGS(code), {
         method: 'PATCH',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       }),
 
     delete: (code: string) =>
       request<{ success: boolean }>(API_ROUTES.SESSION_DELETE(code), {
-        method: 'DELETE'
+        method: 'DELETE',
       }),
 
-    eventsUrl: (code: string) => `${API_URL}${API_ROUTES.SESSION_EVENTS(code)}`
-  }
+    eventsUrl: (code: string) => `${API_URL}${API_ROUTES.SESSION_EVENTS(code)}`,
+  },
 };

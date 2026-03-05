@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
 import { addToast } from '@heroui/react';
-import { useErrorModal } from '@/app/error-modal-context';
+import { useCallback } from 'react';
+
+import { useErrorModal } from '@/components/error/error-modal-context';
 import { ApiError } from '@/lib/errors';
 
 interface UseApiErrorOptions {
@@ -41,7 +42,7 @@ export function useApiError(options?: UseApiErrorOptions) {
         color: 'danger',
       });
     },
-    [showErrorModal, options?.redirectTo]
+    [showErrorModal, options?.redirectTo],
   );
 
   return { handleError };

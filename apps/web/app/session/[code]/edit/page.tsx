@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { Spinner, Button, addToast } from '@heroui/react';
+import { addToast, Button, Spinner } from '@heroui/react';
+import type { ScannedItem, Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import type { Session, ScannedItem } from '@split-snap/shared';
-import { api } from '@/lib/api';
-import { useAuth } from '@/hooks/useAuth';
-import { useApiError } from '@/hooks/useApiError';
+import { use, useEffect, useState } from 'react';
+
 import { ItemEditor } from '@/components/receipt/ItemEditor';
+import { useApiError } from '@/hooks/useApiError';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 export default function EditSessionPage({
-  params
+  params,
 }: {
   params: Promise<{ code: string }>;
 }) {
@@ -35,7 +36,7 @@ export default function EditSessionPage({
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code]);
+  }, [code, handleError]);
 
   // Guard: redirect if not the creator
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function EditSessionPage({
           ...(existingItem ? { id: existingItem.id } : {}),
           name: item.name,
           price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
         };
       });
 
@@ -82,7 +83,7 @@ export default function EditSessionPage({
         tax: data.tax,
         tip: data.tip,
         total: data.total,
-        currency: data.currency
+        currency: data.currency,
       });
 
       addToast({ title: 'Items updated!', color: 'success' });
@@ -96,7 +97,7 @@ export default function EditSessionPage({
 
   if (loading || authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -104,8 +105,8 @@ export default function EditSessionPage({
 
   if (error || !session) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <p className="text-xl text-danger">{error || 'Session not found'}</p>
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+        <p className="text-danger text-xl">{error || 'Session not found'}</p>
         <Button onPress={() => router.push('/')}>Go Home</Button>
       </div>
     );
@@ -120,11 +121,11 @@ export default function EditSessionPage({
   const initialItems: ScannedItem[] = session.items.map((item) => ({
     name: item.name,
     price: item.price,
-    quantity: item.quantity
+    quantity: item.quantity,
   }));
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">

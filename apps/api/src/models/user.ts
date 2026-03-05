@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   email: string;
@@ -15,8 +15,8 @@ const UserSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true },
     avatarUrl: { type: String, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const UserModel =
-  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+  mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

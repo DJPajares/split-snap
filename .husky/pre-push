@@ -1,0 +1,2 @@
+pnpm turbo run build
+pnpm turbo run lint --filter=web

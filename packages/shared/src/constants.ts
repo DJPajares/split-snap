@@ -6,7 +6,7 @@ export const KICK_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 export const SESSION_STATUSES = {
   DRAFT: 'draft' as const,
   ACTIVE: 'active' as const,
-  SETTLED: 'settled' as const
+  SETTLED: 'settled' as const,
 };
 
 export const API_ROUTES = {
@@ -34,9 +34,9 @@ export const API_ROUTES = {
   SESSION_EVENTS: (code: string) => `/sessions/${code}/events`,
   AUTH_REGISTER: '/auth/register',
   AUTH_LOGIN: '/auth/login',
-  AUTH_ME: '/auth/me'
+  AUTH_ME: '/auth/me',
 } as const;
 
 export const APP = {
-  NAME: 'Split Snap'
+  NAME: 'Split Snap',
 };

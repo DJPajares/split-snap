@@ -1,21 +1,21 @@
 'use client';
 
 import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from 'react';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from '@heroui/react';
 import { useRouter } from 'next/navigation';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -29,7 +29,11 @@ interface ErrorModalOptions {
 }
 
 interface ErrorModalContextValue {
-  showErrorModal: (title: string, message: string, options?: ErrorModalOptions) => void;
+  showErrorModal: (
+    title: string,
+    message: string,
+    options?: ErrorModalOptions,
+  ) => void;
 }
 
 // ─── Context ───────────────────────────────────────────────
@@ -38,7 +42,8 @@ const ErrorModalContext = createContext<ErrorModalContextValue | null>(null);
 
 export function useErrorModal() {
   const ctx = useContext(ErrorModalContext);
-  if (!ctx) throw new Error('useErrorModal must be used within ErrorModalProvider');
+  if (!ctx)
+    throw new Error('useErrorModal must be used within ErrorModalProvider');
   return ctx;
 }
 
@@ -58,7 +63,7 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
     (title: string, message: string, options?: ErrorModalOptions) => {
       setModal({ title, message, options });
     },
-    []
+    [],
   );
 
   const handleClose = useCallback(() => {

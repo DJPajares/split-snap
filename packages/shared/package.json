@@ -6,11 +6,12 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
+    "./types": "./dist/types.js",
+    "./constants": "./dist/constants.js",
+    "./tax": "./dist/tax.js",
+    "./currency": "./dist/currency.js",
+    "./errors": "./dist/errors.js",
+    "./utilities": "./dist/utilities.js"
   },
   "files": [
     "dist"

@@ -1,8 +1,8 @@
 import {
-  ErrorCode,
+  type ApiErrorResponse,
   DEFAULT_ERROR_MESSAGES,
-  type ApiErrorResponse
-} from '@split-snap/shared';
+  ErrorCode,
+} from '@split-snap/shared/errors';
 
 // ─── AppError ──────────────────────────────────────────────
 
@@ -15,7 +15,7 @@ export class AppError extends Error {
     code: ErrorCode,
     statusCode: number,
     message?: string,
-    details?: unknown
+    details?: unknown,
   ) {
     super(message ?? DEFAULT_ERROR_MESSAGES[code] ?? 'Unknown error');
     this.code = code;
@@ -29,8 +29,8 @@ export class AppError extends Error {
       error: {
         code: this.code,
         message: this.message,
-        ...(this.details !== undefined ? { details: this.details } : {})
-      }
+        ...(this.details !== undefined ? { details: this.details } : {}),
+      },
     };
   }
 }
@@ -40,7 +40,7 @@ export class AppError extends Error {
 export function badRequest(
   code: ErrorCode,
   message?: string,
-  details?: unknown
+  details?: unknown,
 ): AppError {
   return new AppError(code, 400, message, details);
 }
@@ -52,7 +52,7 @@ export function unauthorized(code: ErrorCode, message?: string): AppError {
 export function forbidden(
   code: ErrorCode,
   message?: string,
-  details?: unknown
+  details?: unknown,
 ): AppError {
   return new AppError(code, 403, message, details);
 }
