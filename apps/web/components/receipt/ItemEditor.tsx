@@ -666,7 +666,6 @@ export function ItemEditor({
                           : 'Service Charge/Tip'
                       }
                       type="number"
-                      inputMode="decimal"
                       placeholder="0.00"
                       value={toNumberInputValue(f.value)}
                       onValueChange={(value) =>
