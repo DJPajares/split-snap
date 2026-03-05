@@ -3,7 +3,7 @@
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useState, useTransition } from 'react';
 
 import { ItemEditor } from '@/components/receipt/ItemEditor';
 import { ReceiptUploader } from '@/components/receipt/ReceiptUploader';
@@ -32,6 +32,7 @@ function ScanPageInner() {
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [creating, setCreating] = useState(false);
+  const [isRouting, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState(startManual ? 'manual' : 'scan');
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError();
@@ -84,6 +85,10 @@ function ScanPageInner() {
       total: number;
       currency: string;
     }) => {
+      if (creating || isRouting) {
+        return;
+      }
+
       setCreating(true);
       try {
         const session = await api.sessions.create({
@@ -110,14 +115,15 @@ function ScanPageInner() {
           localStorage.setItem(`host_token_${session.code}`, session.hostToken);
         }
 
-        router.push(`/session/${session.code}`);
+        startTransition(() => {
+          router.push(`/session/${session.code}`);
+        });
       } catch (err) {
-        handleError(err, 'Failed to create session');
-      } finally {
         setCreating(false);
+        handleError(err, 'Failed to create session');
       }
     },
-    [router, handleError],
+    [creating, isRouting, router, handleError],
   );
 
   return (
@@ -150,7 +156,7 @@ function ScanPageInner() {
               initialTotal={scanResult?.total ?? 0}
               initialPriceInterpretation="line-total"
               onSubmit={handleCreateSession}
-              isSubmitting={creating}
+              isSubmitting={creating || isRouting}
               receiptImageUrl={receiptImageUrl}
             />
           </div>
