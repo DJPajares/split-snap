@@ -138,6 +138,7 @@ export function ItemEditor({
   const [receiptExpanded, setReceiptExpanded] = useState(false);
   const [receiptZoom, setReceiptZoom] = useState(1);
   const [removeIndex, setRemoveIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
   const defaultItems =
     initialItems.length > 0
@@ -194,7 +195,7 @@ export function ItemEditor({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'items',
   });
@@ -268,6 +269,19 @@ export function ItemEditor({
   const removeItem = (index: number) => {
     if (fields.length <= 1) return;
     remove(index);
+  };
+
+  const onDragStartItem = (index: number) => {
+    setDraggingIndex(index);
+  };
+
+  const onDropItem = (targetIndex: number) => {
+    if (draggingIndex === null || draggingIndex === targetIndex) {
+      setDraggingIndex(null);
+      return;
+    }
+    move(draggingIndex, targetIndex);
+    setDraggingIndex(null);
   };
 
   const requestRemoveItem = (index: number) => {
@@ -422,10 +436,24 @@ export function ItemEditor({
         {/* Items */}
         <div className="space-y-4">
           {fields.map((field, i) => (
-            <div key={field.id} className="space-y-1.5">
+            <div
+              key={field.id}
+              className="space-y-1.5"
+              draggable
+              onDragStart={() => onDragStartItem(i)}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => onDropItem(i)}
+              onDragEnd={() => setDraggingIndex(null)}
+            >
               <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
+                  <p className="text-default-500 flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
+                    <span
+                      className="cursor-grab select-none"
+                      aria-hidden="true"
+                    >
+                      ⋮⋮
+                    </span>
                     Item {i + 1}
                   </p>
                   <Button
@@ -541,6 +569,14 @@ export function ItemEditor({
 
         {/* Totals */}
         <div className="space-y-3">
+          <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
+            <p className="text-default-500 text-xs">Subtotal</p>
+            <p className="text-medium">
+              {currencySymbol}
+              {subtotal.toFixed(2)}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <div className="flex items-start gap-2">
@@ -698,7 +734,7 @@ export function ItemEditor({
 
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-default-500 text-xs">Total</p>
-            <p className="text-lg font-bold">
+            <p className="text-xl font-bold">
               {currencySymbol}
               {total.toFixed(2)}
             </p>
