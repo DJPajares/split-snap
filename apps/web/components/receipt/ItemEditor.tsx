@@ -2,12 +2,16 @@
 
 import {
   Button,
-  ButtonGroup,
   Card,
   CardBody,
   CardHeader,
   Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Input,
+  NumberInput,
   Select,
   SelectItem,
 } from '@heroui/react';
@@ -57,38 +61,59 @@ const parseInteger = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const toNumberInputValue = (value: string): number | undefined => {
+  if (value.trim() === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const toFormNumberString = (value: number): string => {
+  if (!Number.isFinite(value)) return '';
+  return value.toString();
+};
+
 const roundTo = (value: number, decimals = 2) => {
   const factor = 10 ** decimals;
   return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
-interface ModeToggleProps {
+interface ModeDropdownProps {
   mode: AmountMode;
   currencySymbol?: string;
+  ariaLabel: string;
   onChange: (mode: AmountMode) => void;
 }
 
-const ModeToggle = ({ mode, currencySymbol, onChange }: ModeToggleProps) => (
-  <ButtonGroup size="sm" className="min-w-fit">
-    <Button
-      size="sm"
-      variant={mode === '$' ? 'solid' : 'flat'}
-      color={mode === '$' ? 'primary' : 'default'}
-      onPress={() => onChange('$')}
-      className="min-w-8 px-2"
+const ModeDropdown = ({
+  mode,
+  currencySymbol,
+  ariaLabel,
+  onChange,
+}: ModeDropdownProps) => (
+  <Dropdown placement="bottom-end">
+    <DropdownTrigger>
+      <div
+        role="button"
+        tabIndex={0}
+        className="text-default-500 hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1 text-sm"
+      >
+        {mode === '$' ? (currencySymbol ?? '$') : '%'}
+        <span className="ml-1 text-xs">▾</span>
+      </div>
+    </DropdownTrigger>
+    <DropdownMenu
+      aria-label={ariaLabel}
+      selectionMode="single"
+      selectedKeys={[mode]}
+      onSelectionChange={(keys) => {
+        const selected = Array.from(keys)[0] as AmountMode | undefined;
+        if (selected) onChange(selected);
+      }}
     >
-      {currencySymbol}
-    </Button>
-    <Button
-      size="sm"
-      variant={mode === '%' ? 'solid' : 'flat'}
-      color={mode === '%' ? 'primary' : 'default'}
-      onPress={() => onChange('%')}
-      className="min-w-8 px-2"
-    >
-      %
-    </Button>
-  </ButtonGroup>
+      <DropdownItem key="$">{currencySymbol ?? '$'}</DropdownItem>
+      <DropdownItem key="%">%</DropdownItem>
+    </DropdownMenu>
+  </Dropdown>
 );
 
 export function ItemEditor({
@@ -321,30 +346,34 @@ export function ItemEditor({
             </button>
             {receiptExpanded && (
               <div className="space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="flat"
-                    onPress={() =>
-                      setReceiptZoom((z) => Math.max(0.5, z - 0.25))
-                    }
-                    aria-label="Zoom out"
-                  >
-                    −
-                  </Button>
-                  <span className="text-default-500 w-12 text-center text-xs">
-                    {Math.round(receiptZoom * 100)}%
-                  </span>
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="flat"
-                    onPress={() => setReceiptZoom((z) => Math.min(3, z + 0.25))}
-                    aria-label="Zoom in"
-                  >
-                    +
-                  </Button>
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="flat"
+                      onPress={() =>
+                        setReceiptZoom((z) => Math.max(0.5, z - 0.25))
+                      }
+                      aria-label="Zoom out"
+                    >
+                      −
+                    </Button>
+                    <span className="text-default-500 w-12 text-center text-xs">
+                      {Math.round(receiptZoom * 100)}%
+                    </span>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="flat"
+                      onPress={() =>
+                        setReceiptZoom((z) => Math.min(3, z + 0.25))
+                      }
+                      aria-label="Zoom in"
+                    >
+                      +
+                    </Button>
+                  </div>
                   {receiptZoom !== 1 && (
                     <Button
                       size="sm"
@@ -405,6 +434,7 @@ export function ItemEditor({
                         size="sm"
                         isInvalid={Boolean(errors.items?.[i]?.name)}
                         errorMessage={errors.items?.[i]?.name?.message}
+                        isClearable
                       />
                     )}
                   />
@@ -412,12 +442,14 @@ export function ItemEditor({
                     name={`items.${i}.amount`}
                     control={control}
                     render={({ field: f }) => (
-                      <Input
+                      <NumberInput
                         label="Amount"
                         type="number"
                         placeholder="0.00"
-                        value={f.value}
-                        onValueChange={f.onChange}
+                        value={toNumberInputValue(f.value)}
+                        onValueChange={(value) =>
+                          f.onChange(toFormNumberString(value))
+                        }
                         onBlur={f.onBlur}
                         startContent={
                           <span className="text-default-400 text-sm">
@@ -428,6 +460,9 @@ export function ItemEditor({
                         size="sm"
                         isInvalid={Boolean(errors.items?.[i]?.amount)}
                         errorMessage={errors.items?.[i]?.amount?.message}
+                        isWheelDisabled
+                        hideStepper
+                        isClearable
                       />
                     )}
                   />
@@ -435,17 +470,22 @@ export function ItemEditor({
                     name={`items.${i}.quantity`}
                     control={control}
                     render={({ field: f }) => (
-                      <Input
+                      <NumberInput
                         label="Qty"
                         type="number"
                         placeholder="1"
-                        value={f.value}
-                        onValueChange={f.onChange}
+                        value={toNumberInputValue(f.value)}
+                        onValueChange={(value) =>
+                          f.onChange(toFormNumberString(value))
+                        }
                         onBlur={f.onBlur}
                         className="w-full sm:col-span-2"
                         size="sm"
                         isInvalid={Boolean(errors.items?.[i]?.quantity)}
                         errorMessage={errors.items?.[i]?.quantity?.message}
+                        hideStepper
+                        isWheelDisabled
+                        isClearable
                       />
                     )}
                   />
@@ -486,15 +526,16 @@ export function ItemEditor({
                 name="tax"
                 control={control}
                 render={({ field: f }) => (
-                  <Input
+                  <NumberInput
                     label={
                       watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
                     }
                     type="number"
                     placeholder="0.00"
-                    value={f.value}
-                    onValueChange={f.onChange}
-                    onBlur={f.onBlur}
+                    value={toNumberInputValue(f.value)}
+                    onValueChange={(value) =>
+                      f.onChange(toFormNumberString(value))
+                    }
                     startContent={
                       <span className="text-default-400 text-sm">
                         {watchedTaxMode === '$' ? currencySymbol : '%'}
@@ -515,22 +556,31 @@ export function ItemEditor({
                           : undefined)
                     }
                     className="flex-1"
+                    endContent={
+                      <div
+                        className="flex items-center"
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <ModeDropdown
+                          mode={watchedTaxMode}
+                          currencySymbol={currencySymbol}
+                          ariaLabel="Tax mode"
+                          onChange={(mode) =>
+                            setValue('taxMode', mode, {
+                              shouldTouch: true,
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                      </div>
+                    }
+                    hideStepper
+                    isWheelDisabled
                   />
                 )}
               />
-              <div className="pt-6">
-                <ModeToggle
-                  mode={watchedTaxMode}
-                  currencySymbol={currencySymbol}
-                  onChange={(m) =>
-                    setValue('taxMode', m, {
-                      shouldTouch: true,
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
             </div>
 
             <div className="flex items-start gap-2">
@@ -538,7 +588,7 @@ export function ItemEditor({
                 name="tip"
                 control={control}
                 render={({ field: f }) => (
-                  <Input
+                  <NumberInput
                     label={
                       watchedTipMode === '%'
                         ? 'Service Charge/Tip (% of subtotal)'
@@ -547,9 +597,10 @@ export function ItemEditor({
                     type="number"
                     inputMode="decimal"
                     placeholder="0.00"
-                    value={f.value}
-                    onValueChange={f.onChange}
-                    onBlur={f.onBlur}
+                    value={toNumberInputValue(f.value)}
+                    onValueChange={(value) =>
+                      f.onChange(toFormNumberString(value))
+                    }
                     startContent={
                       <span className="text-default-400 text-sm">
                         {watchedTipMode === '$' ? currencySymbol : '%'}
@@ -570,22 +621,31 @@ export function ItemEditor({
                           : undefined)
                     }
                     className="flex-1"
+                    endContent={
+                      <div
+                        className="flex items-center"
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <ModeDropdown
+                          mode={watchedTipMode}
+                          currencySymbol={currencySymbol}
+                          ariaLabel="Tip mode"
+                          onChange={(mode) =>
+                            setValue('tipMode', mode, {
+                              shouldTouch: true,
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                      </div>
+                    }
+                    hideStepper
+                    isWheelDisabled
                   />
                 )}
               />
-              <div className="pt-6">
-                <ModeToggle
-                  mode={watchedTipMode}
-                  currencySymbol={currencySymbol}
-                  onChange={(m) =>
-                    setValue('tipMode', m, {
-                      shouldTouch: true,
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
             </div>
           </div>
 
