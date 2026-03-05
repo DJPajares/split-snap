@@ -65,6 +65,7 @@ export interface User {
   email: string;
   name: string;
   avatarUrl?: string | null;
+  loginAt?: string | null;
   createdAt: string;
 }
 
@@ -82,6 +83,7 @@ export interface CreateSessionPayload {
 
 export interface CreateSessionResponse extends Session {
   participantId?: string | null;
+  hostToken?: string | null;
 }
 
 export interface JoinSessionPayload {

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  addToast,
   Button,
   Link,
   Navbar as HeroNavbar,
@@ -80,6 +81,16 @@ export function Navbar() {
                 variant="flat"
                 onPress={() => {
                   logout();
+                  // Clear receipt image from sessionStorage
+                  try {
+                    sessionStorage.removeItem('receipt_image');
+                  } catch {
+                    // Ignore
+                  }
+                  addToast({
+                    title: 'You have been logged out',
+                    color: 'success',
+                  });
                   router.push('/');
                 }}
               >

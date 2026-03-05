@@ -10,8 +10,14 @@ import {
   Input,
   Spinner,
 } from '@heroui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  type JoinSessionFormData,
+  joinSessionSchema,
+} from '@split-snap/shared/schemas';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,7 +35,11 @@ export default function JoinPage({
   const { code } = use(params);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const [name, setName] = useState('');
+  const nameForm = useForm<JoinSessionFormData>({
+    resolver: zodResolver(joinSessionSchema),
+    defaultValues: { name: '' },
+    mode: 'onChange',
+  });
   const [joinState, setJoinState] = useState<JoinState>('idle');
   const [kickCooldownEnd, setKickCooldownEnd] = useState<string | null>(null);
   const [kickCountdown, setKickCountdown] = useState(0);
@@ -147,9 +157,8 @@ export default function JoinPage({
     [code, router, handleError],
   );
 
-  const handleJoin = async () => {
-    if (!name.trim()) return;
-    await joinSession(name.trim());
+  const handleJoin = async (data: JoinSessionFormData) => {
+    await joinSession(data.name);
   };
 
   // SSE subscription when pending — listen for approval/rejection
@@ -167,7 +176,10 @@ export default function JoinPage({
         if (user?.id) {
           return p.userId === user.id;
         }
-        return p.displayName.toLowerCase() === name.toLowerCase();
+        return (
+          p.displayName.toLowerCase() ===
+          nameForm.getValues('name').toLowerCase()
+        );
       });
 
       if (!isStillPending && approvedParticipant) {
@@ -331,32 +343,49 @@ export default function JoinPage({
         <Divider />
         <CardBody className="gap-4 px-6 pb-8">
           {!user && (
-            <Input
-              label="Your Name"
-              placeholder="e.g. DJ"
-              value={name}
-              onValueChange={setName}
-              size="lg"
-              autoFocus
-              onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-            />
+            <form onSubmit={nameForm.handleSubmit(handleJoin)}>
+              <div className="flex flex-col gap-4">
+                <Controller
+                  name="name"
+                  control={nameForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Your Name"
+                      placeholder="e.g. DJ"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      size="lg"
+                      autoFocus
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
+                />
+                <Button
+                  type="submit"
+                  color="primary"
+                  size="lg"
+                  className="font-semibold"
+                  isLoading={joinState === 'joining'}
+                  isDisabled={!nameForm.formState.isValid}
+                >
+                  Join & Start Picking
+                </Button>
+              </div>
+            </form>
           )}
-          <Button
-            color="primary"
-            size="lg"
-            className="font-semibold"
-            onPress={() => {
-              if (user) {
-                void joinSession(user.name, user.id);
-                return;
-              }
-              void handleJoin();
-            }}
-            isLoading={joinState === 'joining'}
-            isDisabled={user ? false : !name.trim()}
-          >
-            {user ? 'Join as Account' : 'Join & Start Picking'}
-          </Button>
+          {user && (
+            <Button
+              color="primary"
+              size="lg"
+              className="font-semibold"
+              onPress={() => void joinSession(user.name, user.id)}
+              isLoading={joinState === 'joining'}
+            >
+              Join as Account
+            </Button>
+          )}
           {autoJoinError && (
             <p className="text-danger text-center text-xs">{autoJoinError}</p>
           )}

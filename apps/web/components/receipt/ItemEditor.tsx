@@ -2,6 +2,7 @@
 
 import {
   Button,
+  ButtonGroup,
   Card,
   CardBody,
   CardHeader,
@@ -10,9 +11,16 @@ import {
   Select,
   SelectItem,
 } from '@heroui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
+import {
+  type AmountMode,
+  type ItemEditorFormData,
+  itemEditorSchema,
+} from '@split-snap/shared/schemas';
 import type { ScannedItem } from '@split-snap/shared/types';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 interface ItemEditorProps {
   initialItems: ScannedItem[];
@@ -35,18 +43,44 @@ interface ItemEditorProps {
   receiptImageUrl?: string | null;
 }
 
-type EditableItem = {
-  name: string;
-  amount: string;
-  quantity: string;
+const parseNumber = (value: string) => {
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 };
 
-type ItemField = keyof EditableItem;
-
-type ItemErrors = {
-  amount?: string;
-  quantity?: string;
+const parseInteger = (value: string) => {
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
 };
+
+interface ModeToggleProps {
+  mode: AmountMode;
+  currencySymbol?: string;
+  onChange: (mode: AmountMode) => void;
+}
+
+const ModeToggle = ({ mode, currencySymbol, onChange }: ModeToggleProps) => (
+  <ButtonGroup size="sm" className="min-w-fit">
+    <Button
+      size="sm"
+      variant={mode === '$' ? 'solid' : 'flat'}
+      color={mode === '$' ? 'primary' : 'default'}
+      onPress={() => onChange('$')}
+      className="min-w-8 px-2"
+    >
+      {currencySymbol}
+    </Button>
+    <Button
+      size="sm"
+      variant={mode === '%' ? 'solid' : 'flat'}
+      color={mode === '%' ? 'primary' : 'default'}
+      onPress={() => onChange('%')}
+      className="min-w-8 px-2"
+    >
+      %
+    </Button>
+  </ButtonGroup>
+);
 
 export function ItemEditor({
   initialItems,
@@ -59,9 +93,10 @@ export function ItemEditor({
   submitLabel = 'Create Session',
   receiptImageUrl,
 }: ItemEditorProps) {
-  const [currency, setCurrency] = useState(initialCurrency);
-  const currencySymbol = getCurrencySymbol(currency);
-  const [items, setItems] = useState<EditableItem[]>(
+  const [receiptExpanded, setReceiptExpanded] = useState(false);
+  const [receiptZoom, setReceiptZoom] = useState(1);
+
+  const defaultItems =
     initialItems.length > 0
       ? initialItems.map((item) => ({
           name: item.name,
@@ -74,151 +109,107 @@ export function ItemEditor({
               : '',
           quantity: item.quantity ? item.quantity.toString() : '1',
         }))
-      : [{ name: '', amount: '', quantity: '1' }],
-  );
-  const [tax, setTax] = useState(initialTax ? initialTax.toString() : '');
-  const [tip, setTip] = useState(initialTip ? initialTip.toString() : '');
-  const [itemErrors, setItemErrors] = useState<ItemErrors[]>(() =>
-    Array.from(
-      { length: initialItems.length > 0 ? initialItems.length : 1 },
-      () => ({}),
-    ),
-  );
-  const [taxError, setTaxError] = useState<string | undefined>();
-  const [tipError, setTipError] = useState<string | undefined>();
-  const [receiptExpanded, setReceiptExpanded] = useState(false);
-  const [receiptZoom, setReceiptZoom] = useState(1);
+      : [{ name: '', amount: '', quantity: '1' }];
 
-  const parseNumber = (value: string) => {
-    const parsed = parseFloat(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
+  const {
+    control,
+    handleSubmit: rhfHandleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<ItemEditorFormData>({
+    resolver: zodResolver(itemEditorSchema),
+    defaultValues: {
+      currency: initialCurrency,
+      items: defaultItems,
+      tax: initialTax ? initialTax.toString() : '',
+      tip: initialTip ? initialTip.toString() : '',
+      taxMode: '$',
+      tipMode: '$',
+    },
+  });
 
-  const parseInteger = (value: string) => {
-    const parsed = parseInt(value, 10);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'items',
+  });
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + parseNumber(item.amount),
-    0,
+  const watchedItems = useWatch({
+    control,
+    name: 'items',
+    defaultValue: defaultItems,
+  });
+  const watchedTax = useWatch({
+    control,
+    name: 'tax',
+    defaultValue: initialTax ? initialTax.toString() : '',
+  });
+  const watchedTip = useWatch({
+    control,
+    name: 'tip',
+    defaultValue: initialTip ? initialTip.toString() : '',
+  });
+  const watchedTaxMode = useWatch({
+    control,
+    name: 'taxMode',
+    defaultValue: '$',
+  });
+  const watchedTipMode = useWatch({
+    control,
+    name: 'tipMode',
+    defaultValue: '$',
+  });
+  const watchedCurrency = useWatch({
+    control,
+    name: 'currency',
+    defaultValue: initialCurrency,
+  });
+  const currencySymbol = getCurrencySymbol(watchedCurrency);
+
+  const subtotal = useMemo(
+    () => watchedItems.reduce((sum, item) => sum + parseNumber(item.amount), 0),
+    [watchedItems],
   );
-  const taxValue = parseNumber(tax);
-  const tipValue = parseNumber(tip);
+
+  const resolveAmount = useCallback(
+    (value: string, mode: AmountMode) => {
+      const num = parseNumber(value);
+      if (mode === '%') return (subtotal * num) / 100;
+      return num;
+    },
+    [subtotal],
+  );
+
+  const taxValue = resolveAmount(watchedTax, watchedTaxMode);
+  const tipValue = resolveAmount(watchedTip, watchedTipMode);
   const total = subtotal + taxValue + tipValue;
-  const isItemComplete = (item: EditableItem) =>
+
+  const isItemComplete = (item: {
+    name: string;
+    amount: string;
+    quantity: string;
+  }) =>
     Boolean(item.name.trim()) &&
     parseNumber(item.amount) > 0 &&
     parseInteger(item.quantity) >= 1;
 
-  const canAddItem = items.every(isItemComplete);
-
-  const updateItem = (index: number, field: ItemField, value: string) => {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
-    );
-
-    if (field === 'amount' || field === 'quantity') {
-      setItemErrors((prev) =>
-        prev.map((error, i) =>
-          i === index ? { ...error, [field]: undefined } : error,
-        ),
-      );
-    }
-  };
-
-  const validateItemField = (index: number, field: 'amount' | 'quantity') => {
-    const value = items[index]?.[field] ?? '';
-    let error: string | undefined;
-
-    if (field === 'amount') {
-      if (value.trim() === '') {
-        error = 'Amount is required.';
-      } else if (parseNumber(value) < 0) {
-        error = 'Amount cannot be negative.';
-      }
-    }
-
-    if (field === 'quantity') {
-      if (value.trim() === '' || parseInteger(value) < 1) {
-        error = 'Quantity must be at least 1.';
-      }
-    }
-
-    setItemErrors((prev) =>
-      prev.map((itemError, i) =>
-        i === index ? { ...itemError, [field]: error } : itemError,
-      ),
-    );
-
-    return !error;
-  };
-
-  const validateExtraAmount = (value: string, type: 'tax' | 'tip') => {
-    const nextError =
-      value.trim() !== '' && parseNumber(value) < 0
-        ? `${type === 'tax' ? 'Tax' : 'Service Charge/Tip'} cannot be negative.`
-        : undefined;
-
-    if (type === 'tax') {
-      setTaxError(nextError);
-    } else {
-      setTipError(nextError);
-    }
-
-    return !nextError;
-  };
+  const canAddItem = watchedItems.every(isItemComplete);
 
   const addItem = () => {
     if (!canAddItem) return;
-    setItems((prev) => [...prev, { name: '', amount: '', quantity: '1' }]);
-    setItemErrors((prev) => [...prev, {}]);
+    append({ name: '', amount: '', quantity: '1' });
   };
 
   const removeItem = (index: number) => {
-    if (items.length <= 1) return;
-    setItems((prev) => prev.filter((_, i) => i !== index));
-    setItemErrors((prev) => prev.filter((_, i) => i !== index));
+    if (fields.length <= 1) return;
+    remove(index);
   };
 
-  const handleSubmit = () => {
+  // Custom validation and submission
+  const onFormSubmit = (data: ItemEditorFormData) => {
+    // Validate items — at least one valid item required
     let hasError = false;
 
-    const nextItemErrors = items.map((item) => {
-      const amountValue = parseNumber(item.amount);
-      const quantityValue = parseInteger(item.quantity);
-
-      const rowErrors: ItemErrors = {};
-
-      if (item.name.trim()) {
-        if (item.amount.trim() === '') {
-          rowErrors.amount = 'Amount is required.';
-        } else if (amountValue < 0) {
-          rowErrors.amount = 'Amount cannot be negative.';
-        }
-
-        if (item.quantity.trim() === '' || quantityValue < 1) {
-          rowErrors.quantity = 'Quantity must be at least 1.';
-        }
-      }
-
-      if (rowErrors.amount || rowErrors.quantity) {
-        hasError = true;
-      }
-
-      return rowErrors;
-    });
-
-    setItemErrors(nextItemErrors);
-
-    const isTaxValid = validateExtraAmount(tax, 'tax');
-    const isTipValid = validateExtraAmount(tip, 'tip');
-
-    if (!isTaxValid || !isTipValid) {
-      hasError = true;
-    }
-
-    const validItems: ScannedItem[] = items
+    const validItems: ScannedItem[] = data.items
       .map((item) => ({
         name: item.name.trim(),
         quantity: parseInteger(item.quantity),
@@ -231,28 +222,57 @@ export function ItemEditor({
       }))
       .filter((item) => item.name && item.price > 0 && item.quantity >= 1);
 
+    // Validate each named item has valid amount/quantity
+    for (let i = 0; i < data.items.length; i++) {
+      const item = data.items[i];
+      if (item.name.trim()) {
+        if (item.amount.trim() === '' || parseNumber(item.amount) < 0) {
+          hasError = true;
+        }
+        if (item.quantity.trim() === '' || parseInteger(item.quantity) < 1) {
+          hasError = true;
+        }
+      }
+    }
+
+    // Validate tax/tip
+    const rawTax = parseNumber(data.tax);
+    const rawTip = parseNumber(data.tip);
+    if (rawTax < 0 || rawTip < 0) hasError = true;
+    if (data.taxMode === '%' && rawTax > 100) hasError = true;
+    if (data.tipMode === '%' && rawTip > 100) hasError = true;
+
     if (validItems.length === 0 || hasError) return;
+
+    const computedSubtotal = data.items.reduce(
+      (sum, item) => sum + parseNumber(item.amount),
+      0,
+    );
+    const finalTax = resolveAmount(data.tax, data.taxMode);
+    const finalTip = resolveAmount(data.tip, data.tipMode);
+    const finalTotal = computedSubtotal + finalTax + finalTip;
 
     onSubmit({
       items: validItems,
-      subtotal,
-      tax: taxValue,
-      tip: tipValue,
-      total,
-      currency,
+      subtotal: computedSubtotal,
+      tax: finalTax,
+      tip: finalTip,
+      total: finalTotal,
+      currency: data.currency,
     });
   };
 
   const canSubmit =
-    items.some(
+    watchedItems.some(
       (item) =>
         item.name.trim() &&
         parseNumber(item.amount) > 0 &&
         parseInteger(item.quantity) >= 1,
     ) &&
-    itemErrors.every((error) => !error.amount && !error.quantity) &&
-    !taxError &&
-    !tipError;
+    parseNumber(watchedTax) >= 0 &&
+    parseNumber(watchedTip) >= 0 &&
+    !(watchedTaxMode === '%' && parseNumber(watchedTax) > 100) &&
+    !(watchedTipMode === '%' && parseNumber(watchedTip) > 100);
 
   return (
     <Card>
@@ -261,21 +281,27 @@ export function ItemEditor({
         <p className="text-default-500 text-sm">
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
-        <Select
-          label="Currency"
-          selectedKeys={[currency]}
-          onSelectionChange={(keys) => {
-            const selected = Array.from(keys)[0] as string;
-            if (selected) setCurrency(selected);
-          }}
-          size="sm"
-        >
-          {CURRENCIES.map((c) => (
-            <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
-              {c.code} ({c.name})
-            </SelectItem>
-          ))}
-        </Select>
+        <Controller
+          name="currency"
+          control={control}
+          render={({ field }) => (
+            <Select
+              label="Currency"
+              selectedKeys={[field.value]}
+              onSelectionChange={(keys) => {
+                const selected = Array.from(keys)[0] as string;
+                if (selected) field.onChange(selected);
+              }}
+              size="sm"
+            >
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
+                  {c.code} ({c.name})
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        />
       </CardHeader>
       <Divider />
       <CardBody className="gap-5">
@@ -346,8 +372,8 @@ export function ItemEditor({
 
         {/* Items */}
         <div className="space-y-4">
-          {items.map((item, i) => (
-            <div key={i} className="space-y-1.5">
+          {fields.map((field, i) => (
+            <div key={field.id} className="space-y-1.5">
               <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
@@ -359,57 +385,76 @@ export function ItemEditor({
                     color="danger"
                     size="sm"
                     onPress={() => removeItem(i)}
-                    isDisabled={items.length <= 1}
+                    isDisabled={fields.length <= 1}
                     aria-label="Remove item"
                   >
                     ✕
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
-                  <Input
-                    label="Item"
-                    placeholder="e.g. Burger"
-                    value={item.name}
-                    onValueChange={(val) => updateItem(i, 'name', val)}
-                    className="w-full sm:col-span-7"
-                    size="sm"
+                  <Controller
+                    name={`items.${i}.name`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <Input
+                        label="Item"
+                        placeholder="e.g. Burger"
+                        value={f.value}
+                        onValueChange={f.onChange}
+                        className="w-full sm:col-span-7"
+                        size="sm"
+                      />
+                    )}
                   />
-                  <Input
-                    label="Amount"
-                    type="number"
-                    placeholder="0.00"
-                    value={item.amount}
-                    onValueChange={(val) => updateItem(i, 'amount', val)}
-                    onBlur={() => validateItemField(i, 'amount')}
-                    startContent={
-                      <span className="text-default-400 text-sm">
-                        {currencySymbol}
-                      </span>
-                    }
-                    className="w-full sm:col-span-3"
-                    size="sm"
-                    isInvalid={Boolean(itemErrors[i]?.amount)}
-                    errorMessage={itemErrors[i]?.amount}
+                  <Controller
+                    name={`items.${i}.amount`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <Input
+                        label="Amount"
+                        type="number"
+                        placeholder="0.00"
+                        value={f.value}
+                        onValueChange={f.onChange}
+                        onBlur={f.onBlur}
+                        startContent={
+                          <span className="text-default-400 text-sm">
+                            {currencySymbol}
+                          </span>
+                        }
+                        className="w-full sm:col-span-3"
+                        size="sm"
+                        isInvalid={Boolean(errors.items?.[i]?.amount)}
+                        errorMessage={errors.items?.[i]?.amount?.message}
+                      />
+                    )}
                   />
-                  <Input
-                    label="Qty"
-                    type="number"
-                    placeholder="1"
-                    value={item.quantity}
-                    onValueChange={(val) => updateItem(i, 'quantity', val)}
-                    onBlur={() => validateItemField(i, 'quantity')}
-                    className="w-full sm:col-span-2"
-                    size="sm"
-                    isInvalid={Boolean(itemErrors[i]?.quantity)}
-                    errorMessage={itemErrors[i]?.quantity}
+                  <Controller
+                    name={`items.${i}.quantity`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <Input
+                        label="Qty"
+                        type="number"
+                        placeholder="1"
+                        value={f.value}
+                        onValueChange={f.onChange}
+                        onBlur={f.onBlur}
+                        className="w-full sm:col-span-2"
+                        size="sm"
+                        isInvalid={Boolean(errors.items?.[i]?.quantity)}
+                        errorMessage={errors.items?.[i]?.quantity?.message}
+                      />
+                    )}
                   />
                 </div>
-                {parseInteger(item.quantity) > 1 &&
-                  parseNumber(item.amount) > 0 && (
+                {parseInteger(watchedItems[i]?.quantity ?? '0') > 1 &&
+                  parseNumber(watchedItems[i]?.amount ?? '0') > 0 && (
                     <p className="text-default-500 text-xs">
                       {currencySymbol}
                       {(
-                        parseNumber(item.amount) / parseInteger(item.quantity)
+                        parseNumber(watchedItems[i]?.amount ?? '0') /
+                        parseInteger(watchedItems[i]?.quantity ?? '1')
                       ).toFixed(2)}{' '}
                       each
                     </p>
@@ -434,46 +479,117 @@ export function ItemEditor({
         {/* Totals */}
         <div className="space-y-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Input
-              label="Tax"
-              type="number"
-              placeholder="0.00"
-              value={tax}
-              onValueChange={(val) => {
-                setTax(val);
-                setTaxError(undefined);
-              }}
-              onBlur={() => validateExtraAmount(tax, 'tax')}
-              startContent={
-                <span className="text-default-400 text-sm">
-                  {currencySymbol}
-                </span>
-              }
-              size="sm"
-              isInvalid={Boolean(taxError)}
-              errorMessage={taxError}
-            />
-            <Input
-              label="Service Charge/Tip"
-              type="number"
-              inputMode="decimal"
-              placeholder="0.00"
-              value={tip}
-              onValueChange={(val) => {
-                setTip(val);
-                setTipError(undefined);
-              }}
-              onBlur={() => validateExtraAmount(tip, 'tip')}
-              startContent={
-                <span className="text-default-400 text-sm">
-                  {currencySymbol}
-                </span>
-              }
-              size="sm"
-              isInvalid={Boolean(tipError)}
-              errorMessage={tipError}
-            />
+            <div className="flex items-start gap-2">
+              <Controller
+                name="tax"
+                control={control}
+                render={({ field: f }) => (
+                  <Input
+                    label={
+                      watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
+                    }
+                    type="number"
+                    placeholder="0.00"
+                    value={f.value}
+                    onValueChange={f.onChange}
+                    onBlur={f.onBlur}
+                    startContent={
+                      <span className="text-default-400 text-sm">
+                        {watchedTaxMode === '$' ? currencySymbol : '%'}
+                      </span>
+                    }
+                    size="sm"
+                    isInvalid={
+                      (f.value !== '' && parseNumber(f.value) < 0) ||
+                      (watchedTaxMode === '%' && parseNumber(f.value) > 100)
+                    }
+                    errorMessage={
+                      f.value !== '' && parseNumber(f.value) < 0
+                        ? 'Tax cannot be negative.'
+                        : watchedTaxMode === '%' && parseNumber(f.value) > 100
+                          ? 'Percentage cannot exceed 100%.'
+                          : undefined
+                    }
+                    className="flex-1"
+                  />
+                )}
+              />
+              <div className="pt-6">
+                <ModeToggle
+                  mode={watchedTaxMode}
+                  currencySymbol={currencySymbol}
+                  onChange={(m) => setValue('taxMode', m)}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Controller
+                name="tip"
+                control={control}
+                render={({ field: f }) => (
+                  <Input
+                    label={
+                      watchedTipMode === '%'
+                        ? 'Service Charge/Tip (% of subtotal)'
+                        : 'Service Charge/Tip'
+                    }
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={f.value}
+                    onValueChange={f.onChange}
+                    onBlur={f.onBlur}
+                    startContent={
+                      <span className="text-default-400 text-sm">
+                        {watchedTipMode === '$' ? currencySymbol : '%'}
+                      </span>
+                    }
+                    size="sm"
+                    isInvalid={
+                      (f.value !== '' && parseNumber(f.value) < 0) ||
+                      (watchedTipMode === '%' && parseNumber(f.value) > 100)
+                    }
+                    errorMessage={
+                      f.value !== '' && parseNumber(f.value) < 0
+                        ? 'Tip cannot be negative.'
+                        : watchedTipMode === '%' && parseNumber(f.value) > 100
+                          ? 'Percentage cannot exceed 100%.'
+                          : undefined
+                    }
+                    className="flex-1"
+                  />
+                )}
+              />
+              <div className="pt-6">
+                <ModeToggle
+                  mode={watchedTipMode}
+                  currencySymbol={currencySymbol}
+                  onChange={(m) => setValue('tipMode', m)}
+                />
+              </div>
+            </div>
           </div>
+
+          {/* Show resolved amounts when in percentage mode */}
+          {(watchedTaxMode === '%' || watchedTipMode === '%') &&
+            subtotal > 0 && (
+              <div className="text-default-400 flex gap-4 text-xs">
+                {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
+                  <span>
+                    Tax: {currencySymbol}
+                    {taxValue.toFixed(2)}
+                  </span>
+                )}
+                {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
+                  <span>
+                    Tip: {currencySymbol}
+                    {tipValue.toFixed(2)}
+                  </span>
+                )}
+              </div>
+            )}
+
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-default-500 text-xs">Total</p>
             <p className="text-lg font-bold">
@@ -487,7 +603,7 @@ export function ItemEditor({
           color="primary"
           size="lg"
           className="mt-2 font-semibold"
-          onPress={handleSubmit}
+          onPress={() => rhfHandleSubmit(onFormSubmit)()}
           isLoading={isSubmitting}
           isDisabled={!canSubmit}
         >

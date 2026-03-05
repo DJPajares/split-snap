@@ -22,7 +22,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ─── Helpers ───────────────────────────────────────────────
 
-function getHeaders(): HeadersInit {
+function getHeaders(sessionCode?: string): HeadersInit {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -33,6 +33,12 @@ function getHeaders(): HeadersInit {
 
     const participantToken = localStorage.getItem('participant_token');
     if (participantToken) headers['X-Participant-Token'] = participantToken;
+
+    // Send guest host token if available for the session
+    if (sessionCode) {
+      const hostToken = localStorage.getItem(`host_token_${sessionCode}`);
+      if (hostToken) headers['X-Host-Token'] = hostToken;
+    }
   }
 
   return headers;
@@ -43,8 +49,13 @@ async function request<T>(
   options?: RequestInit & { rawResponse?: boolean },
 ): Promise<T> {
   const { ...fetchOptions } = options ?? {};
+
+  // Extract session code from path for host token resolution (e.g. /sessions/ABC123/...)
+  const sessionCodeMatch = path.match(/\/sessions\/([A-Z0-9]+)/i);
+  const sessionCode = sessionCodeMatch?.[1]?.toUpperCase();
+
   const res = await fetch(`${API_URL}${path}`, {
-    headers: getHeaders(),
+    headers: getHeaders(sessionCode),
     ...fetchOptions,
   });
 

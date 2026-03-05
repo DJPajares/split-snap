@@ -22,7 +22,20 @@ export default function EditSessionPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError({ redirectTo: '/' });
+
+  // Load receipt image from sessionStorage if available
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('receipt_image');
+      if (stored) {
+        setReceiptImageUrl(stored);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
 
   // Fetch existing session
   useEffect(() => {
@@ -158,6 +171,7 @@ export default function EditSessionPage({
         onSubmit={handleSubmit}
         isSubmitting={submitting}
         submitLabel="Save Changes"
+        receiptImageUrl={receiptImageUrl}
       />
     </div>
   );

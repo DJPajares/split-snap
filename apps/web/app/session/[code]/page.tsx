@@ -132,19 +132,53 @@ export default function SessionPage({
   const hasUnclaimedItems = Boolean(
     session?.items.some((item) => item.claimedBy.length === 0),
   );
+  const hasHostToken =
+    typeof window !== 'undefined' &&
+    Boolean(localStorage.getItem(`host_token_${code}`));
   const isCreator = Boolean(
-    user &&
-    session?.createdBy &&
-    session.createdBy === user.id &&
-    currentParticipant?.userId === user.id &&
-    !currentParticipant.isAnonymous,
+    (user &&
+      session?.createdBy &&
+      session.createdBy === user.id &&
+      currentParticipant?.userId === user.id &&
+      !currentParticipant.isAnonymous) ||
+    hasHostToken,
   );
 
+  const [autoJoining, setAutoJoining] = useState(false);
+
   useEffect(() => {
-    if (!loading && !error && session && !participantId) {
-      router.replace(`/join/${code}`);
+    if (!loading && !error && session && !participantId && !autoJoining) {
+      const isLoggedInHost =
+        user && session.createdBy && session.createdBy === user.id;
+      const isGuestHost = Boolean(localStorage.getItem(`host_token_${code}`));
+
+      if (isLoggedInHost || isGuestHost) {
+        // Auto-rejoin as host instead of redirecting to join page
+        setAutoJoining(true);
+        const displayName = user?.name ?? 'Host';
+        api.sessions
+          .join(code, {
+            displayName,
+            userId: user?.id ?? null,
+          })
+          .then((res) => {
+            if (res.participantId) {
+              localStorage.setItem(`participant_${code}`, res.participantId);
+              setParticipantId(res.participantId);
+            } else {
+              router.replace(`/join/${code}`);
+            }
+          })
+          .catch(() => {
+            // If auto-join fails, fall back to join page
+            router.replace(`/join/${code}`);
+          })
+          .finally(() => setAutoJoining(false));
+      } else {
+        router.replace(`/join/${code}`);
+      }
     }
-  }, [loading, error, session, participantId, router, code]);
+  }, [loading, error, session, participantId, router, code, user, autoJoining]);
 
   const handleClaimToggle = useCallback(
     (itemId: string) => {
