@@ -492,7 +492,7 @@ export function ItemEditor({
                 </div>
                 {parseInteger(watchedItems[i]?.quantity ?? '0') > 1 &&
                   parseNumber(watchedItems[i]?.amount ?? '0') > 0 && (
-                    <p className="text-default-500 text-xs">
+                    <p className="text-default-500 flex justify-end text-xs">
                       {currencySymbol}
                       {(
                         parseNumber(watchedItems[i]?.amount ?? '0') /
@@ -521,152 +521,159 @@ export function ItemEditor({
         {/* Totals */}
         <div className="space-y-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="flex items-start gap-2">
-              <Controller
-                name="tax"
-                control={control}
-                render={({ field: f }) => (
-                  <NumberInput
-                    label={
-                      watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
-                    }
-                    type="number"
-                    placeholder="0.00"
-                    value={toNumberInputValue(f.value)}
-                    onValueChange={(value) =>
-                      f.onChange(toFormNumberString(value))
-                    }
-                    startContent={
-                      <span className="text-default-400 text-sm">
-                        {watchedTaxMode === '$' ? currencySymbol : '%'}
-                      </span>
-                    }
-                    size="sm"
-                    isInvalid={
-                      Boolean(errors.tax) ||
-                      (f.value !== '' && parseNumber(f.value) < 0) ||
-                      (watchedTaxMode === '%' && parseNumber(f.value) > 100)
-                    }
-                    errorMessage={
-                      errors.tax?.message ||
-                      (f.value !== '' && parseNumber(f.value) < 0
-                        ? 'Tax cannot be negative.'
-                        : watchedTaxMode === '%' && parseNumber(f.value) > 100
-                          ? 'Percentage cannot exceed 100%.'
-                          : undefined)
-                    }
-                    className="flex-1"
-                    endContent={
-                      <div
-                        className="flex items-center"
-                        onMouseDown={(event) => event.stopPropagation()}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <ModeDropdown
-                          mode={watchedTaxMode}
-                          currencySymbol={currencySymbol}
-                          ariaLabel="Tax mode"
-                          onChange={(mode) =>
-                            setValue('taxMode', mode, {
-                              shouldTouch: true,
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            })
-                          }
-                        />
-                      </div>
-                    }
-                    hideStepper
-                    isWheelDisabled
-                  />
-                )}
-              />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <Controller
+                  name="tax"
+                  control={control}
+                  render={({ field: f }) => (
+                    <NumberInput
+                      label={
+                        watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
+                      }
+                      type="number"
+                      placeholder="0.00"
+                      value={toNumberInputValue(f.value)}
+                      onValueChange={(value) =>
+                        f.onChange(toFormNumberString(value))
+                      }
+                      startContent={
+                        <span className="text-default-400 text-sm">
+                          {watchedTaxMode === '$' ? currencySymbol : '%'}
+                        </span>
+                      }
+                      size="sm"
+                      isInvalid={
+                        Boolean(errors.tax) ||
+                        (f.value !== '' && parseNumber(f.value) < 0) ||
+                        (watchedTaxMode === '%' && parseNumber(f.value) > 100)
+                      }
+                      errorMessage={
+                        errors.tax?.message ||
+                        (f.value !== '' && parseNumber(f.value) < 0
+                          ? 'Tax cannot be negative.'
+                          : watchedTaxMode === '%' && parseNumber(f.value) > 100
+                            ? 'Percentage cannot exceed 100%.'
+                            : undefined)
+                      }
+                      className="flex-1"
+                      endContent={
+                        <div
+                          className="flex items-center"
+                          onMouseDown={(event) => event.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <ModeDropdown
+                            mode={watchedTaxMode}
+                            currencySymbol={currencySymbol}
+                            ariaLabel="Tax mode"
+                            onChange={(mode) =>
+                              setValue('taxMode', mode, {
+                                shouldTouch: true,
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                        </div>
+                      }
+                      hideStepper
+                      isWheelDisabled
+                    />
+                  )}
+                />
+              </div>
+              {/* Show resolved tax amount when in percentage mode */}
+              {watchedTaxMode === '%' && subtotal > 0 && (
+                <div className="text-default-400 flex justify-end gap-4 text-xs">
+                  {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
+                    <span>
+                      {currencySymbol}
+                      {taxValue.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="flex items-start gap-2">
-              <Controller
-                name="tip"
-                control={control}
-                render={({ field: f }) => (
-                  <NumberInput
-                    label={
-                      watchedTipMode === '%'
-                        ? 'Service Charge/Tip (% of subtotal)'
-                        : 'Service Charge/Tip'
-                    }
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={toNumberInputValue(f.value)}
-                    onValueChange={(value) =>
-                      f.onChange(toFormNumberString(value))
-                    }
-                    startContent={
-                      <span className="text-default-400 text-sm">
-                        {watchedTipMode === '$' ? currencySymbol : '%'}
-                      </span>
-                    }
-                    size="sm"
-                    isInvalid={
-                      Boolean(errors.tip) ||
-                      (f.value !== '' && parseNumber(f.value) < 0) ||
-                      (watchedTipMode === '%' && parseNumber(f.value) > 100)
-                    }
-                    errorMessage={
-                      errors.tip?.message ||
-                      (f.value !== '' && parseNumber(f.value) < 0
-                        ? 'Tip cannot be negative.'
-                        : watchedTipMode === '%' && parseNumber(f.value) > 100
-                          ? 'Percentage cannot exceed 100%.'
-                          : undefined)
-                    }
-                    className="flex-1"
-                    endContent={
-                      <div
-                        className="flex items-center"
-                        onMouseDown={(event) => event.stopPropagation()}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <ModeDropdown
-                          mode={watchedTipMode}
-                          currencySymbol={currencySymbol}
-                          ariaLabel="Tip mode"
-                          onChange={(mode) =>
-                            setValue('tipMode', mode, {
-                              shouldTouch: true,
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            })
-                          }
-                        />
-                      </div>
-                    }
-                    hideStepper
-                    isWheelDisabled
-                  />
-                )}
-              />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <Controller
+                  name="tip"
+                  control={control}
+                  render={({ field: f }) => (
+                    <NumberInput
+                      label={
+                        watchedTipMode === '%'
+                          ? 'Service Charge/Tip (% of subtotal)'
+                          : 'Service Charge/Tip'
+                      }
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={toNumberInputValue(f.value)}
+                      onValueChange={(value) =>
+                        f.onChange(toFormNumberString(value))
+                      }
+                      startContent={
+                        <span className="text-default-400 text-sm">
+                          {watchedTipMode === '$' ? currencySymbol : '%'}
+                        </span>
+                      }
+                      size="sm"
+                      isInvalid={
+                        Boolean(errors.tip) ||
+                        (f.value !== '' && parseNumber(f.value) < 0) ||
+                        (watchedTipMode === '%' && parseNumber(f.value) > 100)
+                      }
+                      errorMessage={
+                        errors.tip?.message ||
+                        (f.value !== '' && parseNumber(f.value) < 0
+                          ? 'Tip cannot be negative.'
+                          : watchedTipMode === '%' && parseNumber(f.value) > 100
+                            ? 'Percentage cannot exceed 100%.'
+                            : undefined)
+                      }
+                      className="flex-1"
+                      endContent={
+                        <div
+                          className="flex items-center"
+                          onMouseDown={(event) => event.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <ModeDropdown
+                            mode={watchedTipMode}
+                            currencySymbol={currencySymbol}
+                            ariaLabel="Tip mode"
+                            onChange={(mode) =>
+                              setValue('tipMode', mode, {
+                                shouldTouch: true,
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                        </div>
+                      }
+                      hideStepper
+                      isWheelDisabled
+                    />
+                  )}
+                />
+              </div>
+              {/* Show resolved tip amount when in percentage mode */}
+              {watchedTipMode === '%' && subtotal > 0 && (
+                <div className="text-default-400 flex justify-end gap-4 text-xs">
+                  {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
+                    <span>
+                      {currencySymbol}
+                      {tipValue.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Show resolved amounts when in percentage mode */}
-          {(watchedTaxMode === '%' || watchedTipMode === '%') &&
-            subtotal > 0 && (
-              <div className="text-default-400 flex gap-4 text-xs">
-                {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
-                  <span>
-                    Tax: {currencySymbol}
-                    {taxValue.toFixed(2)}
-                  </span>
-                )}
-                {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
-                  <span>
-                    Tip: {currencySymbol}
-                    {tipValue.toFixed(2)}
-                  </span>
-                )}
-              </div>
-            )}
 
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-default-500 text-xs">Total</p>
