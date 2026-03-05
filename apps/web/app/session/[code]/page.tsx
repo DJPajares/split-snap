@@ -30,6 +30,7 @@ export default function SessionPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = use(params);
+  const normalizedCode = code.toUpperCase();
   const router = useRouter();
   const [initialSession, setInitialSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,10 +58,10 @@ export default function SessionPage({
   // Load initial session data and validate participant
   useEffect(() => {
     api.sessions
-      .get(code)
+      .get(normalizedCode)
       .then((s) => {
         setInitialSession(s);
-        const stored = localStorage.getItem(`participant_${code}`);
+        const stored = localStorage.getItem(`participant_${normalizedCode}`);
         if (stored) {
           // Validate the stored participant still exists in the session
           const participant = s.participants.find((p) => p.id === stored);
@@ -68,10 +69,13 @@ export default function SessionPage({
             // If user is logged in, only allow a participant explicitly linked to them.
             if (user) {
               if (!participant.userId) {
-                localStorage.setItem(`guest_participant_${code}`, stored);
-                localStorage.removeItem(`participant_${code}`);
+                localStorage.setItem(
+                  `guest_participant_${normalizedCode}`,
+                  stored,
+                );
+                localStorage.removeItem(`participant_${normalizedCode}`);
               } else if (participant.userId !== user.id) {
-                localStorage.removeItem(`participant_${code}`);
+                localStorage.removeItem(`participant_${normalizedCode}`);
               } else {
                 setParticipantId(stored);
               }
@@ -80,7 +84,7 @@ export default function SessionPage({
             }
           } else {
             // Participant was kicked — clear stale data
-            localStorage.removeItem(`participant_${code}`);
+            localStorage.removeItem(`participant_${normalizedCode}`);
           }
         }
       })
@@ -89,7 +93,7 @@ export default function SessionPage({
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code, handleError, user]);
+  }, [normalizedCode, handleError, user]);
 
   // Real-time updates via SSE
   const { session: liveSession, connected } = useSessionSSE({
@@ -104,6 +108,7 @@ export default function SessionPage({
         );
         if (!stillInSession) {
           localStorage.removeItem(`participant_${code}`);
+          localStorage.removeItem(`participant_${normalizedCode}`);
           setParticipantId(null);
           addToast({
             title: 'You were removed from this session',
@@ -121,6 +126,7 @@ export default function SessionPage({
         color: 'warning',
       });
       localStorage.removeItem(`participant_${code}`);
+      localStorage.removeItem(`participant_${normalizedCode}`);
       router.replace('/');
     },
   });
@@ -132,19 +138,67 @@ export default function SessionPage({
   const hasUnclaimedItems = Boolean(
     session?.items.some((item) => item.claimedBy.length === 0),
   );
+  const hasHostToken =
+    typeof window !== 'undefined' &&
+    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
   const isCreator = Boolean(
-    user &&
-    session?.createdBy &&
-    session.createdBy === user.id &&
-    currentParticipant?.userId === user.id &&
-    !currentParticipant.isAnonymous,
+    (user &&
+      session?.createdBy &&
+      session.createdBy === user.id &&
+      currentParticipant?.userId === user.id &&
+      !currentParticipant.isAnonymous) ||
+    hasHostToken,
   );
 
+  const [autoJoining, setAutoJoining] = useState(false);
+
   useEffect(() => {
-    if (!loading && !error && session && !participantId) {
-      router.replace(`/join/${code}`);
+    if (!loading && !error && session && !participantId && !autoJoining) {
+      const isLoggedInHost =
+        user && session.createdBy && session.createdBy === user.id;
+      const isGuestHost = Boolean(
+        localStorage.getItem(`host_token_${normalizedCode}`),
+      );
+
+      if (isLoggedInHost || isGuestHost) {
+        // Auto-rejoin as host instead of redirecting to join page
+        setAutoJoining(true);
+        const displayName = user?.name ?? 'Host';
+        api.sessions
+          .join(normalizedCode, {
+            displayName,
+            userId: user?.id ?? null,
+          })
+          .then((res) => {
+            if (res.participantId) {
+              localStorage.setItem(
+                `participant_${normalizedCode}`,
+                res.participantId,
+              );
+              setParticipantId(res.participantId);
+            } else {
+              router.replace(`/join/${normalizedCode}`);
+            }
+          })
+          .catch(() => {
+            // If auto-join fails, fall back to join page
+            router.replace(`/join/${normalizedCode}`);
+          })
+          .finally(() => setAutoJoining(false));
+      } else {
+        router.replace(`/join/${normalizedCode}`);
+      }
     }
-  }, [loading, error, session, participantId, router, code]);
+  }, [
+    loading,
+    error,
+    session,
+    participantId,
+    router,
+    normalizedCode,
+    user,
+    autoJoining,
+  ]);
 
   const handleClaimToggle = useCallback(
     (itemId: string) => {
@@ -159,7 +213,7 @@ export default function SessionPage({
         debounceTimers.current.delete(itemId);
         setClaimingItems((prev) => new Set(prev).add(itemId));
         try {
-          await api.sessions.claimItem(code, itemId, {
+          await api.sessions.claimItem(normalizedCode, itemId, {
             participantId,
             portion: 1,
           });
@@ -176,73 +230,79 @@ export default function SessionPage({
 
       debounceTimers.current.set(itemId, timer);
     },
-    [code, participantId, session, handleError],
+    [normalizedCode, participantId, session, handleError],
   );
 
   const handleSettle = useCallback(async () => {
     setSettleLoading(true);
     try {
-      await api.sessions.settle(code);
+      await api.sessions.settle(normalizedCode);
       addToast({ title: 'Session settled!', color: 'success' });
     } catch (err) {
       handleError(err, 'Failed to settle');
     } finally {
       setSettleLoading(false);
     }
-  }, [code, handleError]);
+  }, [normalizedCode, handleError]);
 
   const handleUnsettle = useCallback(async () => {
     setUnsettleLoading(true);
     try {
-      await api.sessions.unsettle(code);
+      await api.sessions.unsettle(normalizedCode);
       addToast({ title: 'Settlement undone', color: 'success' });
     } catch (err) {
       handleError(err, 'Failed to undo settlement');
     } finally {
       setUnsettleLoading(false);
     }
-  }, [code, handleError]);
+  }, [normalizedCode, handleError]);
 
   const handleKick = useCallback(
     async (targetParticipantId: string) => {
       try {
-        await api.sessions.kick(code, targetParticipantId);
+        await api.sessions.kick(normalizedCode, targetParticipantId);
         addToast({ title: 'Participant removed', color: 'success' });
       } catch (err) {
         handleError(err, 'Failed to remove participant');
       }
     },
-    [code, handleError],
+    [normalizedCode, handleError],
   );
 
   const handleApprove = useCallback(
     async (pendingParticipantId: string) => {
       try {
-        await api.sessions.approveParticipant(code, pendingParticipantId);
+        await api.sessions.approveParticipant(
+          normalizedCode,
+          pendingParticipantId,
+        );
         addToast({ title: 'Participant approved', color: 'success' });
       } catch (err) {
         handleError(err, 'Failed to approve participant');
       }
     },
-    [code, handleError],
+    [normalizedCode, handleError],
   );
 
   const handleReject = useCallback(
     async (pendingParticipantId: string) => {
       try {
-        await api.sessions.rejectParticipant(code, pendingParticipantId);
+        await api.sessions.rejectParticipant(
+          normalizedCode,
+          pendingParticipantId,
+        );
         addToast({ title: 'Participant rejected', color: 'success' });
       } catch (err) {
         handleError(err, 'Failed to reject participant');
       }
     },
-    [code, handleError],
+    [normalizedCode, handleError],
   );
 
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
     try {
-      await api.sessions.delete(code);
+      await api.sessions.delete(normalizedCode);
       addToast({ title: 'Session deleted', color: 'success' });
       router.push('/');
     } catch (err) {
@@ -250,7 +310,7 @@ export default function SessionPage({
     } finally {
       setDeleteLoading(false);
     }
-  }, [code, router, handleError]);
+  }, [normalizedCode, router, handleError]);
 
   if (loading) {
     return (

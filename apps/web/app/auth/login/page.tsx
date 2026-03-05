@@ -12,9 +12,17 @@ import {
   Tab,
   Tabs,
 } from '@heroui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { APP } from '@split-snap/shared/constants';
+import {
+  type LoginFormData,
+  loginSchema,
+  type RegisterFormData,
+  registerSchema,
+} from '@split-snap/shared/schemas';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,11 +33,18 @@ export default function LoginPage() {
   const { handleError } = useApiError();
 
   const [tab, setTab] = useState('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
+  });
 
   const getPostAuthRedirect = (): string => {
     const pendingCode = localStorage.getItem('pending_session_code');
@@ -55,11 +70,10 @@ export default function LoginPage() {
     return '/dashboard';
   };
 
-  const handleLogin = async () => {
-    if (!email || !password) return;
+  const handleLogin = async (data: LoginFormData) => {
     setLoading(true);
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       addToast({ title: 'Welcome back!', color: 'success' });
       router.push(getPostAuthRedirect());
     } catch (err) {
@@ -69,11 +83,10 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = async () => {
-    if (!email || !password || !name) return;
+  const handleRegister = async (data: RegisterFormData) => {
     setLoading(true);
     try {
-      await register(email, password, name);
+      await register(data.email, data.password, data.name);
       addToast({ title: 'Account created!', color: 'success' });
       router.push(getPostAuthRedirect());
     } catch (err) {
@@ -102,92 +115,157 @@ export default function LoginPage() {
             className="mb-4"
           >
             <Tab key="login" title="Log In">
-              <div className="mt-4 flex flex-col gap-4">
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onValueChange={setEmail}
+              <form
+                className="mt-4 flex flex-col gap-4"
+                onSubmit={loginForm.handleSubmit(handleLogin)}
+              >
+                <Controller
+                  name="email"
+                  control={loginForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
                 />
-                <Input
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••"
-                  value={password}
-                  onValueChange={setPassword}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  endContent={
-                    <Button
-                      size="sm"
-                      variant="light"
-                      onPress={() => setShowPassword((prev) => !prev)}
-                      aria-label={
-                        showPassword ? 'Hide password' : 'Show password'
+                <Controller
+                  name="password"
+                  control={loginForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                      endContent={
+                        <Button
+                          size="sm"
+                          variant="light"
+                          onPress={() => setShowPassword((prev) => !prev)}
+                          aria-label={
+                            showPassword ? 'Hide password' : 'Show password'
+                          }
+                        >
+                          {showPassword ? 'Hide' : 'Show'}
+                        </Button>
                       }
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </Button>
-                  }
+                    />
+                  )}
                 />
                 <Button
+                  type="submit"
                   color="primary"
                   size="lg"
                   className="font-semibold"
-                  onPress={handleLogin}
                   isLoading={loading}
-                  isDisabled={!email || !password}
+                  isDisabled={!loginForm.formState.isValid}
                 >
                   Log In
                 </Button>
-              </div>
+              </form>
             </Tab>
             <Tab key="register" title="Sign Up">
-              <div className="mt-4 flex flex-col gap-4">
-                <Input
-                  label="Name"
-                  placeholder="Your name"
-                  value={name}
-                  onValueChange={setName}
+              <form
+                className="mt-4 flex flex-col gap-4"
+                onSubmit={registerForm.handleSubmit(handleRegister)}
+              >
+                <Controller
+                  name="name"
+                  control={registerForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Name"
+                      placeholder="Your name"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
                 />
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onValueChange={setEmail}
+                <Controller
+                  name="email"
+                  control={registerForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
                 />
-                <Input
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onValueChange={setPassword}
-                  onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-                  endContent={
-                    <Button
-                      size="sm"
-                      variant="light"
-                      onPress={() => setShowPassword((prev) => !prev)}
-                      aria-label={
-                        showPassword ? 'Hide password' : 'Show password'
+                <Controller
+                  name="password"
+                  control={registerForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="At least 6 characters"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                      endContent={
+                        <Button
+                          size="sm"
+                          variant="light"
+                          onPress={() => setShowPassword((prev) => !prev)}
+                          aria-label={
+                            showPassword ? 'Hide password' : 'Show password'
+                          }
+                        >
+                          {showPassword ? 'Hide' : 'Show'}
+                        </Button>
                       }
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </Button>
-                  }
+                    />
+                  )}
+                />
+                <Controller
+                  name="confirmPassword"
+                  control={registerForm.control}
+                  render={({ field, fieldState }) => (
+                    <Input
+                      label="Confirm Password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Re-enter your password"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      isInvalid={Boolean(fieldState.error)}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  )}
                 />
                 <Button
+                  type="submit"
                   color="primary"
                   size="lg"
                   className="font-semibold"
-                  onPress={handleRegister}
                   isLoading={loading}
-                  isDisabled={!email || !password || !name}
+                  isDisabled={!registerForm.formState.isValid}
                 >
                   Create Account
                 </Button>
-              </div>
+              </form>
             </Tab>
           </Tabs>
 

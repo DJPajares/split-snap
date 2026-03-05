@@ -11,6 +11,11 @@ export interface AuthPayload {
   email: string;
 }
 
+export interface HostTokenPayload {
+  sessionCode: string;
+  role: 'host';
+}
+
 /**
  * Require a valid JWT token. Rejects with 401 if missing/invalid.
  */
@@ -52,8 +57,53 @@ export const optionalAuth = createMiddleware<{
 });
 
 /**
+ * Optional host token — sets hostSessionCode variable if X-Host-Token header is present and valid.
+ * This allows guest hosts (unauthenticated session creators) to perform host actions.
+ */
+export const optionalHostToken = createMiddleware<{
+  Variables: { auth?: AuthPayload; hostSessionCode?: string };
+}>(async (c, next) => {
+  // First, check for regular auth
+  const authHeader = c.req.header('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.slice(7);
+      const payload = jwt.verify(token, config.JWT_SECRET) as AuthPayload;
+      c.set('auth', payload);
+    } catch {
+      // Token invalid, proceed without auth
+    }
+  }
+
+  // Then, check for host token
+  const hostToken = c.req.header('X-Host-Token');
+  if (hostToken) {
+    try {
+      const payload = jwt.verify(
+        hostToken,
+        config.JWT_SECRET,
+      ) as HostTokenPayload;
+      if (payload.role === 'host' && payload.sessionCode) {
+        c.set('hostSessionCode', payload.sessionCode);
+      }
+    } catch {
+      // Host token invalid, proceed without it
+    }
+  }
+  await next();
+});
+
+/**
  * Generate a JWT token for a user.
  */
 export function generateToken(payload: AuthPayload): string {
+  return jwt.sign(payload, config.JWT_SECRET, { expiresIn: '7d' });
+}
+
+/**
+ * Generate a host token for a guest-created session.
+ */
+export function generateHostToken(sessionCode: string): string {
+  const payload: HostTokenPayload = { sessionCode, role: 'host' };
   return jwt.sign(payload, config.JWT_SECRET, { expiresIn: '7d' });
 }

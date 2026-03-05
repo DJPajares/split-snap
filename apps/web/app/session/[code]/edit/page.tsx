@@ -16,18 +16,35 @@ export default function EditSessionPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = use(params);
+  const normalizedCode = code.toUpperCase();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const { handleError } = useApiError({ redirectTo: '/' });
+  const hasHostToken =
+    typeof window !== 'undefined' &&
+    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
+
+  // Load receipt image from sessionStorage if available
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('receipt_image');
+      if (stored) {
+        setReceiptImageUrl(stored);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
 
   // Fetch existing session
   useEffect(() => {
     api.sessions
-      .get(code)
+      .get(normalizedCode)
       .then((s) => {
         setSession(s);
       })
@@ -36,22 +53,33 @@ export default function EditSessionPage({
         setError(err instanceof Error ? err.message : 'Session not found');
       })
       .finally(() => setLoading(false));
-  }, [code, handleError]);
+  }, [normalizedCode, handleError]);
 
   // Guard: redirect if not the creator
   useEffect(() => {
     if (!loading && !authLoading && session) {
-      if (!user || session.createdBy !== user.id) {
-        router.replace(`/session/${code}`);
+      const isLoggedInCreator = Boolean(user && session.createdBy === user.id);
+      if (!isLoggedInCreator && !hasHostToken) {
+        router.replace(`/session/${normalizedCode}`);
       }
     }
-  }, [loading, authLoading, session, user, router, code]);
+  }, [
+    loading,
+    authLoading,
+    session,
+    user,
+    hasHostToken,
+    router,
+    normalizedCode,
+  ]);
 
   const handleSubmit = async (data: {
     items: ScannedItem[];
     subtotal: number;
     tax: number;
     tip: number;
+    taxMode: '$' | '%';
+    tipMode: '$' | '%';
     total: number;
     currency: string;
   }) => {
@@ -77,17 +105,19 @@ export default function EditSessionPage({
         };
       });
 
-      await api.sessions.updateItems(code, {
+      await api.sessions.updateItems(normalizedCode, {
         items: itemsWithIds,
         subtotal: data.subtotal,
         tax: data.tax,
         tip: data.tip,
+        taxMode: data.taxMode,
+        tipMode: data.tipMode,
         total: data.total,
         currency: data.currency,
       });
 
       addToast({ title: 'Items updated!', color: 'success' });
-      router.push(`/session/${code}`);
+      router.push(`/session/${normalizedCode}`);
     } catch (err) {
       handleError(err, 'Failed to update items');
     } finally {
@@ -113,7 +143,7 @@ export default function EditSessionPage({
   }
 
   // Not the creator — will redirect via useEffect
-  if (!user || session.createdBy !== user.id) {
+  if ((!user || session.createdBy !== user.id) && !hasHostToken) {
     return null;
   }
 
@@ -137,7 +167,7 @@ export default function EditSessionPage({
           <Button
             variant="flat"
             size="sm"
-            onPress={() => router.push(`/session/${code}`)}
+            onPress={() => router.push(`/session/${normalizedCode}`)}
           >
             ← Back
           </Button>
@@ -153,11 +183,14 @@ export default function EditSessionPage({
         initialSubtotal={session.subtotal}
         initialTax={session.tax}
         initialTip={session.tip}
+        initialTaxMode={session.taxMode}
+        initialTipMode={session.tipMode}
         initialTotal={session.total}
         initialCurrency={session.currency}
         onSubmit={handleSubmit}
         isSubmitting={submitting}
         submitLabel="Save Changes"
+        receiptImageUrl={receiptImageUrl}
       />
     </div>
   );
