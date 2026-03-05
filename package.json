@@ -4,12 +4,13 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "start": "turbo start",
     "lint": "turbo lint",
     "lint:fix": "pnpm -r run lint:fix",
     "clean": "turbo clean",
     "test": "turbo test",
-    "prettier": "prettier --write .",
-    "prettier:check": "prettier --check .",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
     "lint-staged": "lint-staged",
     "prepare": "husky"
   },
