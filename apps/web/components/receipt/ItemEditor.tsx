@@ -11,6 +11,11 @@ import {
   DropdownMenu,
   DropdownTrigger,
   Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   NumberInput,
   Select,
   SelectItem,
@@ -132,6 +137,7 @@ export function ItemEditor({
 }: ItemEditorProps) {
   const [receiptExpanded, setReceiptExpanded] = useState(false);
   const [receiptZoom, setReceiptZoom] = useState(1);
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
 
   const defaultItems =
     initialItems.length > 0
@@ -262,6 +268,21 @@ export function ItemEditor({
   const removeItem = (index: number) => {
     if (fields.length <= 1) return;
     remove(index);
+  };
+
+  const requestRemoveItem = (index: number) => {
+    if (fields.length <= 1) return;
+    setRemoveIndex(index);
+  };
+
+  const cancelRemoveItem = () => {
+    setRemoveIndex(null);
+  };
+
+  const confirmRemoveItem = () => {
+    if (removeIndex === null) return;
+    removeItem(removeIndex);
+    setRemoveIndex(null);
   };
 
   // Custom validation and submission
@@ -412,7 +433,7 @@ export function ItemEditor({
                     variant="light"
                     color="danger"
                     size="sm"
-                    onPress={() => removeItem(i)}
+                    onPress={() => requestRemoveItem(i)}
                     isDisabled={fields.length <= 1}
                     aria-label="Remove item"
                   >
@@ -694,6 +715,42 @@ export function ItemEditor({
           {submitLabel}
         </Button>
       </CardBody>
+
+      <Modal isOpen={removeIndex !== null} onOpenChange={cancelRemoveItem}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Remove item?</ModalHeader>
+              <ModalBody>
+                <p>
+                  This will remove item{' '}
+                  {removeIndex !== null ? removeIndex + 1 : ''}. Continue?
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  variant="flat"
+                  onPress={() => {
+                    cancelRemoveItem();
+                    onClose();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="danger"
+                  onPress={() => {
+                    confirmRemoveItem();
+                    onClose();
+                  }}
+                >
+                  Remove
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </Card>
   );
 }
