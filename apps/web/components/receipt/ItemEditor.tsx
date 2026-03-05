@@ -758,8 +758,12 @@ export function ItemEditor({
               <ModalHeader>Remove item?</ModalHeader>
               <ModalBody>
                 <p>
-                  This will remove item{' '}
-                  {removeIndex !== null ? removeIndex + 1 : ''}. Continue?
+                  This will remove{' '}
+                  {removeIndex !== null
+                    ? watchedItems[removeIndex]?.name?.trim() ||
+                      `Item ${removeIndex + 1}`
+                    : ''}
+                  . Continue?
                 </p>
               </ModalBody>
               <ModalFooter>
