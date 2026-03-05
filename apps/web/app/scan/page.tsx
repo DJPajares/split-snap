@@ -79,6 +79,8 @@ function ScanPageInner() {
       subtotal: number;
       tax: number;
       tip: number;
+      taxMode: '$' | '%';
+      tipMode: '$' | '%';
       total: number;
       currency: string;
     }) => {
@@ -89,6 +91,8 @@ function ScanPageInner() {
           subtotal: data.subtotal,
           tax: data.tax,
           tip: data.tip,
+          taxMode: data.taxMode,
+          tipMode: data.tipMode,
           total: data.total,
           currency: data.currency,
         });

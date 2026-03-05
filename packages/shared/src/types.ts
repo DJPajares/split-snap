@@ -1,6 +1,7 @@
 // ─── Session ───────────────────────────────────────────────
 
 export type SessionStatus = 'draft' | 'active' | 'settled';
+export type AmountMode = '$' | '%';
 
 export interface SessionItem {
   id: string;
@@ -50,6 +51,8 @@ export interface Session {
   subtotal: number;
   tax: number;
   tip: number;
+  taxMode: AmountMode;
+  tipMode: AmountMode;
   total: number;
   currency: string;
   status: SessionStatus;
@@ -76,6 +79,8 @@ export interface CreateSessionPayload {
   subtotal: number;
   tax: number;
   tip: number;
+  taxMode?: AmountMode;
+  tipMode?: AmountMode;
   total: number;
   currency?: string;
   receiptImageUrl?: string | null;
@@ -96,6 +101,8 @@ export interface UpdateItemsPayload {
   subtotal: number;
   tax: number;
   tip: number;
+  taxMode?: AmountMode;
+  tipMode?: AmountMode;
   total: number;
   currency?: string;
 }

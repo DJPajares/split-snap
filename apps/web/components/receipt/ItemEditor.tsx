@@ -30,11 +30,15 @@ interface ItemEditorProps {
   initialTotal: number;
   initialPriceInterpretation?: 'unit' | 'line-total';
   initialCurrency?: string;
+  initialTaxMode?: AmountMode;
+  initialTipMode?: AmountMode;
   onSubmit: (data: {
     items: ScannedItem[];
     subtotal: number;
     tax: number;
     tip: number;
+    taxMode: AmountMode;
+    tipMode: AmountMode;
     total: number;
     currency: string;
   }) => void;
@@ -51,6 +55,11 @@ const parseNumber = (value: string) => {
 const parseInteger = (value: string) => {
   const parsed = parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const roundTo = (value: number, decimals = 2) => {
+  const factor = 10 ** decimals;
+  return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
 interface ModeToggleProps {
@@ -84,10 +93,13 @@ const ModeToggle = ({ mode, currencySymbol, onChange }: ModeToggleProps) => (
 
 export function ItemEditor({
   initialItems,
+  initialSubtotal,
   initialTax,
   initialTip,
   initialPriceInterpretation = 'unit',
   initialCurrency = 'SGD',
+  initialTaxMode = '$',
+  initialTipMode = '$',
   onSubmit,
   isSubmitting,
   submitLabel = 'Create Session',
@@ -111,6 +123,29 @@ export function ItemEditor({
         }))
       : [{ name: '', amount: '', quantity: '1' }];
 
+  const toInitialInputValue = (
+    amount: number,
+    mode: AmountMode,
+    baseSubtotal: number,
+  ) => {
+    if (!amount) return '0';
+    if (mode === '%' && baseSubtotal > 0) {
+      return roundTo((amount / baseSubtotal) * 100).toString();
+    }
+    return roundTo(amount).toString();
+  };
+
+  const initialTaxInput = toInitialInputValue(
+    initialTax,
+    initialTaxMode,
+    initialSubtotal,
+  );
+  const initialTipInput = toInitialInputValue(
+    initialTip,
+    initialTipMode,
+    initialSubtotal,
+  );
+
   const {
     control,
     handleSubmit: rhfHandleSubmit,
@@ -121,10 +156,10 @@ export function ItemEditor({
     defaultValues: {
       currency: initialCurrency,
       items: defaultItems,
-      tax: initialTax ? initialTax.toString() : '',
-      tip: initialTip ? initialTip.toString() : '',
-      taxMode: '$',
-      tipMode: '$',
+      tax: initialTaxInput,
+      tip: initialTipInput,
+      taxMode: initialTaxMode,
+      tipMode: initialTipMode,
     },
   });
 
@@ -141,22 +176,22 @@ export function ItemEditor({
   const watchedTax = useWatch({
     control,
     name: 'tax',
-    defaultValue: initialTax ? initialTax.toString() : '',
+    defaultValue: initialTaxInput,
   });
   const watchedTip = useWatch({
     control,
     name: 'tip',
-    defaultValue: initialTip ? initialTip.toString() : '',
+    defaultValue: initialTipInput,
   });
   const watchedTaxMode = useWatch({
     control,
     name: 'taxMode',
-    defaultValue: '$',
+    defaultValue: initialTaxMode,
   });
   const watchedTipMode = useWatch({
     control,
     name: 'tipMode',
-    defaultValue: '$',
+    defaultValue: initialTipMode,
   });
   const watchedCurrency = useWatch({
     control,
@@ -173,8 +208,8 @@ export function ItemEditor({
   const resolveAmount = useCallback(
     (value: string, mode: AmountMode) => {
       const num = parseNumber(value);
-      if (mode === '%') return (subtotal * num) / 100;
-      return num;
+      if (mode === '%') return roundTo((subtotal * num) / 100);
+      return roundTo(num);
     },
     [subtotal],
   );
@@ -206,9 +241,6 @@ export function ItemEditor({
 
   // Custom validation and submission
   const onFormSubmit = (data: ItemEditorFormData) => {
-    // Validate items — at least one valid item required
-    let hasError = false;
-
     const validItems: ScannedItem[] = data.items
       .map((item) => ({
         name: item.name.trim(),
@@ -219,30 +251,7 @@ export function ItemEditor({
         name: item.name,
         quantity: item.quantity,
         price: item.quantity > 0 ? item.amount / item.quantity : 0,
-      }))
-      .filter((item) => item.name && item.price > 0 && item.quantity >= 1);
-
-    // Validate each named item has valid amount/quantity
-    for (let i = 0; i < data.items.length; i++) {
-      const item = data.items[i];
-      if (item.name.trim()) {
-        if (item.amount.trim() === '' || parseNumber(item.amount) < 0) {
-          hasError = true;
-        }
-        if (item.quantity.trim() === '' || parseInteger(item.quantity) < 1) {
-          hasError = true;
-        }
-      }
-    }
-
-    // Validate tax/tip
-    const rawTax = parseNumber(data.tax);
-    const rawTip = parseNumber(data.tip);
-    if (rawTax < 0 || rawTip < 0) hasError = true;
-    if (data.taxMode === '%' && rawTax > 100) hasError = true;
-    if (data.tipMode === '%' && rawTip > 100) hasError = true;
-
-    if (validItems.length === 0 || hasError) return;
+      }));
 
     const computedSubtotal = data.items.reduce(
       (sum, item) => sum + parseNumber(item.amount),
@@ -257,22 +266,12 @@ export function ItemEditor({
       subtotal: computedSubtotal,
       tax: finalTax,
       tip: finalTip,
+      taxMode: data.taxMode,
+      tipMode: data.tipMode,
       total: finalTotal,
       currency: data.currency,
     });
   };
-
-  const canSubmit =
-    watchedItems.some(
-      (item) =>
-        item.name.trim() &&
-        parseNumber(item.amount) > 0 &&
-        parseInteger(item.quantity) >= 1,
-    ) &&
-    parseNumber(watchedTax) >= 0 &&
-    parseNumber(watchedTip) >= 0 &&
-    !(watchedTaxMode === '%' && parseNumber(watchedTax) > 100) &&
-    !(watchedTipMode === '%' && parseNumber(watchedTip) > 100);
 
   return (
     <Card>
@@ -401,8 +400,11 @@ export function ItemEditor({
                         placeholder="e.g. Burger"
                         value={f.value}
                         onValueChange={f.onChange}
+                        onBlur={f.onBlur}
                         className="w-full sm:col-span-7"
                         size="sm"
+                        isInvalid={Boolean(errors.items?.[i]?.name)}
+                        errorMessage={errors.items?.[i]?.name?.message}
                       />
                     )}
                   />
@@ -500,15 +502,17 @@ export function ItemEditor({
                     }
                     size="sm"
                     isInvalid={
+                      Boolean(errors.tax) ||
                       (f.value !== '' && parseNumber(f.value) < 0) ||
                       (watchedTaxMode === '%' && parseNumber(f.value) > 100)
                     }
                     errorMessage={
-                      f.value !== '' && parseNumber(f.value) < 0
+                      errors.tax?.message ||
+                      (f.value !== '' && parseNumber(f.value) < 0
                         ? 'Tax cannot be negative.'
                         : watchedTaxMode === '%' && parseNumber(f.value) > 100
                           ? 'Percentage cannot exceed 100%.'
-                          : undefined
+                          : undefined)
                     }
                     className="flex-1"
                   />
@@ -518,7 +522,13 @@ export function ItemEditor({
                 <ModeToggle
                   mode={watchedTaxMode}
                   currencySymbol={currencySymbol}
-                  onChange={(m) => setValue('taxMode', m)}
+                  onChange={(m) =>
+                    setValue('taxMode', m, {
+                      shouldTouch: true,
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
               </div>
             </div>
@@ -547,15 +557,17 @@ export function ItemEditor({
                     }
                     size="sm"
                     isInvalid={
+                      Boolean(errors.tip) ||
                       (f.value !== '' && parseNumber(f.value) < 0) ||
                       (watchedTipMode === '%' && parseNumber(f.value) > 100)
                     }
                     errorMessage={
-                      f.value !== '' && parseNumber(f.value) < 0
+                      errors.tip?.message ||
+                      (f.value !== '' && parseNumber(f.value) < 0
                         ? 'Tip cannot be negative.'
                         : watchedTipMode === '%' && parseNumber(f.value) > 100
                           ? 'Percentage cannot exceed 100%.'
-                          : undefined
+                          : undefined)
                     }
                     className="flex-1"
                   />
@@ -565,7 +577,13 @@ export function ItemEditor({
                 <ModeToggle
                   mode={watchedTipMode}
                   currencySymbol={currencySymbol}
-                  onChange={(m) => setValue('tipMode', m)}
+                  onChange={(m) =>
+                    setValue('tipMode', m, {
+                      shouldTouch: true,
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
               </div>
             </div>
@@ -605,7 +623,6 @@ export function ItemEditor({
           className="mt-2 font-semibold"
           onPress={() => rhfHandleSubmit(onFormSubmit)()}
           isLoading={isSubmitting}
-          isDisabled={!canSubmit}
         >
           {submitLabel}
         </Button>

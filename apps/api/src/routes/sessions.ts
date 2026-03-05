@@ -93,6 +93,8 @@ const createSessionSchema = z.object({
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
+  taxMode: z.enum(['$', '%']).default('$'),
+  tipMode: z.enum(['$', '%']).default('$'),
   total: z.number().min(0),
   currency: z.string().default('SGD'),
   receiptImageUrl: z.string().nullable().optional(),
@@ -137,6 +139,8 @@ sessionRoutes.post('/', optionalAuth, async (c) => {
     subtotal: parsed.data.subtotal,
     tax: parsed.data.tax,
     tip: parsed.data.tip,
+    taxMode: parsed.data.taxMode,
+    tipMode: parsed.data.tipMode,
     total: parsed.data.total,
     currency: parsed.data.currency,
     receiptImageUrl: parsed.data.receiptImageUrl ?? null,
@@ -506,6 +510,8 @@ const updateItemsSchema = z.object({
   subtotal: z.number().min(0),
   tax: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
+  taxMode: z.enum(['$', '%']).default('$'),
+  tipMode: z.enum(['$', '%']).default('$'),
   total: z.number().min(0),
   currency: z.string().optional(),
 });
@@ -587,6 +593,8 @@ sessionRoutes.put('/:code/items', optionalHostToken, async (c) => {
   session.subtotal = parsed.data.subtotal;
   session.tax = parsed.data.tax;
   session.tip = parsed.data.tip;
+  session.taxMode = parsed.data.taxMode;
+  session.tipMode = parsed.data.tipMode;
   session.total = parsed.data.total;
   if (parsed.data.currency) {
     session.currency = parsed.data.currency;
