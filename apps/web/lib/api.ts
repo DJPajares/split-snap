@@ -1,6 +1,7 @@
 import { API_ROUTES } from '@split-snap/shared/constants';
 import type {
   AuthResponse,
+  ClaimAllItemsPayload,
   ClaimItemPayload,
   CreateSessionPayload,
   CreateSessionResponse,
@@ -144,6 +145,12 @@ export const api = {
 
     claimItem: (code: string, itemId: string, data: ClaimItemPayload) =>
       request<Session>(API_ROUTES.SESSION_CLAIM(code, itemId), {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+
+    claimAllItems: (code: string, data: ClaimAllItemsPayload) =>
+      request<Session>(API_ROUTES.SESSION_CLAIM_ALL(code), {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),

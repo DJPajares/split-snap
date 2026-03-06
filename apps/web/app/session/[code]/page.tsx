@@ -233,6 +233,34 @@ export default function SessionPage({
     [normalizedCode, participantId, session, handleError],
   );
 
+  const handleClaimAllToggle = useCallback(
+    async (claimAll: boolean) => {
+      if (!participantId || !session) return;
+
+      // Clear pending single-item timers to avoid conflicting writes.
+      for (const timer of debounceTimers.current.values()) {
+        clearTimeout(timer);
+      }
+      debounceTimers.current.clear();
+
+      const allItemIds = session.items.map((item) => item.id);
+      setClaimingItems(new Set(allItemIds));
+
+      try {
+        await api.sessions.claimAllItems(normalizedCode, {
+          participantId,
+          claimAll,
+          portion: 1,
+        });
+      } catch (err) {
+        handleError(err, 'Failed to update claims');
+      } finally {
+        setClaimingItems(new Set());
+      }
+    },
+    [normalizedCode, participantId, session, handleError],
+  );
+
   const handleSettle = useCallback(async () => {
     setSettleLoading(true);
     try {
@@ -451,6 +479,7 @@ export default function SessionPage({
             session={session}
             participantId={participantId}
             onClaimToggle={handleClaimToggle}
+            onClaimAllToggle={handleClaimAllToggle}
             claimingItems={claimingItems}
           />
         </div>

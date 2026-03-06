@@ -17,6 +17,7 @@ export const API_ROUTES = {
   SESSION_JOIN: (code: string) => `/sessions/${code}/join`,
   SESSION_CLAIM: (code: string, itemId: string) =>
     `/sessions/${code}/items/${itemId}/claim`,
+  SESSION_CLAIM_ALL: (code: string) => `/sessions/${code}/items/claim`,
   SESSION_SETTLE: (code: string) => `/sessions/${code}/settle`,
   SESSION_UNSETTLE: (code: string) => `/sessions/${code}/unsettle`,
   SESSION_KICK: (code: string, participantId: string) =>

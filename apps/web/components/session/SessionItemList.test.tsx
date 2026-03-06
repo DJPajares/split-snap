@@ -20,9 +20,12 @@ interface MockChipProps {
 }
 
 interface MockCheckboxProps {
+  children?: React.ReactNode;
   isSelected?: boolean;
   isDisabled?: boolean;
+  isIndeterminate?: boolean;
   onChange?: () => void;
+  'aria-label'?: string;
 }
 
 vi.mock('@heroui/react', () => ({
@@ -33,14 +36,25 @@ vi.mock('@heroui/react', () => ({
   ),
   CardBody: ({ children }: MockCardBodyProps) => <div>{children}</div>,
   Chip: ({ children }: MockChipProps) => <span>{children}</span>,
-  Checkbox: ({ isSelected, isDisabled, onChange }: MockCheckboxProps) => (
-    <input
-      aria-label="claim-item"
-      type="checkbox"
-      checked={isSelected}
-      disabled={isDisabled}
-      onChange={onChange}
-    />
+  Checkbox: ({
+    children,
+    isSelected,
+    isDisabled,
+    isIndeterminate,
+    onChange,
+    'aria-label': ariaLabel,
+  }: MockCheckboxProps) => (
+    <label>
+      <input
+        aria-label={ariaLabel ?? 'claim-item'}
+        type="checkbox"
+        checked={isSelected}
+        disabled={isDisabled}
+        data-indeterminate={isIndeterminate ? 'true' : 'false'}
+        onChange={onChange}
+      />
+      {children}
+    </label>
   ),
 }));
 
@@ -82,6 +96,7 @@ describe('SessionItemList', () => {
         session={baseSession}
         participantId="p1"
         onClaimToggle={onClaimToggle}
+        onClaimAllToggle={vi.fn()}
       />,
     );
 
@@ -99,11 +114,51 @@ describe('SessionItemList', () => {
         session={{ ...baseSession, status: 'settled' }}
         participantId="p1"
         onClaimToggle={onClaimToggle}
+        onClaimAllToggle={vi.fn()}
       />,
     );
 
-    await user.click(screen.getByLabelText('claim-item'));
+    await user.click(screen.getByLabelText('claim-item-item-1'));
 
+    expect(onClaimToggle).not.toHaveBeenCalled();
+  });
+
+  it('calls onClaimAllToggle once when selecting claim all', async () => {
+    const user = userEvent.setup();
+    const onClaimToggle = vi.fn();
+    const onClaimAllToggle = vi.fn();
+
+    render(
+      <SessionItemList
+        session={{
+          ...baseSession,
+          items: [
+            {
+              id: 'item-1',
+              name: 'Burger',
+              price: 10,
+              quantity: 1,
+              claimedBy: [],
+            },
+            {
+              id: 'item-2',
+              name: 'Fries',
+              price: 5,
+              quantity: 1,
+              claimedBy: [{ participantId: 'p1', displayName: 'Pat' }],
+            },
+          ],
+        }}
+        participantId="p1"
+        onClaimToggle={onClaimToggle}
+        onClaimAllToggle={onClaimAllToggle}
+      />,
+    );
+
+    await user.click(screen.getByLabelText('claim-all-items'));
+
+    expect(onClaimAllToggle).toHaveBeenCalledTimes(1);
+    expect(onClaimAllToggle).toHaveBeenCalledWith(true);
     expect(onClaimToggle).not.toHaveBeenCalled();
   });
 });
