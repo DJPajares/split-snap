@@ -1,17 +1,20 @@
 # dependencies
-node_modules/
+**/node_modules/
 .pnpm-store/
 
 # build outputs
-dist/
-.next/
-out/
-.turbo/
+**/dist/
+**/.next/
+**/out/
+**/.turbo/
 
 # env
 .env
 .env.local
 .env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
 
 # IDE
 .vscode/
@@ -30,9 +33,15 @@ npm-debug.log*
 pnpm-debug.log*
 
 # test
-coverage/
+**/coverage/
+
+# vercel
 .vercel
-.env*.local
+**/.vercel
 
 # tesseract.js trained data files
 *.traineddata
+
+# typescript
+*.tsbuildinfo
+**/next-env.d.ts
