@@ -8,25 +8,25 @@
     "build": "tsc",
     "start": "node --env-file=../../.env dist/dev.js",
     "start:prod": "node dist/dev.js",
+    "clean": "rm -rf dist .turbo node_modules",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "clean": "rm -rf dist"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@google/genai": "^1.43.0",
-    "@hono/node-server": "^1.19.9",
+    "@google/genai": "^1.44.0",
+    "@hono/node-server": "^1.19.11",
     "@split-snap/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
-    "hono": "^4.12.3",
+    "hono": "^4.12.5",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.3",
-    "openai": "^6.25.0",
+    "mongoose": "^9.2.4",
+    "openai": "^6.27.0",
     "tesseract.js": "^7.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.19.13",
+    "@types/node": "^25.3.5",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^9.39.3",

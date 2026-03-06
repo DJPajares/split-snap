@@ -21,7 +21,7 @@
     "dev": "tsc --watch",
     "build": "tsc",
     "start": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist .turbo node_modules"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
