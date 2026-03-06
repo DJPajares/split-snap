@@ -433,6 +433,12 @@ const claimSchema = z.object({
   portion: z.number().min(0).max(1).default(1),
 });
 
+const claimAllSchema = z.object({
+  participantId: z.string(),
+  claimAll: z.boolean(),
+  portion: z.number().min(0).max(1).default(1),
+});
+
 sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
   const code = c.req.param('code').toUpperCase();
   const itemId = c.req.param('itemId');
@@ -492,6 +498,70 @@ sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
 
   const serialized = serializeSession(session);
   sseManager.broadcast(code, eventType, serialized);
+
+  return c.json(serialized);
+});
+
+sessionRoutes.patch('/:code/items/claim', async (c) => {
+  const code = c.req.param('code').toUpperCase();
+  const body = await c.req.json();
+  const parsed = claimAllSchema.safeParse(body);
+  if (!parsed.success) {
+    throw badRequest(
+      ErrorCode.VALIDATION_FAILED,
+      'Validation failed',
+      parsed.error.flatten(),
+    );
+  }
+
+  const session = await SessionModel.findOne({ code });
+  if (!session) {
+    throw notFound(ErrorCode.SESSION_NOT_FOUND);
+  }
+
+  if (session.status === 'settled') {
+    throw badRequest(ErrorCode.SESSION_SETTLED);
+  }
+
+  const participant = session.participants.id(parsed.data.participantId);
+  if (!participant) {
+    throw notFound(ErrorCode.PARTICIPANT_NOT_FOUND);
+  }
+
+  const { claimAll, participantId, portion } = parsed.data;
+  let changed = false;
+
+  for (const item of session.items) {
+    const existingClaimIndex = item.claimedBy.findIndex(
+      (claim: { participantId: string }) =>
+        claim.participantId === participantId,
+    );
+
+    if (claimAll) {
+      if (existingClaimIndex >= 0) continue;
+      item.claimedBy.push({
+        participantId,
+        displayName: participant.displayName,
+        portion,
+      });
+      changed = true;
+      continue;
+    }
+
+    if (existingClaimIndex >= 0) {
+      item.claimedBy.splice(existingClaimIndex, 1);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    await session.save();
+  }
+
+  const serialized = serializeSession(session);
+  if (changed) {
+    sseManager.broadcast(code, 'items:updated', serialized);
+  }
 
   return c.json(serialized);
 });

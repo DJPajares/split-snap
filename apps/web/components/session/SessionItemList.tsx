@@ -8,6 +8,7 @@ interface SessionItemListProps {
   session: Session;
   participantId: string | null;
   onClaimToggle: (itemId: string) => void;
+  onClaimAllToggle: (claimAll: boolean) => void;
   claimingItems?: Set<string>;
 }
 
@@ -15,21 +16,59 @@ export function SessionItemList({
   session,
   participantId,
   onClaimToggle,
+  onClaimAllToggle,
   claimingItems = new Set(),
 }: SessionItemListProps) {
   const isSettled = session.status === 'settled';
+
+  const isClaimedByParticipant = (item: Session['items'][number]) =>
+    participantId
+      ? item.claimedBy.some((claim) => claim.participantId === participantId)
+      : false;
+
+  const allClaimed =
+    !!participantId &&
+    session.items.length > 0 &&
+    session.items.every((item) => isClaimedByParticipant(item));
+
+  const someClaimed =
+    !!participantId &&
+    session.items.some((item) => isClaimedByParticipant(item));
+
+  const allItemsLoading =
+    session.items.length > 0 &&
+    session.items.every((item) => claimingItems.has(item.id));
 
   const handleClaimToggle = (itemId: string) => {
     if (isSettled || !participantId) return;
     onClaimToggle(itemId);
   };
 
+  const handleToggleAll = () => {
+    if (isSettled || !participantId) return;
+    onClaimAllToggle(!allClaimed);
+  };
+
   return (
     <div className="space-y-2">
+      {participantId && session.items.length > 0 && (
+        <div className="px-1">
+          <Checkbox
+            aria-label="claim-all-items"
+            isSelected={allClaimed}
+            isIndeterminate={!allClaimed && someClaimed}
+            isDisabled={isSettled || allItemsLoading}
+            onChange={handleToggleAll}
+            size="sm"
+            color="primary"
+          >
+            {allClaimed ? 'Unclaim all' : 'Claim all'}
+          </Checkbox>
+        </div>
+      )}
+
       {session.items.map((item) => {
-        const isClaimed = participantId
-          ? item.claimedBy.some((c) => c.participantId === participantId)
-          : false;
+        const isClaimed = isClaimedByParticipant(item);
         const totalClaimers = item.claimedBy.length;
         const itemTotal = item.price * item.quantity;
         const isLoading = claimingItems.has(item.id);
@@ -50,8 +89,9 @@ export function SessionItemList({
             <CardBody className="flex flex-row items-center gap-3 p-3">
               {participantId && (
                 <Checkbox
+                  aria-label={`claim-item-${item.id}`}
                   isSelected={isClaimed}
-                  isDisabled={isSettled}
+                  isDisabled={isSettled || isLoading}
                   onChange={() => handleClaimToggle(item.id)}
                   size="lg"
                   color="primary"

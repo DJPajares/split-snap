@@ -112,6 +112,12 @@ export interface ClaimItemPayload {
   portion?: number; // defaults to 1
 }
 
+export interface ClaimAllItemsPayload {
+  participantId: string;
+  claimAll: boolean;
+  portion?: number; // defaults to 1
+}
+
 export interface UpgradeParticipantPayload {
   userId: string;
   displayName: string;
