@@ -1,10 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { Hono } from 'hono';
-import { z } from 'zod';
 
 import { ErrorCode } from '@split-snap/shared/errors';
 
 import { badRequest, conflict, notFound, unauthorized } from '../lib/errors.js';
+import { loginSchema, registerSchema } from '../lib/schemas.js';
 import type { AuthPayload } from '../middleware/auth.js';
 import { generateToken, requireAuth } from '../middleware/auth.js';
 import { UserModel } from '../models/index.js';
@@ -12,12 +12,6 @@ import { UserModel } from '../models/index.js';
 export const authRoutes = new Hono();
 
 // ─── Register ──────────────────────────────────────────────
-
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  name: z.string().min(1).max(50),
-});
 
 authRoutes.post('/register', async (c) => {
   const body = await c.req.json();
@@ -61,11 +55,6 @@ authRoutes.post('/register', async (c) => {
 });
 
 // ─── Login ─────────────────────────────────────────────────
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
 
 authRoutes.post('/login', async (c) => {
   const body = await c.req.json();
