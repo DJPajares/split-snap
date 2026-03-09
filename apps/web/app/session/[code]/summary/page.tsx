@@ -1,7 +1,15 @@
 'use client';
 
-import { Button, Card, CardBody, Chip, Spinner } from '@heroui/react';
-import { formatCurrency } from '@split-snap/shared/currency';
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Select,
+  SelectItem,
+  Spinner,
+} from '@heroui/react';
+import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
@@ -61,6 +69,19 @@ export default function SummaryPage({
         >
           ← Back to Session
         </Button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span>Convert exchange rate to:</span>
+        <Select
+          className="w-24"
+          aria-label="convert currency to"
+          defaultSelectedKeys={[`${session.currency}`]}
+        >
+          {CURRENCIES.map((currency) => (
+            <SelectItem key={currency.code}>{currency.code}</SelectItem>
+          ))}
+        </Select>
       </div>
 
       {unclaimedItems.length > 0 && (
