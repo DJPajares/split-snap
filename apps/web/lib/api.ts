@@ -223,4 +223,10 @@ export const api = {
 
     eventsUrl: (code: string) => `${API_URL}${API_ROUTES.SESSION_EVENTS(code)}`,
   },
+
+  // ─── Exchange Rates ──────────────────────────────────────────
+  exchangeRates: {
+    get: () =>
+      request<{ [currency: string]: number }>(API_ROUTES.EXCHANGE_RATES),
+  },
 };

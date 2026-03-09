@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  addToast,
   Button,
   Card,
   CardBody,
@@ -13,7 +14,7 @@ import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 
 import PersonSummaryCard from '@/components/shared/PersonSummaryCard';
 import { useApiError } from '@/hooks/useApiError';
@@ -30,6 +31,11 @@ export default function SummaryPage({
   const [loading, setLoading] = useState(true);
   const { handleError } = useApiError({ redirectTo: '/' });
 
+  const summaries = useMemo(
+    () => (session ? calculateSummaries(session) : []),
+    [session],
+  );
+
   useEffect(() => {
     api.sessions
       .get(code)
@@ -37,6 +43,51 @@ export default function SummaryPage({
       .catch((err) => handleError(err, 'Session error'))
       .finally(() => setLoading(false));
   }, [code, handleError]);
+
+  const handleConvertExchangeRates = async (currency: string) => {
+    if (!session) return;
+
+    const rates = sessionStorage.getItem('exchange_rates');
+
+    if (!rates) {
+      addToast({
+        title: 'Exchange rates not available',
+        description:
+          'Unable to fetch exchange rates. Please try again later or refresh the page.',
+        color: 'danger',
+      });
+      return;
+    }
+
+    const parsedRates = JSON.parse(rates);
+    const rate = parsedRates[currency];
+
+    if (!rate) {
+      addToast({
+        title: 'Currency not supported',
+        description: `Exchange rate for ${currency} is not available.`,
+        color: 'danger',
+      });
+      return;
+    }
+
+    const baseCurrency = session.currency;
+    const conversionRate = rate / parsedRates[baseCurrency];
+
+    const convertedSession = {
+      ...session,
+      items: session.items.map((item) => ({
+        ...item,
+        price: item.price * conversionRate,
+      })),
+      tip: session.tip * conversionRate,
+      tax: session.tax * conversionRate,
+      total: session.total * conversionRate,
+      currency,
+    };
+
+    setSession(convertedSession);
+  };
 
   if (loading) {
     return (
@@ -48,7 +99,7 @@ export default function SummaryPage({
 
   if (!session) return null;
 
-  const summaries = calculateSummaries(session);
+  // const summaries = calculateSummaries(session);
   const unclaimedItems = session.items.filter(
     (item) => item.claimedBy.length === 0,
   );
@@ -71,12 +122,13 @@ export default function SummaryPage({
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span>Convert exchange rate to:</span>
+      <div className="flex items-center justify-end gap-2">
+        <span className="text-default-500">Convert currency to:</span>
         <Select
           className="w-24"
           aria-label="convert currency to"
           defaultSelectedKeys={[`${session.currency}`]}
+          onChange={(e) => handleConvertExchangeRates(e.target.value)}
         >
           {CURRENCIES.map((currency) => (
             <SelectItem key={currency.code}>{currency.code}</SelectItem>
