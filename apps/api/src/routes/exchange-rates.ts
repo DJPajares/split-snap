@@ -3,9 +3,9 @@ import { Hono } from 'hono';
 import { ErrorCode } from '@split-snap/shared/errors';
 import { filterRates } from '@split-snap/shared/utilities';
 
-import { badRequest, internal } from '../lib/errors';
-import { exchangeRatesSchema } from '../lib/schemas';
-import { ExchangeRateModel } from '../models/exchange-rate';
+import { badRequest, internal } from '../lib/errors.js';
+import { exchangeRatesSchema } from '../lib/schemas.js';
+import { ExchangeRateModel } from '../models/exchange-rate.js';
 
 export const exchangeRateRoutes = new Hono();
 
