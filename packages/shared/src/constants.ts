@@ -36,6 +36,7 @@ export const API_ROUTES = {
   AUTH_REGISTER: '/auth/register',
   AUTH_LOGIN: '/auth/login',
   AUTH_ME: '/auth/me',
+  EXCHANGE_RATES: '/exchange-rates',
 } as const;
 
 export const APP = {

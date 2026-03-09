@@ -9,6 +9,7 @@ import { connectDB } from './lib/db.js';
 import { AppError, badRequest, internal } from './lib/errors.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { authRoutes } from './routes/auth.js';
+import { exchangeRateRoutes } from './routes/exchange-rates.js';
 import { receiptRoutes } from './routes/receipts.js';
 import { sessionRoutes } from './routes/sessions.js';
 import { scanReceiptTest } from './services/receipt-scanner.js';
@@ -107,6 +108,7 @@ app.post('/tesseract-upload-test', async (c) => {
 app.route('/auth', authRoutes);
 app.route('/receipts', receiptRoutes);
 app.route('/sessions', sessionRoutes);
+app.route('/exchange-rates', exchangeRateRoutes);
 
 app.notFound((c) => {
   const err = new AppError(ErrorCode.NOT_FOUND, 404);

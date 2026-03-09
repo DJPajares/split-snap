@@ -2,13 +2,22 @@ import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { z } from 'zod';
 
 import { KICK_COOLDOWN_MS } from '@split-snap/shared/constants';
 import { ErrorCode } from '@split-snap/shared/errors';
 
 import { config } from '../lib/config.js';
 import { badRequest, forbidden, internal, notFound } from '../lib/errors.js';
+import {
+  claimAllSchema,
+  claimSchema,
+  createSessionSchema,
+  joinSchema,
+  mergeSchema,
+  settingsSchema,
+  updateItemsSchema,
+  upgradeSchema,
+} from '../lib/schemas.js';
 import { serializeSession } from '../lib/serialize.js';
 import { generateSessionCode } from '../lib/utils.js';
 import type { AuthPayload } from '../middleware/auth.js';
@@ -81,24 +90,6 @@ sessionRoutes.get('/', requireAuth, async (c) => {
 });
 
 // ─── Create session ────────────────────────────────────────
-
-const createSessionSchema = z.object({
-  items: z.array(
-    z.object({
-      name: z.string().min(1),
-      price: z.number().min(0),
-      quantity: z.number().int().min(1).default(1),
-    }),
-  ),
-  subtotal: z.number().min(0),
-  tax: z.number().min(0).default(0),
-  tip: z.number().min(0).default(0),
-  taxMode: z.enum(['$', '%']).default('$'),
-  tipMode: z.enum(['$', '%']).default('$'),
-  total: z.number().min(0),
-  currency: z.string().default('SGD'),
-  receiptImageUrl: z.string().nullable().optional(),
-});
 
 sessionRoutes.post('/', optionalAuth, async (c) => {
   const body = await c.req.json();
@@ -188,11 +179,6 @@ sessionRoutes.get('/:code', async (c) => {
 });
 
 // ─── Join session ──────────────────────────────────────────
-
-const joinSchema = z.object({
-  displayName: z.string().min(1).max(30),
-  userId: z.string().nullable().optional(),
-});
 
 sessionRoutes.post('/:code/join', async (c) => {
   const code = c.req.param('code').toUpperCase();
@@ -428,17 +414,6 @@ sessionRoutes.post('/:code/join', async (c) => {
 
 // ─── Claim / unclaim item ──────────────────────────────────
 
-const claimSchema = z.object({
-  participantId: z.string(),
-  portion: z.number().min(0).max(1).default(1),
-});
-
-const claimAllSchema = z.object({
-  participantId: z.string(),
-  claimAll: z.boolean(),
-  portion: z.number().min(0).max(1).default(1),
-});
-
 sessionRoutes.patch('/:code/items/:itemId/claim', async (c) => {
   const code = c.req.param('code').toUpperCase();
   const itemId = c.req.param('itemId');
@@ -567,24 +542,6 @@ sessionRoutes.patch('/:code/items/claim', async (c) => {
 });
 
 // ─── Update session items ──────────────────────────────────
-
-const updateItemsSchema = z.object({
-  items: z.array(
-    z.object({
-      id: z.string().optional(),
-      name: z.string().min(1),
-      price: z.number().min(0),
-      quantity: z.number().int().min(1).default(1),
-    }),
-  ),
-  subtotal: z.number().min(0),
-  tax: z.number().min(0).default(0),
-  tip: z.number().min(0).default(0),
-  taxMode: z.enum(['$', '%']).default('$'),
-  tipMode: z.enum(['$', '%']).default('$'),
-  total: z.number().min(0),
-  currency: z.string().optional(),
-});
 
 sessionRoutes.put('/:code/items', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
@@ -750,11 +707,6 @@ sessionRoutes.delete(
 
 // ─── Upgrade participant (guest → logged-in) ───────────────
 
-const upgradeSchema = z.object({
-  userId: z.string().min(1),
-  displayName: z.string().min(1).max(30),
-});
-
 sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
   const code = c.req.param('code').toUpperCase();
   const participantId = c.req.param('participantId');
@@ -804,12 +756,6 @@ sessionRoutes.post('/:code/participants/:participantId/upgrade', async (c) => {
 });
 
 // ─── Merge participant (guest → logged-in user) ────────────
-
-const mergeSchema = z.object({
-  fromParticipantId: z.string().min(1),
-  toUserId: z.string().min(1),
-  toDisplayName: z.string().min(1).max(30),
-});
 
 sessionRoutes.post('/:code/participants/merge', async (c) => {
   const code = c.req.param('code').toUpperCase();
@@ -1011,10 +957,6 @@ sessionRoutes.post(
 );
 
 // ─── Update session settings ───────────────────────────────
-
-const settingsSchema = z.object({
-  requireApproval: z.boolean().optional(),
-});
 
 sessionRoutes.patch('/:code/settings', optionalHostToken, async (c) => {
   const code = c.req.param('code').toUpperCase();
