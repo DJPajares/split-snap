@@ -35,6 +35,9 @@ export const ErrorCode = {
   RECEIPT_NO_IMAGE: 'RECEIPT_NO_IMAGE',
   RECEIPT_SCAN_FAILED: 'RECEIPT_SCAN_FAILED',
 
+  // Exchange Rates
+  EXCHANGE_RATE_FETCH_FAILED: 'EXCHANGE_RATE_FETCH_FAILED',
+
   // Generic
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   DATABASE_UNAVAILABLE: 'DATABASE_UNAVAILABLE',
@@ -125,6 +128,10 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.RECEIPT_NO_IMAGE]: 'No receipt image was provided.',
   [ErrorCode.RECEIPT_SCAN_FAILED]:
     'Failed to scan the receipt. Please try again or enter items manually.',
+
+  // Exchange Rates
+  [ErrorCode.EXCHANGE_RATE_FETCH_FAILED]:
+    'Failed to fetch exchange rates. Please try again later.',
 
   // Generic
   [ErrorCode.VALIDATION_FAILED]: 'Please check your input and try again.',

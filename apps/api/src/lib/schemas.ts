@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// -- AUTH --
 export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -11,6 +12,7 @@ export const loginSchema = z.object({
   password: z.string(),
 });
 
+// -- SESSION --
 export const createSessionSchema = z.object({
   items: z.array(
     z.object({
@@ -76,4 +78,9 @@ export const mergeSchema = z.object({
 
 export const settingsSchema = z.object({
   requireApproval: z.boolean().optional(),
+});
+
+// -- EXCHANGE RATES --
+export const exchangeRatesSchema = z.object({
+  currencies: z.array(z.string().length(3)).min(1),
 });

@@ -6,4 +6,19 @@ const formatKeyLabel = (options: string[]) =>
     };
   });
 
-export { formatKeyLabel };
+const filterRates = (
+  acceptedRates: string[],
+  baseRates: Record<string, number>,
+) => {
+  return Object.keys(baseRates).reduce(
+    (acc: Record<string, number>, curr: string) => {
+      if (acceptedRates.includes(curr)) {
+        acc[curr] = baseRates[curr];
+      }
+      return acc;
+    },
+    {},
+  );
+};
+
+export { formatKeyLabel, filterRates };
