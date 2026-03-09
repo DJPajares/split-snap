@@ -15,14 +15,6 @@
     "prepare": "husky",
     "deps:check": "pnpm -r outdated"
   },
-  "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.3.2",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.8.14",
-    "typescript": "^5.9.3"
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs,json,md,mdx,yml,yaml,css,scss}": [
       "prettier --write"
@@ -31,6 +23,14 @@
       "pnpm --filter web exec eslint --fix --max-warnings=0",
       "pnpm --filter web exec vitest related --run --passWithNoTests"
     ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.31.0"
 }
