@@ -3,7 +3,7 @@
 import { HeroUIProvider, ToastProvider } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 
-import { ErrorModalProvider } from '@/components/error/ErrorModalContext';
+import { ErrorModalProvider } from '@/components/error/error-modal-context';
 import { AuthProvider } from '@/hooks/useAuth';
 
 import { ClientDataProvider } from '../providers/clientDataProvider';
