@@ -1,27 +1,24 @@
 'use client';
 
-import { HeroUIProvider } from '@heroui/react';
+import { HeroUIProvider, ToastProvider } from '@heroui/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
-import { ErrorModalProvider } from '@/components/error/error-modal-context';
+import { ErrorModalProvider } from '@/components/error/ErrorModalContext';
 import { AuthProvider } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
+
+import { ClientDataProvider } from '../providers/clientDataProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  useEffect(() => {
-    void api.health.check().catch((error) => {
-      console.error('Health check failed:', error);
-    });
-  }, []);
-
   return (
     <HeroUIProvider navigate={router.push}>
-      <ErrorModalProvider>
-        <AuthProvider>{children}</AuthProvider>
-      </ErrorModalProvider>
+      <ToastProvider />
+      <ClientDataProvider>
+        <ErrorModalProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ErrorModalProvider>
+      </ClientDataProvider>
     </HeroUIProvider>
   );
 }
