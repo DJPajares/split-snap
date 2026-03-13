@@ -65,8 +65,8 @@ export default function DashboardPage() {
     <div className="mx-auto flex max-w-4xl flex-col gap-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
-          <p className="text-default-500">
+          <h1 className="title-section">Welcome, {user.name}</h1>
+          <p className="text-description-lg">
             Manage your bill-splitting sessions
           </p>
         </div>

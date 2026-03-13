@@ -84,13 +84,15 @@ export function ParticipantSidebar({
     <Card>
       <CardHeader className="flex flex-col items-start gap-1">
         <div className="flex w-full items-center justify-between">
-          <h3 className="font-bold">Participants</h3>
+          <h3 className="title-subsection">Participants</h3>
           <Chip size="sm" variant="flat">
             {session.participants.length}
           </Chip>
         </div>
       </CardHeader>
+
       <Divider />
+
       <CardBody className="gap-3">
         {/* Pending participants (only visible to host) */}
         {isCreator &&
@@ -148,7 +150,7 @@ export function ParticipantSidebar({
           )}
 
         {session.participants.length === 0 ? (
-          <p className="text-default-400 py-4 text-center text-sm">
+          <p className="text-description py-4 text-center">
             No one has joined yet. Share the link!
           </p>
         ) : (
@@ -230,7 +232,7 @@ export function ParticipantSidebar({
                             decimal: 2,
                           })}
                         </p>
-                        <p className="text-default-400 text-xs">
+                        <p className="text-description">
                           {summary?.items.length ?? 0} items
                         </p>
                       </div>
@@ -244,7 +246,7 @@ export function ParticipantSidebar({
                       <p className="text-sm font-medium">
                         Remove {participant.displayName}?
                       </p>
-                      <p className="text-default-400 text-xs">
+                      <p className="text-description">
                         All their claims will be removed.
                       </p>
                       <div className="flex justify-end gap-2">
@@ -276,7 +278,7 @@ export function ParticipantSidebar({
         <Divider />
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-default-500">Subtotal</span>
+            <span className="text-description-lg">Subtotal</span>
             <span>
               {formatCurrency({
                 value: session.subtotal,
@@ -286,7 +288,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-default-500">Tax</span>
+            <span className="text-description-lg">Tax</span>
             <span>
               {formatCurrency({
                 value: session.tax,
@@ -296,7 +298,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-default-500">Service Charge/Tip</span>
+            <span className="text-description-lg">Service Charge/Tip</span>
             <span>
               {formatCurrency({
                 value: session.tip,
