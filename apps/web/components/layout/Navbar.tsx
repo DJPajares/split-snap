@@ -16,6 +16,7 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle,
 } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -115,21 +116,50 @@ export function Navbar() {
                 <Avatar size="sm" />
               )}
             </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem key="dark-mode" onPress={handleDarkModeToggle}>
-                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            <DropdownMenu aria-label="User menu">
+              <DropdownItem
+                key="dark-mode"
+                aria-label="Toggle dark mode"
+                onPress={handleDarkModeToggle}
+              >
+                {isDarkMode ? (
+                  <span className="flex items-center">
+                    <Icon
+                      icon="line-md:sun-rising-twotone-loop"
+                      className="mr-2"
+                    />
+                    Light Mode
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <Icon icon="line-md:moon-alt-loop" className="mr-2" />
+                    Dark Mode
+                  </span>
+                )}
               </DropdownItem>
               {user ? (
                 <DropdownItem
                   key="logout"
+                  aria-label="Log out"
                   onPress={handleLogout}
                   color="danger"
                 >
-                  Log Out
+                  <span className="flex items-center">
+                    <Icon icon="line-md:logout" className="mr-2" />
+                    Log Out
+                  </span>
                 </DropdownItem>
               ) : (
-                <DropdownItem key="login" onPress={handleLogin} color="primary">
-                  Log In
+                <DropdownItem
+                  key="login"
+                  aria-label="Log in"
+                  onPress={handleLogin}
+                  color="primary"
+                >
+                  <span className="flex items-center">
+                    <Icon icon="line-md:login" className="mr-2" />
+                    Log In
+                  </span>
                 </DropdownItem>
               )}
             </DropdownMenu>
