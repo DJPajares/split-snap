@@ -31,6 +31,24 @@ const STEPS = [
   },
 ];
 
+const FEATURES = [
+  {
+    icon: '⚡',
+    title: 'Real-time Updates',
+    description: 'Everyone sees changes live as items are claimed.',
+  },
+  {
+    icon: '🧮',
+    title: 'Fair Math',
+    description: 'Tax and tip distributed proportionally — down to the penny.',
+  },
+  {
+    icon: '👤',
+    title: 'No Sign-up Needed',
+    description: 'Participants just need a name — no account required.',
+  },
+];
+
 export default function HomePage() {
   return (
     <div className="flex flex-col">
@@ -44,13 +62,15 @@ export default function HomePage() {
           className="mb-6 rounded-2xl"
           priority
         />
-        <h1 className="max-w-3xl text-4xl font-bold tracking-tight md:text-6xl">
-          Split bills, <span className="text-primary">not friendships</span>
-        </h1>
-        <p className="text-default-500 mt-4 max-w-2xl text-lg md:text-xl">
-          Scan a receipt, share a link, and let everyone pick their items. Tax
-          and tip are automatically distributed. No app download needed.
-        </p>
+        <div className="flex flex-col gap-2">
+          <h1 className="title-hero">
+            Split bills, <span className="text-primary">not friendships</span>
+          </h1>
+          <p className="text-description-lg">
+            Scan a receipt, share a link, and let everyone pick their items. Tax
+            and tip are automatically distributed. No app download needed.
+          </p>
+        </div>
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Button
             as={Link}
@@ -74,16 +94,16 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="bg-content1 px-4 py-16">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-12 text-center text-3xl font-bold">How It Works</h2>
+      <section className="px-4 py-16">
+        <div className="mx-auto flex flex-col gap-2 text-center">
+          <h2 className="title-page">How It Works</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <Card key={i} className="bg-content2">
                 <CardBody className="p-6 text-center">
                   <span className="mb-4 block text-4xl">{step.icon}</span>
-                  <h3 className="mb-2 text-lg font-semibold">{step.title}</h3>
-                  <p className="text-default-500 text-sm">{step.description}</p>
+                  <h3 className="title-card">{step.title}</h3>
+                  <p className="text-description">{step.description}</p>
                 </CardBody>
               </Card>
             ))}
@@ -93,30 +113,16 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="px-4 py-16">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-8 text-3xl font-bold">{`Why ${APP.NAME}?`}</h2>
+        <div className="mx-auto flex flex-col gap-2 text-center">
+          <h2 className="title-page">{`Why ${APP.NAME}?`}</h2>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div>
-              <div className="mb-3 text-3xl">⚡</div>
-              <h3 className="mb-1 font-semibold">Real-time</h3>
-              <p className="text-default-500 text-sm">
-                Everyone sees updates live as items are claimed.
-              </p>
-            </div>
-            <div>
-              <div className="mb-3 text-3xl">🧮</div>
-              <h3 className="mb-1 font-semibold">Fair Math</h3>
-              <p className="text-default-500 text-sm">
-                Tax and tip distributed proportionally — down to the penny.
-              </p>
-            </div>
-            <div>
-              <div className="mb-3 text-3xl">👤</div>
-              <h3 className="mb-1 font-semibold">No Sign-up Needed</h3>
-              <p className="text-default-500 text-sm">
-                Participants just need a name — no account required.
-              </p>
-            </div>
+            {FEATURES.map((feature, i) => (
+              <div key={i}>
+                <span className="mb-4 block text-4xl">{feature.icon}</span>
+                <h3 className="title-card">{feature.title}</h3>
+                <p className="text-description">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

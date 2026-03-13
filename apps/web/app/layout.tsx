@@ -41,7 +41,7 @@ export default function RootLayout({
       >
         <Providers>
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="mx-auto max-w-5xl flex-1">{children}</main>
           <Footer />
         </Providers>
       </body>
