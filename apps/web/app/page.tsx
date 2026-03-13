@@ -95,11 +95,11 @@ export default function HomePage() {
 
       {/* How it works */}
       <section>
-        <div className="mx-auto flex flex-col gap-2 text-center">
+        <div className="mx-auto flex flex-col gap-8 text-center">
           <h2 className="title-page">How It Works</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
-              <Card key={i} className="bg-content2">
+              <Card key={i}>
                 <CardBody className="p-6 text-center">
                   <span className="mb-4 block text-4xl">{step.icon}</span>
                   <h3 className="title-card">{step.title}</h3>
@@ -113,7 +113,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section>
-        <div className="mx-auto flex flex-col gap-2 text-center">
+        <div className="mx-auto flex flex-col gap-8 text-center">
           <h2 className="title-page">{`Why ${APP.NAME}?`}</h2>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             {FEATURES.map((feature, i) => (

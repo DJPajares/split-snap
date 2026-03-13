@@ -326,19 +326,19 @@ export default function JoinPage({
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
+    <div>
       <Card>
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
-          <span className="text-5xl">👋</span>
-          <h1 className="text-2xl font-bold">Join Session</h1>
-          <p className="text-default-500 text-center">
+          <span className="mb-4 block text-5xl">👋</span>
+          <h1 className="title-page">Join Session</h1>
+          <p className="text-description-lg">
             {user
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
           </p>
-          <div className="text-primary font-mono text-lg font-bold tracking-widest">
+          <p className="text-primary font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
-          </div>
+          </p>
         </CardHeader>
         <Divider />
         <CardBody className="gap-4 px-6 pb-8">
@@ -397,7 +397,7 @@ export default function JoinPage({
               </Button>
             </>
           )}
-          <p className="text-default-400 text-center text-xs">
+          <p className="text-caption text-center">
             No account needed — just pick a name.
           </p>
         </CardBody>
