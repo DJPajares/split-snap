@@ -11,22 +11,14 @@
   --secondary-foreground: oklch(0.3 0.05 25);
   --tertiary: oklch(0.75 0.18 85);
   --tertiary-foreground: oklch(0.2 0.02 240);
-  --radius: 0.5rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.25 0.02 240);
-  --card: oklch(0.96 0.01 270);
-  --card-foreground: oklch(0.25 0.02 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 240);
-  --muted: oklch(0.95 0.02 240);
-  --muted-foreground: oklch(0.55 0.02 240);
-  --accent: oklch(0.96 0.01 240);
-  --accent-foreground: oklch(0.3 0.02 240);
-  --destructive: oklch(0.55 0.22 30);
-  --destructive-foreground: oklch(0.97 0.01 240);
-  --border: oklch(0.9 0.02 240);
-  --input: oklch(0.9 0.02 240);
-  --ring: oklch(0.25 0.02 240);
+  --foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
 }
 
 .dark {
@@ -36,22 +28,14 @@
   --secondary-foreground: oklch(0.9 0.02 240);
   --tertiary: oklch(0.7 0.15 85);
   --tertiary-foreground: oklch(0.95 0.01 240);
-  --background: oklch(0.18 0.01 285);
-  --foreground: oklch(0.97 0.01 240);
-  --radius: 0.5rem;
-  --card: oklch(0.25 0.02 250);
-  --card-foreground: oklch(0.97 0.01 240);
-  --popover: oklch(0.05 0.01 240);
-  --popover-foreground: oklch(0.97 0.01 240);
-  --muted: oklch(0.3 0.02 240);
-  --muted-foreground: oklch(0.65 0.02 240);
-  --accent: oklch(0.3 0.02 240);
-  --accent-foreground: oklch(0.97 0.01 240);
-  --destructive: oklch(0.68 0.18 30);
-  --destructive-foreground: oklch(0.97 0.01 240);
-  --border: oklch(0.3 0.02 240);
-  --input: oklch(0.35 0.02 240);
-  --ring: oklch(0.85 0.02 240);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.371 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
 }
 
 @theme inline {
@@ -76,6 +60,32 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+}
+
+@layer base {
+  h1 {
+    @apply text-4xl font-extrabold;
+  }
+
+  h2 {
+    @apply text-3xl font-bold;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+
+  h4 {
+    @apply text-xl font-medium;
+  }
+
+  h5 {
+    @apply text-lg font-medium;
+  }
+
+  p {
+    @apply text-base;
+  }
 }
 
 /*
