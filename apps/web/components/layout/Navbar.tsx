@@ -15,14 +15,22 @@ import {
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 
 export function Navbar() {
+  const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(theme === 'dark');
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  const handleDarkModeToggle = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
+    setIsDarkMode(!isDarkMode);
+  };
 
   return (
     <HeroNavbar
@@ -100,6 +108,11 @@ export function Navbar() {
           </>
         ) : (
           <>
+            <NavbarItem>
+              <Button size="sm" variant="flat" onPress={handleDarkModeToggle}>
+                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+              </Button>
+            </NavbarItem>
             <NavbarItem>
               <Button as={Link} href="/auth/login" size="sm" variant="flat">
                 Log In
