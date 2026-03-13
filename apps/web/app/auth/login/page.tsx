@@ -112,11 +112,13 @@ export default function LoginPage() {
             priority
           />
           <h2>{`Welcome to ${APP.NAME}`}</h2>
-          <p className="text-muted-foreground text-center text-sm">
+          <p className="text-description">
             Sign in to save your sessions and access them later.
           </p>
         </CardHeader>
+
         <Divider />
+
         <CardBody className="px-6 pb-8">
           <Tabs
             selectedKey={tab}
@@ -152,7 +154,7 @@ export default function LoginPage() {
                     <Input
                       label="Password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••"
+                      placeholder="Enter your password"
                       value={field.value}
                       onValueChange={field.onChange}
                       onBlur={field.onBlur}
@@ -230,7 +232,7 @@ export default function LoginPage() {
                     <Input
                       label="Password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="At least 6 characters"
+                      placeholder="Enter your password"
                       value={field.value}
                       onValueChange={field.onChange}
                       onBlur={field.onBlur}
@@ -299,9 +301,9 @@ export default function LoginPage() {
             </Tab>
           </Tabs>
 
-          <p className="text-default-400 mt-4 text-center text-xs">
+          <p className="text-description text-center">
             You don&apos;t need an account to join sessions.{' '}
-            <Link href="/" size="sm">
+            <Link href="/" size="sm" className="font-semibold">
               Go back
             </Link>
           </p>
