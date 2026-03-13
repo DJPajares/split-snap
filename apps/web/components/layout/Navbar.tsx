@@ -1,12 +1,7 @@
 'use client';
 
 import {
-  addToast,
   Avatar,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
   Link,
   Navbar as HeroNavbar,
   NavbarBrand,
@@ -16,45 +11,17 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 
+import { NavbarDropdownMenu } from './NavbarDropdownMenu';
+
 export function Navbar() {
-  const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(theme === 'dark');
-  const { user, logout } = useAuth();
-  const router = useRouter();
-
-  const handleDarkModeToggle = () => {
-    setTheme(isDarkMode ? 'light' : 'dark');
-    setIsDarkMode(!isDarkMode);
-  };
-
-  const handleLogout = () => {
-    logout();
-    // Clear receipt image from sessionStorage
-    try {
-      sessionStorage.removeItem('receipt_image');
-    } catch {
-      // Ignore
-    }
-    addToast({
-      title: 'You have been logged out',
-      color: 'success',
-    });
-    router.push('/');
-  };
-
-  const handleLogin = () => {
-    router.push('/auth/login');
-  };
+  const { user } = useAuth();
 
   return (
     <HeroNavbar
@@ -69,10 +36,7 @@ export function Navbar() {
           className="sm:hidden"
         />
         <NavbarBrand>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xl font-bold text-inherit"
-          >
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt={`${APP.NAME} logo`}
@@ -81,21 +45,21 @@ export function Navbar() {
               className="rounded-md"
               priority
             />
-            <span>{APP.NAME}</span>
+            <h2 className="title-card">{APP.NAME}</h2>
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
       <NavbarContent className="hidden gap-4 sm:flex" justify="center">
         <NavbarItem>
-          <Link href="/scan" color="foreground">
-            Scan Receipt
+          <Link href="/scan">
+            <h3 className="title-subsection">Scan Receipt</h3>
           </Link>
         </NavbarItem>
         {user && (
           <NavbarItem>
-            <Link href="/dashboard" color="foreground">
-              Dashboard
+            <Link href="/dashboard">
+              <h3 className="title-subsection">Dashboard</h3>
             </Link>
           </NavbarItem>
         )}
@@ -103,67 +67,18 @@ export function Navbar() {
 
       <NavbarContent justify="end">
         <NavbarItem>
-          <Dropdown>
-            <DropdownTrigger>
-              {user ? (
-                <Avatar
-                  isBordered
-                  size="sm"
-                  color="primary"
-                  src="https://i.pravatar.cc/150?u=a04258114e29026708c"
-                />
-              ) : (
-                <Avatar size="sm" />
-              )}
-            </DropdownTrigger>
-            <DropdownMenu aria-label="User menu">
-              <DropdownItem
-                key="dark-mode"
-                aria-label="Toggle dark mode"
-                onPress={handleDarkModeToggle}
-              >
-                {isDarkMode ? (
-                  <span className="flex items-center">
-                    <Icon
-                      icon="line-md:sun-rising-twotone-loop"
-                      className="mr-2"
-                    />
-                    Light Mode
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    <Icon icon="line-md:moon-alt-loop" className="mr-2" />
-                    Dark Mode
-                  </span>
-                )}
-              </DropdownItem>
-              {user ? (
-                <DropdownItem
-                  key="logout"
-                  aria-label="Log out"
-                  onPress={handleLogout}
-                  color="danger"
-                >
-                  <span className="flex items-center">
-                    <Icon icon="line-md:logout" className="mr-2" />
-                    Log Out
-                  </span>
-                </DropdownItem>
-              ) : (
-                <DropdownItem
-                  key="login"
-                  aria-label="Log in"
-                  onPress={handleLogin}
-                  color="primary"
-                >
-                  <span className="flex items-center">
-                    <Icon icon="line-md:login" className="mr-2" />
-                    Log In
-                  </span>
-                </DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
+          <NavbarDropdownMenu>
+            {user ? (
+              <Avatar
+                isBordered
+                size="sm"
+                color="primary"
+                src="https://i.pravatar.cc/150?u=a04258114e29026708c"
+              />
+            ) : (
+              <Avatar size="sm" />
+            )}
+          </NavbarDropdownMenu>
         </NavbarItem>
       </NavbarContent>
 
@@ -176,7 +91,7 @@ export function Navbar() {
             size="lg"
             onPress={() => setIsMenuOpen(false)}
           >
-            Scan Receipt
+            <h3 className="title-subsection">Scan Receipt</h3>
           </Link>
         </NavbarMenuItem>
         {user && (
@@ -187,7 +102,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              Dashboard
+              <h3 className="title-subsection">Dashboard</h3>
             </Link>
           </NavbarMenuItem>
         )}
@@ -199,7 +114,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              Log In
+              <h3 className="title-subsection">Log In</h3>
             </Link>
           </NavbarMenuItem>
         )}
