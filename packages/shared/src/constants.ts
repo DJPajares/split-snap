@@ -40,5 +40,5 @@ export const API_ROUTES = {
 } as const;
 
 export const APP = {
-  NAME: 'Split Snap',
+  NAME: 'SplitSnap™',
 };

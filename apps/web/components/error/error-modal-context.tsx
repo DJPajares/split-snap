@@ -96,7 +96,7 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
                 {modal?.title}
               </ModalHeader>
               <ModalBody>
-                <p className="text-default-600">{modal?.message}</p>
+                <p className="text-description-lg">{modal?.message}</p>
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" onPress={handleClose}>

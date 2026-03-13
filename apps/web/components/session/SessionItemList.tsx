@@ -100,7 +100,7 @@ export function SessionItemList({
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{item.name}</p>
                 {item.quantity > 1 && (
-                  <p className="text-default-400 text-xs">
+                  <p className="text-caption">
                     {formatCurrency({
                       value: item.price,
                       currency: session.currency,

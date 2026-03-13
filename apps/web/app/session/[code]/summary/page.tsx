@@ -105,13 +105,11 @@ export default function SummaryPage({
   );
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between gap-3">
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold">Bill Summary</h1>
-          <p className="text-default-500 text-base font-semibold">
-            Session {code}
-          </p>
+          <h1 className="title-section">Bill Summary</h1>
+          <p className="text-description-lg">Session {code}</p>
         </div>
         <Button
           variant="flat"
@@ -123,7 +121,7 @@ export default function SummaryPage({
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <span className="text-default-500">Convert currency to:</span>
+        <p className="text-description-lg">Convert currency to:</p>
         <Select
           className="w-24"
           aria-label="convert currency to"
@@ -173,14 +171,14 @@ export default function SummaryPage({
       <Card>
         <CardBody className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-lg font-bold">Grand Total</span>
-            <span className="text-2xl font-bold">
+            <h2 className="title-section">Grand Total</h2>
+            <h2 className="title-section">
               {formatCurrency({
                 value: session.total,
                 currency: session.currency,
                 decimal: 2,
               })}
-            </span>
+            </h2>
           </div>
         </CardBody>
       </Card>

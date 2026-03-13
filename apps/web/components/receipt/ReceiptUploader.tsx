@@ -66,7 +66,7 @@ export function ReceiptUploader({
         {isLoading ? (
           <>
             <Spinner size="lg" color="primary" />
-            <p className="text-default-500">Scanning receipt with AI...</p>
+            <p className="text-description-lg">Scanning receipt with AI...</p>
           </>
         ) : preview ? (
           <>
@@ -76,7 +76,7 @@ export function ReceiptUploader({
               alt="Receipt preview"
               className="max-h-48 rounded-lg object-contain"
             />
-            <p className="text-default-500 text-sm">Click or drop to replace</p>
+            <p className="text-description">Click or drop to replace</p>
           </>
         ) : (
           <>
@@ -84,7 +84,7 @@ export function ReceiptUploader({
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>
-            <p className="text-default-500 text-sm">Supports JPEG, PNG, HEIC</p>
+            <p className="text-description">Supports JPEG, PNG, HEIC</p>
             <Button
               color="primary"
               variant="flat"

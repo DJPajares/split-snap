@@ -254,7 +254,7 @@ export default function JoinPage({
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <span className="text-5xl">⏳</span>
             <h2 className="text-xl font-bold">Temporarily Removed</h2>
-            <p className="text-default-500 text-center">
+            <p className="text-description-lg text-center">
               You were removed from this session.
               {hasCountdown
                 ? ` You can rejoin in ${minutes}:${seconds.toString().padStart(2, '0')}.`
@@ -284,7 +284,7 @@ export default function JoinPage({
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <span className="text-5xl">❌</span>
             <h2 className="text-xl font-bold">Request Rejected</h2>
-            <p className="text-default-500 text-center">
+            <p className="text-description-lg text-center">
               The host has rejected your join request.
             </p>
             <Button color="primary" onPress={() => router.push('/')}>
@@ -304,7 +304,7 @@ export default function JoinPage({
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <Spinner size="lg" />
             <h2 className="text-xl font-bold">Waiting for Approval</h2>
-            <p className="text-default-500 text-center">
+            <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.
             </p>
             <div className="text-primary font-mono text-lg font-bold tracking-widest">
@@ -326,19 +326,19 @@ export default function JoinPage({
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
+    <div>
       <Card>
-        <CardHeader className="flex flex-col items-center gap-2 pt-8">
-          <span className="text-5xl">👋</span>
-          <h1 className="text-2xl font-bold">Join Session</h1>
-          <p className="text-default-500 text-center">
+        <CardHeader className="flex flex-col items-center gap-2">
+          <span className="mb-4 block text-5xl">👋</span>
+          <h1 className="title-section">Join Session</h1>
+          <p className="text-description-lg">
             {user
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
           </p>
-          <div className="text-primary font-mono text-lg font-bold tracking-widest">
+          <p className="text-primary font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
-          </div>
+          </p>
         </CardHeader>
         <Divider />
         <CardBody className="gap-4 px-6 pb-8">
@@ -366,7 +366,6 @@ export default function JoinPage({
                   type="submit"
                   color="primary"
                   size="lg"
-                  className="font-semibold"
                   isLoading={joinState === 'joining'}
                   isDisabled={!nameForm.formState.isValid}
                 >
@@ -379,7 +378,6 @@ export default function JoinPage({
             <Button
               color="primary"
               size="lg"
-              className="font-semibold"
               onPress={() => void joinSession(user.name, user.id)}
               isLoading={joinState === 'joining'}
             >
@@ -397,7 +395,7 @@ export default function JoinPage({
               </Button>
             </>
           )}
-          <p className="text-default-400 text-center text-xs">
+          <p className="text-caption text-center">
             No account needed — just pick a name.
           </p>
         </CardBody>
