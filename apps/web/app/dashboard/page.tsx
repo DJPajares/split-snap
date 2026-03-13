@@ -62,8 +62,8 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
           <p className="text-default-500">
@@ -81,7 +81,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Filter chips */}
-      <div className="mb-6">
+      <div>
         <ButtonGroup variant="flat" size="sm">
           <Button
             color={roleFilter === 'all' ? 'primary' : 'default'}
@@ -112,21 +112,21 @@ export default function DashboardPage() {
         <Card>
           <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
             <span className="text-5xl">📋</span>
-            <p className="text-lg font-semibold">
+            <h3 className="title-subsection">
               {roleFilter === 'all'
                 ? 'No sessions yet'
                 : roleFilter === 'host'
                   ? 'No hosted sessions'
                   : 'No joined sessions'}
-            </p>
-            <p className="text-default-500 max-w-sm text-center">
+            </h3>
+            <p className="text-description text-center">
               {roleFilter === 'all'
                 ? 'Start by scanning a receipt or entering items manually. Your sessions will appear here.'
                 : roleFilter === 'host'
                   ? 'Sessions you create will appear here.'
                   : 'Sessions you join will appear here.'}
             </p>
-            {roleFilter === 'all' && (
+            {(roleFilter === 'all' || roleFilter === 'host') && (
               <Button as={Link} href="/scan" color="primary" variant="flat">
                 Create Your First Split
               </Button>
@@ -145,7 +145,7 @@ export default function DashboardPage() {
               <CardBody className="flex flex-row items-center justify-between gap-4 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">{session.code}</span>
+                    <h3 className="title-subsection">{session.code}</h3>
                     <Chip
                       size="sm"
                       color={session.role === 'host' ? 'warning' : 'primary'}
@@ -167,7 +167,7 @@ export default function DashboardPage() {
                       {session.status}
                     </Chip>
                   </div>
-                  <p className="text-default-500 text-sm">
+                  <p className="text-description">
                     {session.items.length} item
                     {session.items.length !== 1 ? 's' : ''} ·{' '}
                     {session.participants.length} participant
@@ -176,14 +176,14 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold">
+                  <h3 className="title-subsection">
                     {formatCurrency({
                       value: session.total,
                       currency: session.currency,
                       decimal: 2,
                     })}
-                  </p>
-                  <p className="text-default-400 text-xs">{session.currency}</p>
+                  </h3>
+                  <p className="text-description">{session.currency}</p>
                 </div>
               </CardBody>
             </Card>

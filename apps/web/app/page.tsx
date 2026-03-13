@@ -51,9 +51,9 @@ const FEATURES = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-20 py-6 sm:gap-40">
       {/* Hero */}
-      <section className="flex flex-col items-center justify-center px-4 py-20 text-center md:py-32">
+      <section className="flex flex-col items-center justify-center text-center">
         <Image
           src="/logo.png"
           alt={`${APP.NAME} logo`}
@@ -94,7 +94,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="px-4 py-16">
+      <section>
         <div className="mx-auto flex flex-col gap-2 text-center">
           <h2 className="title-page">How It Works</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -112,10 +112,10 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="px-4 py-16">
+      <section>
         <div className="mx-auto flex flex-col gap-2 text-center">
           <h2 className="title-page">{`Why ${APP.NAME}?`}</h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             {FEATURES.map((feature, i) => (
               <div key={i}>
                 <span className="mb-4 block text-4xl">{feature.icon}</span>
