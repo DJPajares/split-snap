@@ -2,7 +2,11 @@
 
 import {
   addToast,
-  Button,
+  Avatar,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Link,
   Navbar as HeroNavbar,
   NavbarBrand,
@@ -30,6 +34,25 @@ export function Navbar() {
   const handleDarkModeToggle = () => {
     setTheme(isDarkMode ? 'light' : 'dark');
     setIsDarkMode(!isDarkMode);
+  };
+
+  const handleLogout = () => {
+    logout();
+    // Clear receipt image from sessionStorage
+    try {
+      sessionStorage.removeItem('receipt_image');
+    } catch {
+      // Ignore
+    }
+    addToast({
+      title: 'You have been logged out',
+      color: 'success',
+    });
+    router.push('/');
+  };
+
+  const handleLogin = () => {
+    router.push('/auth/login');
   };
 
   return (
@@ -78,48 +101,40 @@ export function Navbar() {
       </NavbarContent>
 
       <NavbarContent justify="end">
-        {user ? (
-          <>
-            <NavbarItem className="hidden sm:flex">
-              <span className="text-default-500 text-sm">{user.name}</span>
-            </NavbarItem>
-            <NavbarItem>
-              <Button
-                size="sm"
-                variant="flat"
-                onPress={() => {
-                  logout();
-                  // Clear receipt image from sessionStorage
-                  try {
-                    sessionStorage.removeItem('receipt_image');
-                  } catch {
-                    // Ignore
-                  }
-                  addToast({
-                    title: 'You have been logged out',
-                    color: 'success',
-                  });
-                  router.push('/');
-                }}
-              >
-                Log Out
-              </Button>
-            </NavbarItem>
-          </>
-        ) : (
-          <>
-            <NavbarItem>
-              <Button size="sm" variant="flat" onPress={handleDarkModeToggle}>
+        <NavbarItem>
+          <Dropdown>
+            <DropdownTrigger>
+              {user ? (
+                <Avatar
+                  isBordered
+                  size="sm"
+                  color="primary"
+                  src="https://i.pravatar.cc/150?u=a04258114e29026708c"
+                />
+              ) : (
+                <Avatar size="sm" />
+              )}
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem key="dark-mode" onPress={handleDarkModeToggle}>
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-              </Button>
-            </NavbarItem>
-            <NavbarItem>
-              <Button as={Link} href="/auth/login" size="sm" variant="flat">
-                Log In
-              </Button>
-            </NavbarItem>
-          </>
-        )}
+              </DropdownItem>
+              {user ? (
+                <DropdownItem
+                  key="logout"
+                  onPress={handleLogout}
+                  color="danger"
+                >
+                  Log Out
+                </DropdownItem>
+              ) : (
+                <DropdownItem key="login" onPress={handleLogin} color="primary">
+                  Log In
+                </DropdownItem>
+              )}
+            </DropdownMenu>
+          </Dropdown>
+        </NavbarItem>
       </NavbarContent>
 
       {/* Mobile menu */}
