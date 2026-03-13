@@ -27,7 +27,7 @@ export function Navbar() {
     <HeroNavbar
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      maxWidth="xl"
+      maxWidth="full"
       isBordered
     >
       <NavbarContent>
