@@ -13,6 +13,7 @@ import {
   Tabs,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Icon } from '@iconify/react';
 import { APP } from '@split-snap/shared/constants';
 import {
   type LoginFormData,
@@ -20,6 +21,7 @@ import {
   type RegisterFormData,
   registerSchema,
 } from '@split-snap/shared/schemas';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -34,6 +36,7 @@ export default function LoginPage() {
 
   const [tab, setTab] = useState('login');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const loginForm = useForm<LoginFormData>({
@@ -99,14 +102,23 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <Card>
-        <CardHeader className="flex flex-col items-center gap-2 pt-8">
-          <span className="text-4xl">🔐</span>
-          <h1 className="text-2xl font-bold">{`Welcome to ${APP.NAME}`}</h1>
-          <p className="text-default-500 text-center text-sm">
-            Sign in to save your sessions and access them later.
+        <CardHeader className="flex flex-col items-center gap-2 pt-8 text-center">
+          <Image
+            src="/logo.png"
+            alt={`${APP.NAME} logo`}
+            width={36}
+            height={36}
+            className="rounded-md"
+            priority
+          />
+          <h2 className="title-section">{`Welcome to ${APP.NAME}`}</h2>
+          <p className="text-description">
+            Sign in to save your sessions and access them later
           </p>
         </CardHeader>
+
         <Divider />
+
         <CardBody className="px-6 pb-8">
           <Tabs
             selectedKey={tab}
@@ -142,23 +154,25 @@ export default function LoginPage() {
                     <Input
                       label="Password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••"
+                      placeholder="Enter your password"
                       value={field.value}
                       onValueChange={field.onChange}
                       onBlur={field.onBlur}
                       isInvalid={Boolean(fieldState.error)}
                       errorMessage={fieldState.error?.message}
                       endContent={
-                        <Button
-                          size="sm"
-                          variant="light"
-                          onPress={() => setShowPassword((prev) => !prev)}
-                          aria-label={
-                            showPassword ? 'Hide password' : 'Show password'
-                          }
+                        <button
+                          aria-label="toggle password visibility"
+                          className="outline-transparent focus:outline-solid"
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
                         >
-                          {showPassword ? 'Hide' : 'Show'}
-                        </Button>
+                          {showPassword ? (
+                            <Icon icon="tabler:eye-off" />
+                          ) : (
+                            <Icon icon="tabler:eye" />
+                          )}
+                        </button>
                       }
                     />
                   )}
@@ -218,23 +232,25 @@ export default function LoginPage() {
                     <Input
                       label="Password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="At least 6 characters"
+                      placeholder="Enter your password"
                       value={field.value}
                       onValueChange={field.onChange}
                       onBlur={field.onBlur}
                       isInvalid={Boolean(fieldState.error)}
                       errorMessage={fieldState.error?.message}
                       endContent={
-                        <Button
-                          size="sm"
-                          variant="light"
-                          onPress={() => setShowPassword((prev) => !prev)}
-                          aria-label={
-                            showPassword ? 'Hide password' : 'Show password'
-                          }
+                        <button
+                          aria-label="toggle password visibility"
+                          className="outline-transparent focus:outline-solid"
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
                         >
-                          {showPassword ? 'Hide' : 'Show'}
-                        </Button>
+                          {showPassword ? (
+                            <Icon icon="tabler:eye-off" />
+                          ) : (
+                            <Icon icon="tabler:eye" />
+                          )}
+                        </button>
                       }
                     />
                   )}
@@ -245,13 +261,29 @@ export default function LoginPage() {
                   render={({ field, fieldState }) => (
                     <Input
                       label="Confirm Password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? 'text' : 'password'}
                       placeholder="Re-enter your password"
                       value={field.value}
                       onValueChange={field.onChange}
                       onBlur={field.onBlur}
                       isInvalid={Boolean(fieldState.error)}
                       errorMessage={fieldState.error?.message}
+                      endContent={
+                        <button
+                          aria-label="toggle password visibility"
+                          className="outline-transparent focus:outline-solid"
+                          type="button"
+                          onClick={() =>
+                            setShowConfirmPassword((prev) => !prev)
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <Icon icon="tabler:eye-off" />
+                          ) : (
+                            <Icon icon="tabler:eye" />
+                          )}
+                        </button>
+                      }
                     />
                   )}
                 />
@@ -269,9 +301,9 @@ export default function LoginPage() {
             </Tab>
           </Tabs>
 
-          <p className="text-default-400 mt-4 text-center text-xs">
+          <p className="text-description text-center">
             You don&apos;t need an account to join sessions.{' '}
-            <Link href="/" size="sm">
+            <Link href="/" size="sm" className="font-semibold">
               Go back
             </Link>
           </p>

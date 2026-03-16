@@ -93,10 +93,20 @@ vi.mock('@heroui/react', () => ({
       />
     </label>
   ),
-  Select: ({ label, children, selectedKeys }: MockSelectProps) => (
+  Select: ({
+    label,
+    children,
+    selectedKeys,
+    onSelectionChange,
+  }: MockSelectProps) => (
     <label>
       {label}
-      <select value={selectedKeys?.[0] ?? ''}>{children}</select>
+      <select
+        value={selectedKeys?.[0] ?? ''}
+        onChange={(e) => onSelectionChange?.(new Set([e.target.value]))}
+      >
+        {children}
+      </select>
     </label>
   ),
   SelectItem: ({

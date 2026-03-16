@@ -12,6 +12,7 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
@@ -363,12 +364,12 @@ export default function SessionPage({
   }
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 py-6">
+    <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Session {code}</h1>
+            <h1 className="title-section">Session {code}</h1>
             <Chip
               size="sm"
               color={
@@ -392,87 +393,97 @@ export default function SessionPage({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="flat" size="sm" onPress={() => setShowShare(true)}>
-            🔗 Share
+          <Button
+            variant="flat"
+            size="sm"
+            startContent={<Icon icon="tabler:share-3" height={20} />}
+            onPress={() => setShowShare(true)}
+          >
+            Share
           </Button>
           <Button
             as="a"
             href={`/session/${code}/summary`}
             variant="flat"
             size="sm"
+            startContent={<Icon icon="tabler:chart-column" height={20} />}
           >
-            📊 Summary
+            Summary
           </Button>
         </div>
       </div>
 
       {/* Creator CTA actions */}
       {isCreator && session.status === 'active' && (
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             color="success"
             variant="solid"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:check" height={16} />}
             onPress={onSettleOpen}
             isDisabled={hasUnclaimedItems}
           >
-            ✓ Settle
+            Settle
           </Button>
           <Button
             as="a"
             href={`/session/${code}/edit`}
-            color="primary"
-            variant="flat"
+            variant="faded"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:edit" height={16} />}
           >
-            ✏️ Edit Items
+            Edit Items
           </Button>
           <Button
             color="danger"
             variant="light"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:trash" height={16} />}
             onPress={onDeleteOpen}
           >
-            🗑️ Delete
+            Delete
           </Button>
         </div>
       )}
       {isCreator && session.status === 'settled' && (
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             color="warning"
             variant="flat"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:arrow-back" height={16} />}
             onPress={handleUnsettle}
             isLoading={unsettleLoading}
           >
-            ↩ Undo Settlement
+            Undo Settlement
           </Button>
           <Button
             color="danger"
             variant="light"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:trash" height={16} />}
             onPress={onDeleteOpen}
           >
-            🗑️ Delete
+            Delete
           </Button>
         </div>
       )}
       {session.status === 'active' && hasUnclaimedItems && isCreator && (
-        <p className="text-warning mb-4 text-sm">
+        <p className="text-warning text-sm">
           Claim all items before finalizing settlement.
         </p>
       )}
 
       {/* Main content: items + sidebar */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <h2 className="mb-3 text-lg font-semibold">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
+        <div className="sm:col-span-3">
+          <h2 className="text-lg font-semibold">
             Items ({session.items.length})
           </h2>
           <SessionItemList
@@ -484,7 +495,7 @@ export default function SessionPage({
           />
         </div>
 
-        <div className="order-first lg:order-last">
+        <div className="order-first sm:order-last sm:col-span-2">
           <ParticipantSidebar
             session={session}
             currentParticipantId={participantId}
@@ -510,7 +521,7 @@ export default function SessionPage({
               <ModalHeader>Settle Session</ModalHeader>
               <ModalBody>
                 <p>Finalize this session now?</p>
-                <p className="text-default-500 text-sm">
+                <p className="text-description">
                   Participants will no longer be able to claim or unclaim items
                   until you undo settlement.
                 </p>
@@ -543,7 +554,7 @@ export default function SessionPage({
               <ModalHeader>Delete Session</ModalHeader>
               <ModalBody>
                 <p>Are you sure you want to delete this session?</p>
-                <p className="text-default-500 text-sm">
+                <p className="text-description">
                   This will permanently remove the session and disconnect all
                   participants. This action cannot be undone.
                 </p>

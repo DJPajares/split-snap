@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState, useTransition } from 'react';
@@ -127,27 +128,42 @@ function ScanPageInner() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold">New Split</h1>
-      <p className="text-default-500 mb-6">
-        Scan a receipt or enter items manually to start splitting.
-      </p>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-1">
+        <h1 className="title-section">New Split</h1>
+        <p className="text-description-lg">
+          Scan a receipt or enter items manually to start splitting.
+        </p>
+      </div>
 
       <Tabs
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
-        className="mb-6"
       >
-        <Tab key="scan" title="📸 Scan Receipt">
-          <div className="mt-4">
-            <ReceiptUploader
-              onFileSelected={handleFileSelected}
-              isLoading={scanning}
-            />
-          </div>
+        <Tab
+          key="scan"
+          title={
+            <div className="flex items-center space-x-2">
+              <Icon icon="tabler:camera" />
+              <span>Scan Receipt</span>
+            </div>
+          }
+        >
+          <ReceiptUploader
+            onFileSelected={handleFileSelected}
+            isLoading={scanning}
+          />
         </Tab>
-        <Tab key="manual" title="✏️ Manual Entry">
-          <div className="mt-4">
+        <Tab
+          key="manual"
+          title={
+            <div className="flex items-center space-x-2">
+              <Icon icon="tabler:pencil" />
+              <span>Manual Entry</span>
+            </div>
+          }
+        >
+          <div>
             <ItemEditor
               initialItems={scanResult?.items ?? []}
               initialSubtotal={scanResult?.subtotal ?? 0}

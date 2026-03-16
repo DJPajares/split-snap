@@ -1,8 +1,7 @@
 'use client';
 
 import {
-  addToast,
-  Button,
+  Avatar,
   Link,
   Navbar as HeroNavbar,
   NavbarBrand,
@@ -14,21 +13,21 @@ import {
 } from '@heroui/react';
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 
+import { NavbarDropdownMenu } from './NavbarDropdownMenu';
+
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <HeroNavbar
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      maxWidth="xl"
+      maxWidth="full"
       isBordered
     >
       <NavbarContent>
@@ -37,10 +36,7 @@ export function Navbar() {
           className="sm:hidden"
         />
         <NavbarBrand>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xl font-bold text-inherit"
-          >
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt={`${APP.NAME} logo`}
@@ -49,64 +45,41 @@ export function Navbar() {
               className="rounded-md"
               priority
             />
-            <span>{APP.NAME}</span>
+            <h2 className="title-card">{APP.NAME}</h2>
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
       <NavbarContent className="hidden gap-4 sm:flex" justify="center">
         <NavbarItem>
-          <Link href="/scan" color="foreground">
-            Scan Receipt
+          <Link href="/scan">
+            <h3 className="title-subsection">Scan Receipt</h3>
           </Link>
         </NavbarItem>
         {user && (
           <NavbarItem>
-            <Link href="/dashboard" color="foreground">
-              Dashboard
+            <Link href="/dashboard">
+              <h3 className="title-subsection">Dashboard</h3>
             </Link>
           </NavbarItem>
         )}
       </NavbarContent>
 
       <NavbarContent justify="end">
-        {user ? (
-          <>
-            <NavbarItem className="hidden sm:flex">
-              <span className="text-default-500 text-sm">{user.name}</span>
-            </NavbarItem>
-            <NavbarItem>
-              <Button
+        <NavbarItem>
+          <NavbarDropdownMenu>
+            {user ? (
+              <Avatar
+                isBordered
                 size="sm"
-                variant="flat"
-                onPress={() => {
-                  logout();
-                  // Clear receipt image from sessionStorage
-                  try {
-                    sessionStorage.removeItem('receipt_image');
-                  } catch {
-                    // Ignore
-                  }
-                  addToast({
-                    title: 'You have been logged out',
-                    color: 'success',
-                  });
-                  router.push('/');
-                }}
-              >
-                Log Out
-              </Button>
-            </NavbarItem>
-          </>
-        ) : (
-          <>
-            <NavbarItem>
-              <Button as={Link} href="/auth/login" size="sm" variant="flat">
-                Log In
-              </Button>
-            </NavbarItem>
-          </>
-        )}
+                color="primary"
+                src="https://i.pravatar.cc/150?u=a04258114e29026708c"
+              />
+            ) : (
+              <Avatar size="sm" />
+            )}
+          </NavbarDropdownMenu>
+        </NavbarItem>
       </NavbarContent>
 
       {/* Mobile menu */}
@@ -118,7 +91,7 @@ export function Navbar() {
             size="lg"
             onPress={() => setIsMenuOpen(false)}
           >
-            Scan Receipt
+            <h3 className="title-card">Scan Receipt</h3>
           </Link>
         </NavbarMenuItem>
         {user && (
@@ -129,7 +102,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              Dashboard
+              <h3 className="title-card">Dashboard</h3>
             </Link>
           </NavbarMenuItem>
         )}
@@ -141,7 +114,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              Log In
+              <h3 className="title-card">Log In</h3>
             </Link>
           </NavbarMenuItem>
         )}

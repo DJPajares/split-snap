@@ -2,23 +2,105 @@
 
 @plugin '../hero.ts';
 
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts}';
+@source '../node_modules/@heroui/theme/dist';
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --primary: oklch(0.5 0.25 270);
+  --primary-foreground: oklch(0.97 0.01 240);
+  --secondary: oklch(0.65 0.12 260);
+  --secondary-foreground: oklch(0.3 0.05 25);
+  --tertiary: oklch(0.75 0.18 85);
+  --tertiary-foreground: oklch(0.2 0.02 240);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
 }
 
-/*
- * HeroUI base layer: apply the .dark theme class utilities
- * and ensure smooth color transitions on theme toggle.
- */
-@layer base {
-  :root {
-    color-scheme: light;
+.dark {
+  --primary: oklch(0.55 0.12 165);
+  --primary-foreground: oklch(0.97 0.01 240);
+  --secondary: oklch(0.5 0.12 300);
+  --secondary-foreground: oklch(0.9 0.02 240);
+  --tertiary: oklch(0.7 0.15 85);
+  --tertiary-foreground: oklch(0.95 0.01 240);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.3 0.02 240);
+  --accent-foreground: oklch(0.97 0.01 240);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+}
+
+@layer components {
+  .title-hero {
+    @apply text-foreground text-4xl font-extrabold tracking-tight;
   }
 
-  .dark {
-    color-scheme: dark;
+  .title-page {
+    @apply text-foreground text-3xl font-bold tracking-tight;
+  }
+
+  .title-section {
+    @apply text-foreground text-2xl font-semibold;
+  }
+
+  .title-card {
+    @apply text-foreground text-xl font-semibold;
+  }
+
+  .title-subsection {
+    @apply text-foreground text-lg font-medium;
+  }
+
+  .text-body {
+    @apply text-foreground text-base;
+  }
+
+  .text-body-sm {
+    @apply text-foreground text-sm;
+  }
+
+  .text-description {
+    @apply text-muted-foreground text-sm;
+  }
+
+  .text-description-lg {
+    @apply text-muted-foreground text-base;
+  }
+
+  .text-muted {
+    @apply text-muted-foreground;
+  }
+
+  .text-label {
+    @apply text-foreground text-sm font-medium;
+  }
+
+  .text-caption {
+    @apply text-muted-foreground text-xs;
   }
 }

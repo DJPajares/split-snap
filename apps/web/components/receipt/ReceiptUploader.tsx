@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, CardBody, Spinner } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import { useCallback, useRef, useState } from 'react';
 
 interface ReceiptUploaderProps {
@@ -43,7 +44,7 @@ export function ReceiptUploader({
       }`}
     >
       <CardBody
-        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8"
+        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8 text-center"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -66,7 +67,7 @@ export function ReceiptUploader({
         {isLoading ? (
           <>
             <Spinner size="lg" color="primary" />
-            <p className="text-default-500">Scanning receipt with AI...</p>
+            <p className="text-description-lg">Scanning receipt with AI...</p>
           </>
         ) : preview ? (
           <>
@@ -76,15 +77,16 @@ export function ReceiptUploader({
               alt="Receipt preview"
               className="max-h-48 rounded-lg object-contain"
             />
-            <p className="text-default-500 text-sm">Click or drop to replace</p>
+            <p className="text-description">Click or drop to replace</p>
           </>
         ) : (
           <>
-            <span className="text-5xl">📸</span>
+            {/* <span className="text-5xl">📸</span> */}
+            <Icon icon="tabler:camera" height={48} />
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>
-            <p className="text-default-500 text-sm">Supports JPEG, PNG, HEIC</p>
+            <p className="text-description">Supports JPEG, PNG, HEIC</p>
             <Button
               color="primary"
               variant="flat"

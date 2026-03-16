@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Button, Spinner } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { ScannedItem, Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
@@ -155,24 +156,23 @@ export default function EditSessionPage({
   }));
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+    <div>
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">
-            <h1 className="text-2xl font-bold">Edit Items</h1>
-            <p className="text-default-500 text-base font-semibold">
-              Session {code}
-            </p>
+            <h1 className="title-section">Edit Items</h1>
+            <p className="text-description-lg">Session {code}</p>
           </div>
           <Button
             variant="flat"
             size="sm"
+            startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
-            ← Back
+            Back
           </Button>
         </div>
-        <p className="text-default-500 text-sm">
+        <p className="text-description">
           Modify items, prices, or quantities. Claims on changed items will be
           cleared.
         </p>
