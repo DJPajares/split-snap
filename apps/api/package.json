@@ -17,10 +17,10 @@
     "@hono/node-server": "^1.19.11",
     "@split-snap/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
-    "hono": "^4.12.7",
+    "hono": "^4.12.8",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.0",
-    "openai": "^6.27.0",
+    "openai": "^6.29.0",
     "tesseract.js": "^7.0.0",
     "zod": "^4.3.6"
   },
