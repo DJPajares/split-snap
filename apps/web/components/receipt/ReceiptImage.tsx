@@ -1,6 +1,5 @@
 import { Button } from '@heroui/react';
 import { Icon } from '@iconify/react';
-import Image from 'next/image';
 import { useState } from 'react';
 
 type ReceiptImageProps = {
@@ -59,14 +58,13 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
               </Button>
             )}
           </div>
-          <div className="border-default-200 flex max-h-80 justify-center overflow-auto rounded-lg border">
-            <Image
+          <div className="border-default-200 max-h-80 overflow-auto rounded-lg border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={receiptImageUrl}
               alt="Scanned receipt"
-              className="origin-top transition-transform"
+              className="w-full origin-top-left transition-transform"
               style={{ transform: `scale(${receiptZoom})` }}
-              width={400}
-              height={600}
             />
           </div>
         </div>
