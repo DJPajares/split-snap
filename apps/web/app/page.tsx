@@ -94,7 +94,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section>
+      <section className="bg-accent -mx-4 px-4 py-12 sm:-mx-8 sm:px-8">
         <div className="mx-auto flex flex-col gap-8 text-center">
           <h2 className="title-page">How It Works</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

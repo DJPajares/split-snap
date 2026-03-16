@@ -470,8 +470,8 @@ export default function SessionPage({
       )}
 
       {/* Main content: items + sidebar */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
+        <div className="sm:col-span-3">
           <h2 className="text-lg font-semibold">
             Items ({session.items.length})
           </h2>
@@ -484,7 +484,7 @@ export default function SessionPage({
           />
         </div>
 
-        <div className="order-first lg:order-last">
+        <div className="order-first sm:order-last sm:col-span-2">
           <ParticipantSidebar
             session={session}
             currentParticipantId={participantId}
