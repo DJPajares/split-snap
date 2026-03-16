@@ -102,7 +102,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <Card>
-        <CardHeader className="flex flex-col items-center gap-2 pt-8">
+        <CardHeader className="flex flex-col items-center gap-2 pt-8 text-center">
           <Image
             src="/logo.png"
             alt={`${APP.NAME} logo`}
@@ -111,9 +111,9 @@ export default function LoginPage() {
             className="rounded-md"
             priority
           />
-          <h2>{`Welcome to ${APP.NAME}`}</h2>
+          <h2 className="title-section">{`Welcome to ${APP.NAME}`}</h2>
           <p className="text-description">
-            Sign in to save your sessions and access them later.
+            Sign in to save your sessions and access them later
           </p>
         </CardHeader>
 

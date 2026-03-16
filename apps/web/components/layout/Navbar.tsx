@@ -91,7 +91,7 @@ export function Navbar() {
             size="lg"
             onPress={() => setIsMenuOpen(false)}
           >
-            <h3 className="title-subsection">Scan Receipt</h3>
+            <h3 className="title-card">Scan Receipt</h3>
           </Link>
         </NavbarMenuItem>
         {user && (
@@ -102,7 +102,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              <h3 className="title-subsection">Dashboard</h3>
+              <h3 className="title-card">Dashboard</h3>
             </Link>
           </NavbarMenuItem>
         )}
@@ -114,7 +114,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              <h3 className="title-subsection">Log In</h3>
+              <h3 className="title-card">Log In</h3>
             </Link>
           </NavbarMenuItem>
         )}
