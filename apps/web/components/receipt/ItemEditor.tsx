@@ -31,6 +31,8 @@ import type { ScannedItem } from '@split-snap/shared/types';
 import { useCallback, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
+import { ReceiptImage } from './ReceiptImage';
+
 interface ItemEditorProps {
   initialItems: ScannedItem[];
   initialSubtotal: number;
@@ -137,8 +139,6 @@ export function ItemEditor({
   submitLabel = 'Create Session',
   receiptImageUrl,
 }: ItemEditorProps) {
-  const [receiptExpanded, setReceiptExpanded] = useState(false);
-  const [receiptZoom, setReceiptZoom] = useState(1);
   const [removeIndex, setRemoveIndex] = useState<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
@@ -364,76 +364,12 @@ export function ItemEditor({
           )}
         />
       </CardHeader>
+
       <Divider />
+
       <CardBody className="gap-5">
         {/* Receipt reference image */}
-        {receiptImageUrl && (
-          <div className="space-y-2">
-            <button
-              className="flex w-full items-center gap-2 text-left"
-              onClick={() => setReceiptExpanded(!receiptExpanded)}
-            >
-              <span className="text-lg">🧾</span>
-              <span className="flex-1 text-sm font-medium">
-                Receipt Reference
-              </span>
-              <span className="text-caption">
-                {receiptExpanded ? 'Hide' : 'Show'}
-              </span>
-            </button>
-            {receiptExpanded && (
-              <div className="space-y-2">
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="flat"
-                      onPress={() =>
-                        setReceiptZoom((z) => Math.max(0.5, z - 0.25))
-                      }
-                      aria-label="Zoom out"
-                    >
-                      −
-                    </Button>
-                    <span className="text-caption w-12 text-center">
-                      {Math.round(receiptZoom * 100)}%
-                    </span>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="flat"
-                      onPress={() =>
-                        setReceiptZoom((z) => Math.min(3, z + 0.25))
-                      }
-                      aria-label="Zoom in"
-                    >
-                      +
-                    </Button>
-                  </div>
-                  {receiptZoom !== 1 && (
-                    <Button
-                      size="sm"
-                      variant="light"
-                      onPress={() => setReceiptZoom(1)}
-                    >
-                      Reset
-                    </Button>
-                  )}
-                </div>
-                <div className="border-default-200 max-h-80 overflow-auto rounded-lg border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={receiptImageUrl}
-                    alt="Scanned receipt"
-                    className="w-full origin-top-left transition-transform"
-                    style={{ transform: `scale(${receiptZoom})` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
 
         {/* Items */}
         <div className="space-y-4">
