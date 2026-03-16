@@ -60,12 +60,12 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
         >
           {isDarkMode ? (
             <span className="flex items-center">
-              <Icon icon="line-md:sun-rising-twotone-loop" className="mr-2" />
+              <Icon icon="tabler:sun-filled" className="mr-2" />
               Light Mode
             </span>
           ) : (
             <span className="flex items-center">
-              <Icon icon="line-md:moon-alt-loop" className="mr-2" />
+              <Icon icon="tabler:moon" className="mr-2" />
               Dark Mode
             </span>
           )}
@@ -78,7 +78,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             color="danger"
           >
             <span className="flex items-center">
-              <Icon icon="line-md:logout" className="mr-2" />
+              <Icon icon="tabler:logout" className="mr-2" />
               Log Out
             </span>
           </DropdownItem>
@@ -90,7 +90,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             color="primary"
           >
             <span className="flex items-center">
-              <Icon icon="line-md:login" className="mr-2" />
+              <Icon icon="tabler:login" className="mr-2" />
               Log In
             </span>
           </DropdownItem>

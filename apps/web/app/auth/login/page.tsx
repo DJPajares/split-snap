@@ -168,9 +168,9 @@ export default function LoginPage() {
                           onClick={() => setShowPassword((prev) => !prev)}
                         >
                           {showPassword ? (
-                            <Icon icon="mdi:eye-off" />
+                            <Icon icon="tabler:eye-off" />
                           ) : (
-                            <Icon icon="mdi:eye" />
+                            <Icon icon="tabler:eye" />
                           )}
                         </button>
                       }
@@ -246,9 +246,9 @@ export default function LoginPage() {
                           onClick={() => setShowPassword((prev) => !prev)}
                         >
                           {showPassword ? (
-                            <Icon icon="mdi:eye-off" />
+                            <Icon icon="tabler:eye-off" />
                           ) : (
-                            <Icon icon="mdi:eye" />
+                            <Icon icon="tabler:eye" />
                           )}
                         </button>
                       }
@@ -278,9 +278,9 @@ export default function LoginPage() {
                           }
                         >
                           {showConfirmPassword ? (
-                            <Icon icon="mdi:eye-off" />
+                            <Icon icon="tabler:eye-off" />
                           ) : (
-                            <Icon icon="mdi:eye" />
+                            <Icon icon="tabler:eye" />
                           )}
                         </button>
                       }

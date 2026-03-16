@@ -11,6 +11,7 @@ import {
   Spinner,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Icon } from '@iconify/react';
 import {
   type JoinSessionFormData,
   joinSessionSchema,
@@ -329,7 +330,7 @@ export default function JoinPage({
     <div>
       <Card>
         <CardHeader className="flex flex-col items-center gap-2">
-          <span className="mb-4 block text-5xl">👋</span>
+          <Icon icon="tabler:arrow-big-right-lines" height={44} />
           <h1 className="title-section">Join Session</h1>
           <p className="text-description-lg">
             {user

@@ -12,6 +12,7 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
@@ -392,16 +393,22 @@ export default function SessionPage({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="flat" size="sm" onPress={() => setShowShare(true)}>
-            🔗 Share
+          <Button
+            variant="flat"
+            size="sm"
+            startContent={<Icon icon="tabler:share-3" height={20} />}
+            onPress={() => setShowShare(true)}
+          >
+            Share
           </Button>
           <Button
             as="a"
             href={`/session/${code}/summary`}
             variant="flat"
             size="sm"
+            startContent={<Icon icon="tabler:chart-column" height={20} />}
           >
-            📊 Summary
+            Summary
           </Button>
         </div>
       </div>
@@ -414,29 +421,31 @@ export default function SessionPage({
             variant="solid"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:check" height={16} />}
             onPress={onSettleOpen}
             isDisabled={hasUnclaimedItems}
           >
-            ✓ Settle
+            Settle
           </Button>
           <Button
             as="a"
             href={`/session/${code}/edit`}
-            color="primary"
-            variant="flat"
+            variant="faded"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:edit" height={16} />}
           >
-            ✏️ Edit Items
+            Edit Items
           </Button>
           <Button
             color="danger"
             variant="light"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:trash" height={16} />}
             onPress={onDeleteOpen}
           >
-            🗑️ Delete
+            Delete
           </Button>
         </div>
       )}
@@ -447,19 +456,21 @@ export default function SessionPage({
             variant="flat"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:arrow-back" height={16} />}
             onPress={handleUnsettle}
             isLoading={unsettleLoading}
           >
-            ↩ Undo Settlement
+            Undo Settlement
           </Button>
           <Button
             color="danger"
             variant="light"
             size="md"
             className="w-full sm:w-auto"
+            startContent={<Icon icon="tabler:trash" height={16} />}
             onPress={onDeleteOpen}
           >
-            🗑️ Delete
+            Delete
           </Button>
         </div>
       )}

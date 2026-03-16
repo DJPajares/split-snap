@@ -114,10 +114,10 @@ export default function SummaryPage({
         <Button
           variant="flat"
           size="sm"
-          startContent={<Icon icon="lucide:arrow-left" />}
+          startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
           onPress={() => router.push(`/session/${code}`)}
         >
-          Back to Session
+          Back
         </Button>
       </div>
 

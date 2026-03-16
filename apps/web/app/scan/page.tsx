@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState, useTransition } from 'react';
@@ -139,13 +140,29 @@ function ScanPageInner() {
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
       >
-        <Tab key="scan" title="📸 Scan Receipt">
+        <Tab
+          key="scan"
+          title={
+            <div className="flex items-center space-x-2">
+              <Icon icon="tabler:camera" />
+              <span>Scan Receipt</span>
+            </div>
+          }
+        >
           <ReceiptUploader
             onFileSelected={handleFileSelected}
             isLoading={scanning}
           />
         </Tab>
-        <Tab key="manual" title="✏️ Manual Entry">
+        <Tab
+          key="manual"
+          title={
+            <div className="flex items-center space-x-2">
+              <Icon icon="tabler:pencil" />
+              <span>Manual Entry</span>
+            </div>
+          }
+        >
           <div>
             <ItemEditor
               initialItems={scanResult?.items ?? []}

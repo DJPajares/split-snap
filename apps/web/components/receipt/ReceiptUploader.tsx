@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, CardBody, Spinner } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import { useCallback, useRef, useState } from 'react';
 
 interface ReceiptUploaderProps {
@@ -43,7 +44,7 @@ export function ReceiptUploader({
       }`}
     >
       <CardBody
-        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8"
+        className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8 text-center"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -80,7 +81,8 @@ export function ReceiptUploader({
           </>
         ) : (
           <>
-            <span className="text-5xl">📸</span>
+            {/* <span className="text-5xl">📸</span> */}
+            <Icon icon="tabler:camera" height={48} />
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>

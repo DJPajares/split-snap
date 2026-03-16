@@ -166,7 +166,7 @@ export default function EditSessionPage({
           <Button
             variant="flat"
             size="sm"
-            startContent={<Icon icon="lucide:arrow-left" />}
+            startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
             Back
