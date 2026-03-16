@@ -10,6 +10,7 @@ import {
   SelectItem,
   Spinner,
 } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
@@ -99,7 +100,6 @@ export default function SummaryPage({
 
   if (!session) return null;
 
-  // const summaries = calculateSummaries(session);
   const unclaimedItems = session.items.filter(
     (item) => item.claimedBy.length === 0,
   );
@@ -114,9 +114,10 @@ export default function SummaryPage({
         <Button
           variant="flat"
           size="sm"
+          startContent={<Icon icon="lucide:arrow-left" />}
           onPress={() => router.push(`/session/${code}`)}
         >
-          ← Back to Session
+          Back to Session
         </Button>
       </div>
 

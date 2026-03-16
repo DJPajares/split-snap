@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Button, Spinner } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import type { ScannedItem, Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
@@ -165,9 +166,10 @@ export default function EditSessionPage({
           <Button
             variant="flat"
             size="sm"
+            startContent={<Icon icon="lucide:arrow-left" />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
-            ← Back
+            Back
           </Button>
         </div>
         <p className="text-description">
