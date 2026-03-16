@@ -127,27 +127,26 @@ function ScanPageInner() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold">New Split</h1>
-      <p className="text-default-500 mb-6">
-        Scan a receipt or enter items manually to start splitting.
-      </p>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-1">
+        <h1 className="title-section">New Split</h1>
+        <p className="text-description-lg">
+          Scan a receipt or enter items manually to start splitting.
+        </p>
+      </div>
 
       <Tabs
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
-        className="mb-6"
       >
         <Tab key="scan" title="📸 Scan Receipt">
-          <div className="mt-4">
-            <ReceiptUploader
-              onFileSelected={handleFileSelected}
-              isLoading={scanning}
-            />
-          </div>
+          <ReceiptUploader
+            onFileSelected={handleFileSelected}
+            isLoading={scanning}
+          />
         </Tab>
         <Tab key="manual" title="✏️ Manual Entry">
-          <div className="mt-4">
+          <div>
             <ItemEditor
               initialItems={scanResult?.items ?? []}
               initialSubtotal={scanResult?.subtotal ?? 0}

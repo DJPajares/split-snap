@@ -100,10 +100,12 @@ const ModeDropdown = ({
       <div
         role="button"
         tabIndex={0}
-        className="text-default-500 hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1 text-sm"
+        className="hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1"
       >
-        {mode === '$' ? (currencySymbol ?? '$') : '%'}
-        <span className="ml-1 text-xs">▾</span>
+        <p className="text-description">
+          {mode === '$' ? (currencySymbol ?? '$') : '%'}
+          <span className="ml-1 text-xs">▾</span>
+        </p>
       </div>
     </DropdownTrigger>
     <DropdownMenu
@@ -336,8 +338,8 @@ export function ItemEditor({
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-2">
-        <h2 className="text-xl font-bold">Review Items</h2>
-        <p className="text-default-500 text-sm">
+        <h3 className="title-card">Review Items</h3>
+        <p className="text-description">
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
         <Controller
@@ -375,7 +377,7 @@ export function ItemEditor({
               <span className="flex-1 text-sm font-medium">
                 Receipt Reference
               </span>
-              <span className="text-default-400 text-xs">
+              <span className="text-caption">
                 {receiptExpanded ? 'Hide' : 'Show'}
               </span>
             </button>
@@ -394,7 +396,7 @@ export function ItemEditor({
                     >
                       −
                     </Button>
-                    <span className="text-default-500 w-12 text-center text-xs">
+                    <span className="text-caption w-12 text-center">
                       {Math.round(receiptZoom * 100)}%
                     </span>
                     <Button
@@ -447,7 +449,7 @@ export function ItemEditor({
             >
               <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-default-500 flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
+                  <p className="text-caption flex items-center gap-2 font-medium tracking-wide uppercase">
                     <span
                       className="cursor-grab select-none"
                       aria-hidden="true"
@@ -501,7 +503,7 @@ export function ItemEditor({
                         }
                         onBlur={f.onBlur}
                         startContent={
-                          <span className="text-default-400 text-sm">
+                          <span className="text-description">
                             {currencySymbol}
                           </span>
                         }
@@ -541,14 +543,16 @@ export function ItemEditor({
                 </div>
                 {parseInteger(watchedItems[i]?.quantity ?? '0') > 1 &&
                   parseNumber(watchedItems[i]?.amount ?? '0') > 0 && (
-                    <p className="text-default-500 flex justify-end text-xs">
-                      {currencySymbol}
-                      {(
-                        parseNumber(watchedItems[i]?.amount ?? '0') /
-                        parseInteger(watchedItems[i]?.quantity ?? '1')
-                      ).toFixed(2)}{' '}
-                      each
-                    </p>
+                    <span className="flex justify-end">
+                      <p className="text-caption">
+                        {currencySymbol}
+                        {(
+                          parseNumber(watchedItems[i]?.amount ?? '0') /
+                          parseInteger(watchedItems[i]?.quantity ?? '1')
+                        ).toFixed(2)}{' '}
+                        each
+                      </p>
+                    </span>
                   )}
               </div>
             </div>
@@ -570,11 +574,11 @@ export function ItemEditor({
         {/* Totals */}
         <div className="space-y-3">
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
-            <p className="text-default-500 text-xs">Subtotal</p>
-            <p className="text-medium">
+            <p className="text-caption">Subtotal</p>
+            <h3 className="title-subsection">
               {currencySymbol}
               {subtotal.toFixed(2)}
-            </p>
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -595,7 +599,7 @@ export function ItemEditor({
                         f.onChange(toFormNumberString(value))
                       }
                       startContent={
-                        <span className="text-default-400 text-sm">
+                        <span className="text-description">
                           {watchedTaxMode === '$' ? currencySymbol : '%'}
                         </span>
                       }
@@ -642,14 +646,16 @@ export function ItemEditor({
               </div>
               {/* Show resolved tax amount when in percentage mode */}
               {watchedTaxMode === '%' && subtotal > 0 && (
-                <div className="text-default-400 flex justify-end gap-4 text-xs">
-                  {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
-                    <span>
-                      {currencySymbol}
-                      {taxValue.toFixed(2)}
-                    </span>
-                  )}
-                </div>
+                <span className="flex justify-end">
+                  <p className="text-caption">
+                    {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
+                      <span>
+                        {currencySymbol}
+                        {taxValue.toFixed(2)}
+                      </span>
+                    )}
+                  </p>
+                </span>
               )}
             </div>
 
@@ -672,7 +678,7 @@ export function ItemEditor({
                         f.onChange(toFormNumberString(value))
                       }
                       startContent={
-                        <span className="text-default-400 text-sm">
+                        <span className="text-description">
                           {watchedTipMode === '$' ? currencySymbol : '%'}
                         </span>
                       }
@@ -719,31 +725,32 @@ export function ItemEditor({
               </div>
               {/* Show resolved tip amount when in percentage mode */}
               {watchedTipMode === '%' && subtotal > 0 && (
-                <div className="text-default-400 flex justify-end gap-4 text-xs">
-                  {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
-                    <span>
-                      {currencySymbol}
-                      {tipValue.toFixed(2)}
-                    </span>
-                  )}
-                </div>
+                <span className="flex justify-end">
+                  <p className="text-caption flex">
+                    {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
+                      <span>
+                        {currencySymbol}
+                        {tipValue.toFixed(2)}
+                      </span>
+                    )}
+                  </p>
+                </span>
               )}
             </div>
           </div>
 
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
-            <p className="text-default-500 text-xs">Total</p>
-            <p className="text-xl font-bold">
+            <p className="text-caption">Total</p>
+            <h2 className="title-section">
               {currencySymbol}
               {total.toFixed(2)}
-            </p>
+            </h2>
           </div>
         </div>
 
         <Button
           color="primary"
           size="lg"
-          className="mt-2 font-semibold"
           onPress={() => rhfHandleSubmit(onFormSubmit)()}
           isLoading={isSubmitting}
         >

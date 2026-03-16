@@ -58,38 +58,40 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
     <Card>
       <CardHeader>
         <div className="flex w-full items-center justify-between">
-          <h3 className="text-lg font-bold">{summary.displayName}</h3>
-          <span className="text-primary text-xl font-bold">
+          <h3 className="title-subsection">{summary.displayName}</h3>
+          <h3 className="text-primary title-card">
             {formatCurrency({
               value: summary.total,
               currency,
               decimal: 2,
             })}
-          </span>
+          </h3>
         </div>
       </CardHeader>
+
       <Divider />
+
       <CardBody className="gap-2">
         {summary.items.map((item, i) => (
-          <div key={i} className="flex justify-between text-sm">
-            <span className="text-default-600">
+          <div key={i} className="flex justify-between">
+            <p className="text-description-lg">
               {item.name}
               {getItemQuantityLabel(item.claimedQuantity)}
-            </span>
-            <span>
+            </p>
+            <p>
               {formatCurrency({
                 value: item.amount,
                 currency,
                 decimal: 2,
               })}
-            </span>
+            </p>
           </div>
         ))}
 
         {summary.items.length > 0 && <Divider className="my-1" />}
 
-        <div className="flex justify-between text-sm">
-          <span className="text-default-500">Items subtotal</span>
+        <div className="flex justify-between">
+          <span className="text-description-lg">Items subtotal</span>
           <span>
             {formatCurrency({
               value: summary.itemsSubtotal,
@@ -98,8 +100,8 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
             })}
           </span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-default-500">Tax (share)</span>
+        <div className="flex justify-between">
+          <span className="text-description-lg">Tax (share)</span>
           <span>
             {formatCurrency({
               value: summary.taxShare,
@@ -108,8 +110,10 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
             })}
           </span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-default-500">Service Charge/Tip (share)</span>
+        <div className="flex justify-between">
+          <span className="text-description-lg">
+            Service Charge/Tip (share)
+          </span>
           <span>
             {formatCurrency({
               value: summary.tipShare,
