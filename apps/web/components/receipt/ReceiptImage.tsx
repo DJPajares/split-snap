@@ -1,4 +1,5 @@
 import { Button } from '@heroui/react';
+import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -33,7 +34,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                 onPress={() => setReceiptZoom((z) => Math.max(0.5, z - 0.25))}
                 aria-label="Zoom out"
               >
-                −
+                <Icon icon="tabler:minus" height={12} />
               </Button>
               <span className="text-caption w-12 text-center">
                 {Math.round(receiptZoom * 100)}%
@@ -45,7 +46,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                 onPress={() => setReceiptZoom((z) => Math.min(3, z + 0.25))}
                 aria-label="Zoom in"
               >
-                +
+                <Icon icon="tabler:plus" height={12} />
               </Button>
             </div>
             {receiptZoom !== 1 && (
