@@ -17,6 +17,7 @@ import type { Session } from '@split-snap/shared/types';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
+import { ReceiptImage } from '@/components/receipt/ReceiptImage';
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
 import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
@@ -43,6 +44,7 @@ export default function SessionPage({
   const [settleLoading, setSettleLoading] = useState(false);
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
   const {
     isOpen: isSettleOpen,
     onOpen: onSettleOpen,
@@ -55,6 +57,18 @@ export default function SessionPage({
   } = useDisclosure();
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
+
+  // Load receipt image from sessionStorage if available
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('receipt_image');
+      if (stored) {
+        setReceiptImageUrl(stored);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
 
   // Load initial session data and validate participant
   useEffect(() => {
@@ -504,6 +518,14 @@ export default function SessionPage({
             onApprove={handleApprove}
             onReject={handleReject}
           />
+        </div>
+
+        {/* Receipt image upload and preview */}
+        <div className="space-y-2">
+          {/* Receipt reference image */}
+          {receiptImageUrl && (
+            <ReceiptImage receiptImageUrl={receiptImageUrl} />
+          )}
         </div>
       </div>
 
