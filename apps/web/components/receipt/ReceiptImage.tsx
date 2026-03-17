@@ -58,7 +58,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
               </Button>
             )}
           </div>
-          <div className="border-default-200 max-h-80 overflow-auto rounded-lg border">
+          <div className="border-default-200 max-h-80 overflow-auto rounded-lg border sm:max-h-120">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={receiptImageUrl}

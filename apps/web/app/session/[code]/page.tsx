@@ -494,6 +494,12 @@ export default function SessionPage({
         </p>
       )}
 
+      {/* Receipt image upload and preview */}
+      <div className="space-y-2">
+        {/* Receipt reference image */}
+        {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
+      </div>
+
       {/* Main content: items + sidebar */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
         <div className="sm:col-span-3">
@@ -518,14 +524,6 @@ export default function SessionPage({
             onApprove={handleApprove}
             onReject={handleReject}
           />
-        </div>
-
-        {/* Receipt image upload and preview */}
-        <div className="space-y-2">
-          {/* Receipt reference image */}
-          {receiptImageUrl && (
-            <ReceiptImage receiptImageUrl={receiptImageUrl} />
-          )}
         </div>
       </div>
 
