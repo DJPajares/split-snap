@@ -5,7 +5,12 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
+import {
+  IconLogin,
+  IconLogout,
+  IconMoon,
+  IconSunFilled,
+} from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
@@ -59,15 +64,15 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
           onPress={handleDarkModeToggle}
         >
           {isDarkMode ? (
-            <span className="flex items-center">
-              <Icon icon="tabler:sun-filled" className="mr-2" />
-              Light Mode
-            </span>
+            <div className="flex flex-row items-center gap-2">
+              <IconSunFilled />
+              <p>Light Mode</p>
+            </div>
           ) : (
-            <span className="flex items-center">
-              <Icon icon="tabler:moon" className="mr-2" />
-              Dark Mode
-            </span>
+            <div className="flex flex-row items-center gap-2">
+              <IconMoon />
+              <p>Dark Mode</p>
+            </div>
           )}
         </DropdownItem>
         {user ? (
@@ -77,10 +82,10 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             onPress={handleLogout}
             color="danger"
           >
-            <span className="flex items-center">
-              <Icon icon="tabler:logout" className="mr-2" />
-              Log Out
-            </span>
+            <div className="flex flex-row items-center gap-2">
+              <IconLogout />
+              <p>Log Out</p>
+            </div>
           </DropdownItem>
         ) : (
           <DropdownItem
@@ -89,10 +94,10 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             onPress={handleLogin}
             color="primary"
           >
-            <span className="flex items-center">
-              <Icon icon="tabler:login" className="mr-2" />
-              Log In
-            </span>
+            <div className="flex flex-row items-center gap-2">
+              <IconLogin />
+              <p>Log In</p>
+            </div>
           </DropdownItem>
         )}
       </DropdownMenu>

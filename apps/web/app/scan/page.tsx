@@ -1,8 +1,8 @@
 'use client';
 
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
-import { Icon } from '@iconify/react';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
+import { IconCamera, IconPencil } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState, useTransition } from 'react';
 
@@ -143,9 +143,9 @@ function ScanPageInner() {
         <Tab
           key="scan"
           title={
-            <div className="flex items-center space-x-2">
-              <Icon icon="tabler:camera" />
-              <span>Scan Receipt</span>
+            <div className="flex flex-row items-center gap-2">
+              <IconCamera size={16} />
+              <p>Scan Receipt</p>
             </div>
           }
         >
@@ -157,9 +157,9 @@ function ScanPageInner() {
         <Tab
           key="manual"
           title={
-            <div className="flex items-center space-x-2">
-              <Icon icon="tabler:pencil" />
-              <span>Manual Entry</span>
+            <div className="flex flex-row items-center gap-2">
+              <IconPencil size={16} />
+              <p>Manual Entry</p>
             </div>
           }
         >

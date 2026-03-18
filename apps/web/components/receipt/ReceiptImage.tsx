@@ -1,5 +1,5 @@
 import { Button, Card, CardBody } from '@heroui/react';
-import { Icon } from '@iconify/react';
+import { IconMinus, IconPlus, IconReceiptFilled } from '@tabler/icons-react';
 import { useState } from 'react';
 
 type ReceiptImageProps = {
@@ -17,7 +17,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
           className="flex w-full items-center gap-2 text-left"
           onClick={() => setReceiptExpanded(!receiptExpanded)}
         >
-          <Icon icon="tabler:receipt-filled" />
+          <IconReceiptFilled size={16} />
           <span className="flex-1 text-sm font-medium">Receipt Reference</span>
           <span className="text-caption">
             {receiptExpanded ? 'Hide' : 'Show'}
@@ -34,7 +34,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                   onPress={() => setReceiptZoom((z) => Math.max(0.5, z - 0.25))}
                   aria-label="Zoom out"
                 >
-                  <Icon icon="tabler:minus" height={12} />
+                  <IconMinus size={12} />
                 </Button>
                 <span className="text-caption w-12 text-center">
                   {Math.round(receiptZoom * 100)}%
@@ -46,7 +46,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                   onPress={() => setReceiptZoom((z) => Math.min(3, z + 0.25))}
                   aria-label="Zoom in"
                 >
-                  <Icon icon="tabler:plus" height={12} />
+                  <IconPlus size={12} />
                 </Button>
               </div>
               {receiptZoom !== 1 && (

@@ -12,8 +12,15 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
 import type { Session } from '@split-snap/shared/types';
+import {
+  IconArrowBack,
+  IconChartColumn,
+  IconCheck,
+  IconEdit,
+  IconShare3,
+  IconTrash,
+} from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -410,7 +417,7 @@ export default function SessionPage({
           <Button
             variant="flat"
             size="sm"
-            startContent={<Icon icon="tabler:share-3" height={20} />}
+            startContent={<IconShare3 />}
             onPress={() => setShowShare(true)}
           >
             Share
@@ -420,7 +427,7 @@ export default function SessionPage({
             href={`/session/${code}/summary`}
             variant="flat"
             size="sm"
-            startContent={<Icon icon="tabler:chart-column" height={20} />}
+            startContent={<IconChartColumn />}
           >
             Summary
           </Button>
@@ -435,7 +442,7 @@ export default function SessionPage({
             variant="solid"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:check" height={16} />}
+            startContent={<IconCheck size={16} />}
             onPress={onSettleOpen}
             isDisabled={hasUnclaimedItems}
           >
@@ -447,7 +454,7 @@ export default function SessionPage({
             variant="faded"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:edit" height={16} />}
+            startContent={<IconEdit size={16} />}
           >
             Edit Items
           </Button>
@@ -456,7 +463,7 @@ export default function SessionPage({
             variant="light"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:trash" height={16} />}
+            startContent={<IconTrash size={16} />}
             onPress={onDeleteOpen}
           >
             Delete
@@ -470,7 +477,7 @@ export default function SessionPage({
             variant="flat"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:arrow-back" height={16} />}
+            startContent={<IconArrowBack size={16} />}
             onPress={handleUnsettle}
             isLoading={unsettleLoading}
           >
@@ -481,7 +488,7 @@ export default function SessionPage({
             variant="light"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:trash" height={16} />}
+            startContent={<IconTrash size={16} />}
             onPress={onDeleteOpen}
           >
             Delete

@@ -11,11 +11,11 @@ import {
   Spinner,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Icon } from '@iconify/react';
 import {
   type JoinSessionFormData,
   joinSessionSchema,
 } from '@split-snap/shared/schemas';
+import { IconArrowBigRightLines } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -330,7 +330,7 @@ export default function JoinPage({
     <div>
       <Card>
         <CardHeader className="flex flex-col items-center gap-2">
-          <Icon icon="tabler:arrow-big-right-lines" height={44} />
+          <IconArrowBigRightLines size={40} />
           <h1 className="title-section">Join Session</h1>
           <p className="text-description-lg">
             {user

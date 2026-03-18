@@ -10,10 +10,10 @@ import {
   SelectItem,
   Spinner,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
+import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
@@ -114,7 +114,7 @@ export default function SummaryPage({
         <Button
           variant="flat"
           size="sm"
-          startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
+          startContent={<IconArrowBigLeft size={16} />}
           onPress={() => router.push(`/session/${code}`)}
         >
           Back
