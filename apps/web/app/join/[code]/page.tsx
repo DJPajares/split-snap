@@ -16,6 +16,7 @@ import {
   type JoinSessionFormData,
   joinSessionSchema,
 } from '@split-snap/shared/schemas';
+import { ParamsCodeProps } from '@split-snap/shared/types';
 import { IconArrowBigRightLines } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
@@ -29,11 +30,7 @@ import { ApiError } from '@/lib/errors';
 
 type JoinState = 'idle' | 'joining' | 'pending' | 'rejected' | 'kicked';
 
-export default function JoinPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function JoinPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();

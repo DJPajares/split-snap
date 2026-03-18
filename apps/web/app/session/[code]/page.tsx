@@ -13,7 +13,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
-import type { Session } from '@split-snap/shared/types';
+import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
 import {
   IconArrowBack,
   IconChartColumn,
@@ -34,13 +34,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
 import { api } from '@/lib/api';
 
-type SessionPageProps = {
-  params: Promise<{
-    code: string;
-  }>;
-};
-
-export default function SessionPage({ params }: SessionPageProps) {
+export default function SessionPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const normalizedCode = code.toUpperCase();
   const router = useRouter();

@@ -13,7 +13,7 @@ import {
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
-import type { Session } from '@split-snap/shared/types';
+import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
 import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
@@ -22,11 +22,7 @@ import PersonSummaryCard from '@/components/shared/PersonSummaryCard';
 import { useApiError } from '@/hooks/useApiError';
 import { api } from '@/lib/api';
 
-export default function SummaryPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function SummaryPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);

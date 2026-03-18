@@ -2,7 +2,11 @@
 
 import { addToast, Button, Spinner } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
-import type { ScannedItem, Session } from '@split-snap/shared/types';
+import type {
+  ParamsCodeProps,
+  ScannedItem,
+  Session,
+} from '@split-snap/shared/types';
 import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
@@ -12,11 +16,7 @@ import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 
-export default function EditSessionPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function EditSessionPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const normalizedCode = code.toUpperCase();
   const router = useRouter();
