@@ -34,14 +34,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
 import { api } from '@/lib/api';
 
-export default function SessionPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+type SessionPageProps = {
+  params: Promise<{
+    code: string;
+  }>;
+};
+
+export default function SessionPage({ params }: SessionPageProps) {
   const { code } = use(params);
   const normalizedCode = code.toUpperCase();
   const router = useRouter();
+
   const [initialSession, setInitialSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +56,7 @@ export default function SessionPage({
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+
   const {
     isOpen: isSettleOpen,
     onOpen: onSettleOpen,
@@ -456,29 +460,46 @@ export default function SessionPage({
       </div>
 
       {/* Creator CTA actions */}
-      {isCreator && session.status === 'active' && (
+      {isCreator && (
         <div className="flex flex-wrap gap-3">
-          <Button
-            color="success"
-            variant="solid"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<IconCheck size={16} />}
-            onPress={onSettleOpen}
-            isDisabled={hasUnclaimedItems}
-          >
-            Settle
-          </Button>
-          <Button
-            as="a"
-            href={`/session/${code}/edit`}
-            variant="faded"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<IconEdit size={16} />}
-          >
-            Edit Items
-          </Button>
+          {session.status === 'active' && (
+            <>
+              <Button
+                color="success"
+                variant="solid"
+                size="md"
+                className="w-full sm:w-auto"
+                startContent={<IconCheck size={16} />}
+                onPress={onSettleOpen}
+                isDisabled={hasUnclaimedItems}
+              >
+                Settle
+              </Button>
+              <Button
+                as="a"
+                href={`/session/${code}/edit`}
+                variant="faded"
+                size="md"
+                className="w-full sm:w-auto"
+                startContent={<IconEdit size={16} />}
+              >
+                Edit Items
+              </Button>
+            </>
+          )}
+          {session.status === 'settled' && (
+            <Button
+              color="warning"
+              variant="flat"
+              size="md"
+              className="w-full sm:w-auto"
+              startContent={<IconArrowBack size={16} />}
+              onPress={handleUnsettle}
+              isLoading={unsettleLoading}
+            >
+              Undo Settlement
+            </Button>
+          )}
           <Button
             color="danger"
             variant="light"
@@ -491,46 +512,19 @@ export default function SessionPage({
           </Button>
         </div>
       )}
-      {isCreator && session.status === 'settled' && (
-        <div className="flex flex-wrap gap-3">
-          <Button
-            color="warning"
-            variant="flat"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<IconArrowBack size={16} />}
-            onPress={handleUnsettle}
-            isLoading={unsettleLoading}
-          >
-            Undo Settlement
-          </Button>
-          <Button
-            color="danger"
-            variant="light"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<IconTrash size={16} />}
-            onPress={onDeleteOpen}
-          >
-            Delete
-          </Button>
-        </div>
-      )}
+
       {session.status === 'active' && hasUnclaimedItems && isCreator && (
         <p className="text-warning text-sm">
           Claim all items before finalizing settlement.
         </p>
       )}
 
-      {/* Receipt image upload and preview */}
-      <div className="space-y-2">
-        {/* Receipt reference image */}
-        {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
-      </div>
+      {/* Receipt reference image */}
+      {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
 
       {/* Main content: items + sidebar */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
-        <div className="sm:col-span-3">
+        <div className="flex flex-col gap-2 sm:col-span-3">
           <h2 className="text-lg font-semibold">
             Items ({session.items.length})
           </h2>
@@ -543,7 +537,8 @@ export default function SessionPage({
           />
         </div>
 
-        <div className="order-first sm:order-last sm:col-span-2">
+        <div className="order-first flex flex-col gap-2 sm:order-last sm:col-span-2">
+          <h2 className="text-lg font-semibold">{`Participants (${session.participants.length})`}</h2>
           <ParticipantSidebar
             session={session}
             currentParticipantId={participantId}
