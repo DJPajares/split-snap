@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
   Chip,
   Divider,
   Popover,
@@ -82,17 +81,6 @@ export function ParticipantSidebar({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col items-start gap-1">
-        <div className="flex w-full items-center justify-between">
-          <h3 className="title-subsection">Participants</h3>
-          <Chip size="sm" variant="flat">
-            {session.participants.length}
-          </Chip>
-        </div>
-      </CardHeader>
-
-      <Divider />
-
       <CardBody className="gap-3">
         {/* Pending participants (only visible to host) */}
         {isCreator &&

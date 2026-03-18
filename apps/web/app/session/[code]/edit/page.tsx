@@ -1,8 +1,13 @@
 'use client';
 
 import { addToast, Button, Spinner } from '@heroui/react';
-import { Icon } from '@iconify/react';
-import type { ScannedItem, Session } from '@split-snap/shared/types';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
+import type {
+  ParamsCodeProps,
+  ScannedItem,
+  Session,
+} from '@split-snap/shared/types';
+import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
@@ -11,11 +16,7 @@ import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 
-export default function EditSessionPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function EditSessionPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const normalizedCode = code.toUpperCase();
   const router = useRouter();
@@ -28,12 +29,16 @@ export default function EditSessionPage({
   const { handleError } = useApiError({ redirectTo: '/' });
   const hasHostToken =
     typeof window !== 'undefined' &&
-    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
+    Boolean(
+      localStorage.getItem(
+        `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+      ),
+    );
 
   // Load receipt image from sessionStorage if available
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem('receipt_image');
+      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
       if (stored) {
         setReceiptImageUrl(stored);
       }
@@ -156,7 +161,7 @@ export default function EditSessionPage({
   }));
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">
@@ -166,7 +171,7 @@ export default function EditSessionPage({
           <Button
             variant="flat"
             size="sm"
-            startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
+            startContent={<IconArrowBigLeft size={16} />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
             Back

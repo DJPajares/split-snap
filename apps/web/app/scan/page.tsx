@@ -1,8 +1,9 @@
 'use client';
 
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
-import { Icon } from '@iconify/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
+import { IconCamera, IconPencil } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState, useTransition } from 'react';
 
@@ -50,7 +51,7 @@ function ScanPageInner() {
           const base64 = reader.result as string;
           // Only store if under 4MB (sessionStorage limit ~5MB)
           if (base64.length < 4 * 1024 * 1024) {
-            sessionStorage.setItem('receipt_image', base64);
+            sessionStorage.setItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE, base64);
           }
         };
         reader.readAsDataURL(file);
@@ -106,14 +107,17 @@ function ScanPageInner() {
         // If the host was auto-joined, store participant ID to skip join page
         if (session.participantId) {
           localStorage.setItem(
-            `participant_${session.code}`,
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${session.code}`,
             session.participantId,
           );
         }
 
         // Store guest host token for non-authenticated session creators
         if (session.hostToken) {
-          localStorage.setItem(`host_token_${session.code}`, session.hostToken);
+          localStorage.setItem(
+            `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${session.code}`,
+            session.hostToken,
+          );
         }
 
         startTransition(() => {
@@ -143,9 +147,9 @@ function ScanPageInner() {
         <Tab
           key="scan"
           title={
-            <div className="flex items-center space-x-2">
-              <Icon icon="tabler:camera" />
-              <span>Scan Receipt</span>
+            <div className="flex flex-row items-center gap-2">
+              <IconCamera size={16} />
+              <p>Scan Receipt</p>
             </div>
           }
         >
@@ -157,9 +161,9 @@ function ScanPageInner() {
         <Tab
           key="manual"
           title={
-            <div className="flex items-center space-x-2">
-              <Icon icon="tabler:pencil" />
-              <span>Manual Entry</span>
+            <div className="flex flex-row items-center gap-2">
+              <IconPencil size={16} />
+              <p>Manual Entry</p>
             </div>
           }
         >

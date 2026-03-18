@@ -12,11 +12,20 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
-import type { Session } from '@split-snap/shared/types';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
+import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
+import {
+  IconArrowBack,
+  IconChartColumn,
+  IconCheck,
+  IconEdit,
+  IconShare3,
+  IconTrash,
+} from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
+import { ReceiptImage } from '@/components/receipt/ReceiptImage';
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
 import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
@@ -25,14 +34,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
 import { api } from '@/lib/api';
 
-export default function SessionPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function SessionPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const normalizedCode = code.toUpperCase();
   const router = useRouter();
+
   const [initialSession, setInitialSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +49,8 @@ export default function SessionPage({
   const [settleLoading, setSettleLoading] = useState(false);
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+
   const {
     isOpen: isSettleOpen,
     onOpen: onSettleOpen,
@@ -56,13 +64,27 @@ export default function SessionPage({
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
 
+  // Load receipt image from sessionStorage if available
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
+      if (stored) {
+        setReceiptImageUrl(stored);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
+
   // Load initial session data and validate participant
   useEffect(() => {
     api.sessions
       .get(normalizedCode)
       .then((s) => {
         setInitialSession(s);
-        const stored = localStorage.getItem(`participant_${normalizedCode}`);
+        const stored = localStorage.getItem(
+          `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+        );
         if (stored) {
           // Validate the stored participant still exists in the session
           const participant = s.participants.find((p) => p.id === stored);
@@ -71,12 +93,16 @@ export default function SessionPage({
             if (user) {
               if (!participant.userId) {
                 localStorage.setItem(
-                  `guest_participant_${normalizedCode}`,
+                  `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${normalizedCode}`,
                   stored,
                 );
-                localStorage.removeItem(`participant_${normalizedCode}`);
+                localStorage.removeItem(
+                  `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+                );
               } else if (participant.userId !== user.id) {
-                localStorage.removeItem(`participant_${normalizedCode}`);
+                localStorage.removeItem(
+                  `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+                );
               } else {
                 setParticipantId(stored);
               }
@@ -85,7 +111,9 @@ export default function SessionPage({
             }
           } else {
             // Participant was kicked — clear stale data
-            localStorage.removeItem(`participant_${normalizedCode}`);
+            localStorage.removeItem(
+              `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+            );
           }
         }
       })
@@ -108,8 +136,12 @@ export default function SessionPage({
           (p) => p.id === participantId,
         );
         if (!stillInSession) {
-          localStorage.removeItem(`participant_${code}`);
-          localStorage.removeItem(`participant_${normalizedCode}`);
+          localStorage.removeItem(
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+          );
+          localStorage.removeItem(
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+          );
           setParticipantId(null);
           addToast({
             title: 'You were removed from this session',
@@ -126,8 +158,10 @@ export default function SessionPage({
         description: 'This session was deleted by the host.',
         color: 'warning',
       });
-      localStorage.removeItem(`participant_${code}`);
-      localStorage.removeItem(`participant_${normalizedCode}`);
+      localStorage.removeItem(`${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`);
+      localStorage.removeItem(
+        `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+      );
       router.replace('/');
     },
   });
@@ -141,7 +175,11 @@ export default function SessionPage({
   );
   const hasHostToken =
     typeof window !== 'undefined' &&
-    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
+    Boolean(
+      localStorage.getItem(
+        `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+      ),
+    );
   const isCreator = Boolean(
     (user &&
       session?.createdBy &&
@@ -158,7 +196,9 @@ export default function SessionPage({
       const isLoggedInHost =
         user && session.createdBy && session.createdBy === user.id;
       const isGuestHost = Boolean(
-        localStorage.getItem(`host_token_${normalizedCode}`),
+        localStorage.getItem(
+          `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+        ),
       );
 
       if (isLoggedInHost || isGuestHost) {
@@ -173,7 +213,7 @@ export default function SessionPage({
           .then((res) => {
             if (res.participantId) {
               localStorage.setItem(
-                `participant_${normalizedCode}`,
+                `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
                 res.participantId,
               );
               setParticipantId(res.participantId);
@@ -396,7 +436,7 @@ export default function SessionPage({
           <Button
             variant="flat"
             size="sm"
-            startContent={<Icon icon="tabler:share-3" height={20} />}
+            startContent={<IconShare3 />}
             onPress={() => setShowShare(true)}
           >
             Share
@@ -406,7 +446,7 @@ export default function SessionPage({
             href={`/session/${code}/summary`}
             variant="flat"
             size="sm"
-            startContent={<Icon icon="tabler:chart-column" height={20} />}
+            startContent={<IconChartColumn />}
           >
             Summary
           </Button>
@@ -414,75 +454,71 @@ export default function SessionPage({
       </div>
 
       {/* Creator CTA actions */}
-      {isCreator && session.status === 'active' && (
+      {isCreator && (
         <div className="flex flex-wrap gap-3">
-          <Button
-            color="success"
-            variant="solid"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:check" height={16} />}
-            onPress={onSettleOpen}
-            isDisabled={hasUnclaimedItems}
-          >
-            Settle
-          </Button>
-          <Button
-            as="a"
-            href={`/session/${code}/edit`}
-            variant="faded"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:edit" height={16} />}
-          >
-            Edit Items
-          </Button>
+          {session.status === 'active' && (
+            <>
+              <Button
+                color="success"
+                variant="solid"
+                size="md"
+                className="w-full sm:w-auto"
+                startContent={<IconCheck size={16} />}
+                onPress={onSettleOpen}
+                isDisabled={hasUnclaimedItems}
+              >
+                Settle
+              </Button>
+              <Button
+                as="a"
+                href={`/session/${code}/edit`}
+                variant="faded"
+                size="md"
+                className="w-full sm:w-auto"
+                startContent={<IconEdit size={16} />}
+              >
+                Edit Items
+              </Button>
+            </>
+          )}
+          {session.status === 'settled' && (
+            <Button
+              color="warning"
+              variant="flat"
+              size="md"
+              className="w-full sm:w-auto"
+              startContent={<IconArrowBack size={16} />}
+              onPress={handleUnsettle}
+              isLoading={unsettleLoading}
+            >
+              Undo Settlement
+            </Button>
+          )}
           <Button
             color="danger"
             variant="light"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:trash" height={16} />}
+            startContent={<IconTrash size={16} />}
             onPress={onDeleteOpen}
           >
             Delete
           </Button>
         </div>
       )}
-      {isCreator && session.status === 'settled' && (
-        <div className="flex flex-wrap gap-3">
-          <Button
-            color="warning"
-            variant="flat"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:arrow-back" height={16} />}
-            onPress={handleUnsettle}
-            isLoading={unsettleLoading}
-          >
-            Undo Settlement
-          </Button>
-          <Button
-            color="danger"
-            variant="light"
-            size="md"
-            className="w-full sm:w-auto"
-            startContent={<Icon icon="tabler:trash" height={16} />}
-            onPress={onDeleteOpen}
-          >
-            Delete
-          </Button>
-        </div>
-      )}
+
       {session.status === 'active' && hasUnclaimedItems && isCreator && (
         <p className="text-warning text-sm">
           Claim all items before finalizing settlement.
         </p>
       )}
 
+      {/* Receipt reference image */}
+      {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
+
       {/* Main content: items + sidebar */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
-        <div className="sm:col-span-3">
+        <div className="flex flex-col gap-2 sm:col-span-3">
           <h2 className="text-lg font-semibold">
             Items ({session.items.length})
           </h2>
@@ -495,7 +531,8 @@ export default function SessionPage({
           />
         </div>
 
-        <div className="order-first sm:order-last sm:col-span-2">
+        <div className="order-first flex flex-col gap-2 sm:order-last sm:col-span-2">
+          <h2 className="text-lg font-semibold">{`Participants (${session.participants.length})`}</h2>
           <ParticipantSidebar
             session={session}
             currentParticipantId={participantId}

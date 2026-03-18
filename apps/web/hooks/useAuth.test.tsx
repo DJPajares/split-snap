@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -30,7 +31,7 @@ describe('useAuth', () => {
   });
 
   it('loads current user when auth token exists', async () => {
-    localStorage.setItem('auth_token', 'token-123');
+    localStorage.setItem(STORAGE_KEYS.KEY_AUTH_TOKEN, 'token-123');
     meMock.mockResolvedValue({
       id: 'u1',
       email: 'user@example.com',
@@ -46,13 +47,13 @@ describe('useAuth', () => {
   });
 
   it('removes stale token when me endpoint fails', async () => {
-    localStorage.setItem('auth_token', 'stale-token');
+    localStorage.setItem(STORAGE_KEYS.KEY_AUTH_TOKEN, 'stale-token');
     meMock.mockRejectedValue(new Error('Unauthorized'));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(localStorage.getItem('auth_token')).toBeNull();
+    expect(localStorage.getItem(STORAGE_KEYS.KEY_AUTH_TOKEN)).toBeNull();
     expect(result.current.user).toBeNull();
   });
 

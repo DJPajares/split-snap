@@ -1,4 +1,4 @@
-import { API_ROUTES } from '@split-snap/shared/constants';
+import { API_ROUTES, STORAGE_KEYS } from '@split-snap/shared/constants';
 import type {
   AuthResponse,
   ClaimAllItemsPayload,
@@ -29,15 +29,19 @@ function getHeaders(sessionCode?: string): HeadersInit {
   };
 
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(STORAGE_KEYS.KEY_AUTH_TOKEN);
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const participantToken = localStorage.getItem('participant_token');
+    const participantToken = localStorage.getItem(
+      STORAGE_KEYS.KEY_PARTICIPANT_TOKEN,
+    );
     if (participantToken) headers['X-Participant-Token'] = participantToken;
 
     // Send guest host token if available for the session
     if (sessionCode) {
-      const hostToken = localStorage.getItem(`host_token_${sessionCode}`);
+      const hostToken = localStorage.getItem(
+        `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${sessionCode}`,
+      );
       if (hostToken) headers['X-Host-Token'] = hostToken;
     }
   }
@@ -102,8 +106,10 @@ export const api = {
         headers: {
           // Don't set Content-Type for FormData — browser sets it with boundary
           ...(typeof window !== 'undefined' &&
-          localStorage.getItem('auth_token')
-            ? { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
+          localStorage.getItem(STORAGE_KEYS.KEY_AUTH_TOKEN)
+            ? {
+                Authorization: `Bearer ${localStorage.getItem(STORAGE_KEYS.KEY_AUTH_TOKEN)}`,
+              }
             : {}),
         },
       });

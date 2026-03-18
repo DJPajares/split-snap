@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Card, CardBody, Spinner } from '@heroui/react';
-import { Icon } from '@iconify/react';
+import { IconCamera } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
 
 interface ReceiptUploaderProps {
@@ -81,8 +81,7 @@ export function ReceiptUploader({
           </>
         ) : (
           <>
-            {/* <span className="text-5xl">📸</span> */}
-            <Icon icon="tabler:camera" height={48} />
+            <IconCamera size={48} />
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>

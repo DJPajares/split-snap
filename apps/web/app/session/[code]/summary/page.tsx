@@ -10,10 +10,11 @@ import {
   SelectItem,
   Spinner,
 } from '@heroui/react';
-import { Icon } from '@iconify/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
-import type { Session } from '@split-snap/shared/types';
+import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
+import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
@@ -21,11 +22,7 @@ import PersonSummaryCard from '@/components/shared/PersonSummaryCard';
 import { useApiError } from '@/hooks/useApiError';
 import { api } from '@/lib/api';
 
-export default function SummaryPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function SummaryPage({ params }: ParamsCodeProps) {
   const { code } = use(params);
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
@@ -48,7 +45,7 @@ export default function SummaryPage({
   const handleConvertExchangeRates = async (currency: string) => {
     if (!session) return;
 
-    const rates = sessionStorage.getItem('exchange_rates');
+    const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
 
     if (!rates) {
       addToast({
@@ -114,7 +111,7 @@ export default function SummaryPage({
         <Button
           variant="flat"
           size="sm"
-          startContent={<Icon icon="tabler:arrow-big-left" height={16} />}
+          startContent={<IconArrowBigLeft size={16} />}
           onPress={() => router.push(`/session/${code}`)}
         >
           Back

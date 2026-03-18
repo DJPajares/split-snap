@@ -202,3 +202,11 @@ export interface PersonSummary {
   tipShare: number;
   total: number;
 }
+
+// ─── Common ───────────────────────────────────────────────
+
+export type ParamsCodeProps = {
+  params: Promise<{
+    code: string;
+  }>;
+};
