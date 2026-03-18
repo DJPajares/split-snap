@@ -30,8 +30,8 @@ importers:
   apps/api:
     dependencies:
       '@google/genai':
-        specifier: ^1.45.0
-        version: 1.45.0
+        specifier: ^1.46.0
+        version: 1.46.0
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.8)
@@ -567,8 +567,8 @@ packages:
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
 
-  '@google/genai@1.45.0':
-    resolution: {integrity: sha512-+sNRWhKiRibVgc4OKi7aBJJ0A7RcoVD8tGG+eFkqxAWRjASDW+ktS9lLwTDnAxZICzCVoeAdu8dYLJVTX60N9w==}
+  '@google/genai@1.46.0':
+    resolution: {integrity: sha512-ewPMN5JkKfgU5/kdco9ZhXBHDPhVqZpMQqIFQhwsHLf8kyZfx1cNpw1pHo1eV6PGEW7EhIBFi3aYZraFndAXqg==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -4955,7 +4955,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@google/genai@1.45.0':
+  '@google/genai@1.46.0':
     dependencies:
       google-auth-library: 10.6.2
       p-retry: 4.6.2

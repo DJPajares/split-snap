@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@google/genai": "^1.45.0",
+    "@google/genai": "^1.46.0",
     "@hono/node-server": "^1.19.11",
     "@split-snap/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
