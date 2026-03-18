@@ -11,6 +11,7 @@ import {
   Spinner,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   type JoinSessionFormData,
   joinSessionSchema,
@@ -56,7 +57,9 @@ export default function JoinPage({
   useEffect(() => {
     if (authLoading) return;
 
-    const storedParticipantId = localStorage.getItem(`participant_${code}`);
+    const storedParticipantId = localStorage.getItem(
+      `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+    );
     if (!storedParticipantId) {
       queueMicrotask(() => {
         setCheckingStoredParticipant(false);
@@ -90,17 +93,21 @@ export default function JoinPage({
 
         if (participant && !participant.userId) {
           localStorage.setItem(
-            `guest_participant_${code}`,
+            `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${code}`,
             storedParticipantId,
           );
         }
 
-        localStorage.removeItem(`participant_${code}`);
+        localStorage.removeItem(
+          `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+        );
         setCheckingStoredParticipant(false);
       })
       .catch(() => {
         if (!active) return;
-        localStorage.removeItem(`participant_${code}`);
+        localStorage.removeItem(
+          `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+        );
         setCheckingStoredParticipant(false);
       });
 
@@ -130,7 +137,10 @@ export default function JoinPage({
 
         if (result.participantId) {
           // Directly admitted
-          localStorage.setItem(`participant_${code}`, result.participantId);
+          localStorage.setItem(
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+            result.participantId,
+          );
           addToast({ title: `Welcome, ${displayName}!`, color: 'success' });
           router.push(`/session/${code}`);
         }
@@ -185,7 +195,10 @@ export default function JoinPage({
 
       if (!isStillPending && approvedParticipant) {
         // Approved!
-        localStorage.setItem(`participant_${code}`, approvedParticipant.id);
+        localStorage.setItem(
+          `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+          approvedParticipant.id,
+        );
         addToast({ title: 'You have been approved!', color: 'success' });
         router.push(`/session/${code}`);
         return;
@@ -202,9 +215,11 @@ export default function JoinPage({
   // Auto-join after login redirect (user came from handleLoginRedirect)
   useEffect(() => {
     if (checkingStoredParticipant || authLoading || !user) return;
-    const pendingCode = localStorage.getItem('pending_session_code');
+    const pendingCode = localStorage.getItem(
+      STORAGE_KEYS.KEY_PENDING_SESSION_CODE,
+    );
     if (pendingCode === code) {
-      localStorage.removeItem('pending_session_code');
+      localStorage.removeItem(STORAGE_KEYS.KEY_PENDING_SESSION_CODE);
       // Auto-submit join for the logged-in user
       queueMicrotask(() => {
         void joinSession(user.name, user.id);
@@ -213,11 +228,16 @@ export default function JoinPage({
   }, [checkingStoredParticipant, authLoading, user, code, joinSession]);
 
   const handleLoginRedirect = () => {
-    localStorage.setItem('pending_session_code', code);
+    localStorage.setItem(STORAGE_KEYS.KEY_PENDING_SESSION_CODE, code);
     // Preserve existing guest participantId so it survives the login flow
-    const existingParticipant = localStorage.getItem(`participant_${code}`);
+    const existingParticipant = localStorage.getItem(
+      `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+    );
     if (existingParticipant) {
-      localStorage.setItem('pending_participant_id', existingParticipant);
+      localStorage.setItem(
+        STORAGE_KEYS.KEY_PENDING_PARTICIPANT_ID,
+        existingParticipant,
+      );
     }
     router.push('/auth/login');
   };

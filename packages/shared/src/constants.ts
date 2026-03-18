@@ -1,15 +1,19 @@
-export const SESSION_CODE_LENGTH = 6;
-export const SESSION_EXPIRY_DAYS = 7;
-export const DEFAULT_CURRENCY = 'SGD';
-export const KICK_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const APP = {
+  NAME: 'SplitSnap™',
+};
 
-export const SESSION_STATUSES = {
+const SESSION_CODE_LENGTH = 6;
+const SESSION_EXPIRY_DAYS = 7;
+const DEFAULT_CURRENCY = 'SGD';
+const KICK_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
+const SESSION_STATUSES = {
   DRAFT: 'draft' as const,
   ACTIVE: 'active' as const,
   SETTLED: 'settled' as const,
 };
 
-export const API_ROUTES = {
+const API_ROUTES = {
   RECEIPTS_SCAN: '/receipts/scan',
   SESSIONS: '/sessions',
   SESSION: (code: string) => `/sessions/${code}`,
@@ -39,6 +43,25 @@ export const API_ROUTES = {
   EXCHANGE_RATES: '/exchange-rates',
 } as const;
 
-export const APP = {
-  NAME: 'SplitSnap™',
+const STORAGE_KEYS = {
+  KEY_AUTH_TOKEN: 'auth_token',
+  KEY_PARTICIPANT_TOKEN: 'participant_token',
+  KEY_EXCHANGE_RATES: 'exchange_rates',
+  KEY_RECEIPT_IMAGE: 'receipt_image',
+  KEY_PENDING_SESSION_CODE: 'pending_session_code',
+  KEY_PENDING_PARTICIPANT_ID: 'pending_participant_id',
+  KEY_GUEST_PARTICIPANT_PREFIX: 'guest_participant_',
+  KEY_PARTICIPANT_PREFIX: 'participant_',
+  KEY_HOST_TOKEN_PREFIX: 'host_token_',
+};
+
+export {
+  APP,
+  SESSION_CODE_LENGTH,
+  SESSION_EXPIRY_DAYS,
+  DEFAULT_CURRENCY,
+  KICK_COOLDOWN_MS,
+  SESSION_STATUSES,
+  API_ROUTES,
+  STORAGE_KEYS,
 };

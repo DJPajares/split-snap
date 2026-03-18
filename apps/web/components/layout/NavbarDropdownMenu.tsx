@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   IconLogin,
   IconLogout,
@@ -37,7 +38,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
 
     // Clear receipt image from sessionStorage
     try {
-      sessionStorage.removeItem('receipt_image');
+      sessionStorage.removeItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
     } catch {
       // Ignore
     }

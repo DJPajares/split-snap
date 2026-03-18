@@ -12,6 +12,7 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { Session } from '@split-snap/shared/types';
 import {
   IconArrowBack,
@@ -68,7 +69,7 @@ export default function SessionPage({
   // Load receipt image from sessionStorage if available
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem('receipt_image');
+      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
       if (stored) {
         setReceiptImageUrl(stored);
       }
@@ -83,7 +84,9 @@ export default function SessionPage({
       .get(normalizedCode)
       .then((s) => {
         setInitialSession(s);
-        const stored = localStorage.getItem(`participant_${normalizedCode}`);
+        const stored = localStorage.getItem(
+          `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+        );
         if (stored) {
           // Validate the stored participant still exists in the session
           const participant = s.participants.find((p) => p.id === stored);
@@ -92,12 +95,16 @@ export default function SessionPage({
             if (user) {
               if (!participant.userId) {
                 localStorage.setItem(
-                  `guest_participant_${normalizedCode}`,
+                  `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${normalizedCode}`,
                   stored,
                 );
-                localStorage.removeItem(`participant_${normalizedCode}`);
+                localStorage.removeItem(
+                  `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+                );
               } else if (participant.userId !== user.id) {
-                localStorage.removeItem(`participant_${normalizedCode}`);
+                localStorage.removeItem(
+                  `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+                );
               } else {
                 setParticipantId(stored);
               }
@@ -106,7 +113,9 @@ export default function SessionPage({
             }
           } else {
             // Participant was kicked — clear stale data
-            localStorage.removeItem(`participant_${normalizedCode}`);
+            localStorage.removeItem(
+              `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+            );
           }
         }
       })
@@ -129,8 +138,12 @@ export default function SessionPage({
           (p) => p.id === participantId,
         );
         if (!stillInSession) {
-          localStorage.removeItem(`participant_${code}`);
-          localStorage.removeItem(`participant_${normalizedCode}`);
+          localStorage.removeItem(
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
+          );
+          localStorage.removeItem(
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+          );
           setParticipantId(null);
           addToast({
             title: 'You were removed from this session',
@@ -147,8 +160,10 @@ export default function SessionPage({
         description: 'This session was deleted by the host.',
         color: 'warning',
       });
-      localStorage.removeItem(`participant_${code}`);
-      localStorage.removeItem(`participant_${normalizedCode}`);
+      localStorage.removeItem(`${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`);
+      localStorage.removeItem(
+        `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
+      );
       router.replace('/');
     },
   });
@@ -162,7 +177,11 @@ export default function SessionPage({
   );
   const hasHostToken =
     typeof window !== 'undefined' &&
-    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
+    Boolean(
+      localStorage.getItem(
+        `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+      ),
+    );
   const isCreator = Boolean(
     (user &&
       session?.createdBy &&
@@ -179,7 +198,9 @@ export default function SessionPage({
       const isLoggedInHost =
         user && session.createdBy && session.createdBy === user.id;
       const isGuestHost = Boolean(
-        localStorage.getItem(`host_token_${normalizedCode}`),
+        localStorage.getItem(
+          `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+        ),
       );
 
       if (isLoggedInHost || isGuestHost) {
@@ -194,7 +215,7 @@ export default function SessionPage({
           .then((res) => {
             if (res.participantId) {
               localStorage.setItem(
-                `participant_${normalizedCode}`,
+                `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
                 res.participantId,
               );
               setParticipantId(res.participantId);

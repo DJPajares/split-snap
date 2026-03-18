@@ -13,7 +13,7 @@ import {
   Tabs,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { APP } from '@split-snap/shared/constants';
+import { APP, STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   type LoginFormData,
   loginSchema,
@@ -50,23 +50,27 @@ export default function LoginPage() {
   });
 
   const getPostAuthRedirect = (): string => {
-    const pendingCode = localStorage.getItem('pending_session_code');
+    const pendingCode = localStorage.getItem(
+      STORAGE_KEYS.KEY_PENDING_SESSION_CODE,
+    );
     if (pendingCode) {
       // Restore guest participantId if it was preserved before login redirect
       const pendingParticipantId = localStorage.getItem(
-        'pending_participant_id',
+        STORAGE_KEYS.KEY_PENDING_PARTICIPANT_ID,
       );
       if (pendingParticipantId) {
         // Save the guest participantId separately so it can be restored on logout
         localStorage.setItem(
-          `guest_participant_${pendingCode}`,
+          `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${pendingCode}`,
           pendingParticipantId,
         );
-        localStorage.removeItem('pending_participant_id');
+        localStorage.removeItem(STORAGE_KEYS.KEY_PENDING_PARTICIPANT_ID);
       }
       // Clear logged-in participant so join page doesn't short-circuit to session
-      localStorage.removeItem(`participant_${pendingCode}`);
-      // Note: Don't remove pending_session_code here — it's consumed by the join page
+      localStorage.removeItem(
+        `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${pendingCode}`,
+      );
+      // Note: Don't remove STORAGE_KEYS.KEY_PENDING_SESSION_CODE here — it's consumed by the join page
       // to auto-join after redirect
       return `/join/${pendingCode}`;
     }

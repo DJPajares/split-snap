@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { IconCamera, IconPencil } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -50,7 +51,7 @@ function ScanPageInner() {
           const base64 = reader.result as string;
           // Only store if under 4MB (sessionStorage limit ~5MB)
           if (base64.length < 4 * 1024 * 1024) {
-            sessionStorage.setItem('receipt_image', base64);
+            sessionStorage.setItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE, base64);
           }
         };
         reader.readAsDataURL(file);
@@ -106,14 +107,17 @@ function ScanPageInner() {
         // If the host was auto-joined, store participant ID to skip join page
         if (session.participantId) {
           localStorage.setItem(
-            `participant_${session.code}`,
+            `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${session.code}`,
             session.participantId,
           );
         }
 
         // Store guest host token for non-authenticated session creators
         if (session.hostToken) {
-          localStorage.setItem(`host_token_${session.code}`, session.hostToken);
+          localStorage.setItem(
+            `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${session.code}`,
+            session.hostToken,
+          );
         }
 
         startTransition(() => {

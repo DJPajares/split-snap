@@ -1,5 +1,6 @@
 'use client';
 
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { User } from '@split-snap/shared/types';
 import {
   createContext,
@@ -27,13 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load user on mount if token exists
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(STORAGE_KEYS.KEY_AUTH_TOKEN);
     if (token) {
       api.auth
         .me()
         .then(setUser)
         .catch(() => {
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem(STORAGE_KEYS.KEY_AUTH_TOKEN);
         })
         .finally(() => setLoading(false));
     } else {
@@ -45,33 +46,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.auth.login({ email, password });
-    localStorage.setItem('auth_token', res.token);
+    localStorage.setItem(STORAGE_KEYS.KEY_AUTH_TOKEN, res.token);
     setUser(res.user);
   }, []);
 
   const register = useCallback(
     async (email: string, password: string, name: string) => {
       const res = await api.auth.register({ email, password, name });
-      localStorage.setItem('auth_token', res.token);
+      localStorage.setItem(STORAGE_KEYS.KEY_AUTH_TOKEN, res.token);
       setUser(res.user);
     },
     [],
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(STORAGE_KEYS.KEY_AUTH_TOKEN);
     // Restore guest participant identities and clear logged-in ones
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('participant_')) {
-        const sessionCode = key.replace('participant_', '');
+      if (key?.startsWith(STORAGE_KEYS.KEY_PARTICIPANT_PREFIX)) {
+        const sessionCode = key.replace(
+          STORAGE_KEYS.KEY_PARTICIPANT_PREFIX,
+          '',
+        );
         const guestId = localStorage.getItem(
-          `guest_participant_${sessionCode}`,
+          `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${sessionCode}`,
         );
         if (guestId) {
           localStorage.setItem(key, guestId);
-          localStorage.removeItem(`guest_participant_${sessionCode}`);
+          localStorage.removeItem(
+            `${STORAGE_KEYS.KEY_GUEST_PARTICIPANT_PREFIX}${sessionCode}`,
+          );
         } else {
           keysToRemove.push(key);
         }

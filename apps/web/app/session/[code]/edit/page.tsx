@@ -1,6 +1,7 @@
 'use client';
 
 import { addToast, Button, Spinner } from '@heroui/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { ScannedItem, Session } from '@split-snap/shared/types';
 import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
@@ -28,12 +29,16 @@ export default function EditSessionPage({
   const { handleError } = useApiError({ redirectTo: '/' });
   const hasHostToken =
     typeof window !== 'undefined' &&
-    Boolean(localStorage.getItem(`host_token_${normalizedCode}`));
+    Boolean(
+      localStorage.getItem(
+        `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
+      ),
+    );
 
   // Load receipt image from sessionStorage if available
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem('receipt_image');
+      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
       if (stored) {
         setReceiptImageUrl(stored);
       }

@@ -10,6 +10,7 @@ import {
   SelectItem,
   Spinner,
 } from '@heroui/react';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
@@ -48,7 +49,7 @@ export default function SummaryPage({
   const handleConvertExchangeRates = async (currency: string) => {
     if (!session) return;
 
-    const rates = sessionStorage.getItem('exchange_rates');
+    const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
 
     if (!rates) {
       addToast({
