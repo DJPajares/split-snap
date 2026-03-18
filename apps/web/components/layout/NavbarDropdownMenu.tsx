@@ -1,11 +1,12 @@
 import {
   addToast,
+  Divider,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
-import { STORAGE_KEYS } from '@split-snap/shared/constants';
+import { APP, STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   IconLogin,
   IconLogout,
@@ -17,6 +18,7 @@ import { useTheme } from 'next-themes';
 import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
+import packageInfo from '@/package.json';
 
 type NavbarDropdownMenuProps = {
   children: React.ReactNode;
@@ -76,6 +78,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             </div>
           )}
         </DropdownItem>
+
         {user ? (
           <DropdownItem
             key="logout"
@@ -101,6 +104,13 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             </div>
           </DropdownItem>
         )}
+
+        <DropdownItem key="app-version" isReadOnly>
+          <div className="flex flex-col gap-2">
+            <Divider />
+            <p className="text-caption text-end">{`${APP.NAME} v${packageInfo.version}`}</p>
+          </div>
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );
