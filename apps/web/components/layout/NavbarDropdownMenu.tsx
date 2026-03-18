@@ -65,12 +65,12 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
         >
           {isDarkMode ? (
             <div className="flex flex-row items-center gap-2">
-              <IconSunFilled />
+              <IconSunFilled size={20} />
               <p>Light Mode</p>
             </div>
           ) : (
             <div className="flex flex-row items-center gap-2">
-              <IconMoon />
+              <IconMoon size={20} />
               <p>Dark Mode</p>
             </div>
           )}
@@ -83,7 +83,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             color="danger"
           >
             <div className="flex flex-row items-center gap-2">
-              <IconLogout />
+              <IconLogout size={20} />
               <p>Log Out</p>
             </div>
           </DropdownItem>
@@ -95,7 +95,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             color="primary"
           >
             <div className="flex flex-row items-center gap-2">
-              <IconLogin />
+              <IconLogin size={20} />
               <p>Log In</p>
             </div>
           </DropdownItem>
