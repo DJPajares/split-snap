@@ -21,7 +21,11 @@ import {
   SelectItem,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CURRENCIES, getCurrencySymbol } from '@split-snap/shared/currency';
+import {
+  CURRENCIES,
+  formatCurrency,
+  getCurrencySymbol,
+} from '@split-snap/shared/currency';
 import {
   type AmountMode,
   type ItemEditorFormData,
@@ -373,126 +377,133 @@ export function ItemEditor({
 
         {/* Items */}
         <div className="space-y-4">
-          {fields.map((field, i) => (
-            <div
-              key={field.id}
-              className="space-y-1.5"
-              draggable
-              onDragStart={() => onDragStartItem(i)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => onDropItem(i)}
-              onDragEnd={() => setDraggingIndex(null)}
-            >
-              <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-caption flex items-center gap-2 font-medium tracking-wide uppercase">
-                    <span
-                      className="cursor-grab select-none"
-                      aria-hidden="true"
+          {fields.map((field, i) => {
+            const parsedAmount = parseNumber(watchedItems[i]?.amount ?? '0');
+            const parsedQuantity = parseInteger(
+              watchedItems[i]?.quantity ?? '1',
+            );
+            const amountPerUnit =
+              parsedQuantity > 0 ? parsedAmount / parsedQuantity : 0;
+
+            return (
+              <div
+                key={field.id}
+                className="space-y-1.5"
+                draggable
+                onDragStart={() => onDragStartItem(i)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => onDropItem(i)}
+                onDragEnd={() => setDraggingIndex(null)}
+              >
+                <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-caption flex items-center gap-2 font-medium tracking-wide uppercase">
+                      <span
+                        className="cursor-grab select-none"
+                        aria-hidden="true"
+                      >
+                        ⋮⋮
+                      </span>
+                      Item {i + 1}
+                    </p>
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      color="danger"
+                      size="sm"
+                      onPress={() => requestRemoveItem(i)}
+                      isDisabled={fields.length <= 1}
+                      aria-label="Remove item"
                     >
-                      ⋮⋮
-                    </span>
-                    Item {i + 1}
-                  </p>
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    color="danger"
-                    size="sm"
-                    onPress={() => requestRemoveItem(i)}
-                    isDisabled={fields.length <= 1}
-                    aria-label="Remove item"
-                  >
-                    ✕
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
-                  <Controller
-                    name={`items.${i}.name`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <Input
-                        label="Item"
-                        placeholder="e.g. Burger"
-                        value={f.value}
-                        onValueChange={f.onChange}
-                        onBlur={f.onBlur}
-                        className="w-full sm:col-span-7"
-                        size="sm"
-                        isInvalid={Boolean(errors.items?.[i]?.name)}
-                        errorMessage={errors.items?.[i]?.name?.message}
-                        isClearable
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`items.${i}.amount`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <NumberInput
-                        label="Amount"
-                        type="number"
-                        placeholder="0.00"
-                        value={toNumberInputValue(f.value)}
-                        onValueChange={(value) =>
-                          f.onChange(toFormNumberString(value))
-                        }
-                        onBlur={f.onBlur}
-                        startContent={
-                          <span className="text-description">
-                            {currencySymbol}
-                          </span>
-                        }
-                        className="w-full sm:col-span-3"
-                        size="sm"
-                        isInvalid={Boolean(errors.items?.[i]?.amount)}
-                        errorMessage={errors.items?.[i]?.amount?.message}
-                        isWheelDisabled
-                        hideStepper
-                        isClearable
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`items.${i}.quantity`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <NumberInput
-                        label="Qty"
-                        type="number"
-                        placeholder="1"
-                        value={toNumberInputValue(f.value)}
-                        onValueChange={(value) =>
-                          f.onChange(toFormNumberString(value))
-                        }
-                        onBlur={f.onBlur}
-                        className="w-full sm:col-span-2"
-                        size="sm"
-                        isInvalid={Boolean(errors.items?.[i]?.quantity)}
-                        errorMessage={errors.items?.[i]?.quantity?.message}
-                        hideStepper
-                        isWheelDisabled
-                        isClearable
-                      />
-                    )}
-                  />
-                </div>
-                {parseInteger(watchedItems[i]?.quantity ?? '0') > 1 &&
-                  parseNumber(watchedItems[i]?.amount ?? '0') > 0 && (
+                      ✕
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
+                    <Controller
+                      name={`items.${i}.name`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <Input
+                          label="Item"
+                          placeholder="e.g. Burger"
+                          value={f.value}
+                          onValueChange={f.onChange}
+                          onBlur={f.onBlur}
+                          className="w-full sm:col-span-7"
+                          size="sm"
+                          isInvalid={Boolean(errors.items?.[i]?.name)}
+                          errorMessage={errors.items?.[i]?.name?.message}
+                          isClearable
+                        />
+                      )}
+                    />
+                    <Controller
+                      name={`items.${i}.amount`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <NumberInput
+                          label="Amount"
+                          type="number"
+                          placeholder="0.00"
+                          value={toNumberInputValue(f.value)}
+                          onValueChange={(value) =>
+                            f.onChange(toFormNumberString(value))
+                          }
+                          onBlur={f.onBlur}
+                          startContent={
+                            <span className="text-description">
+                              {currencySymbol}
+                            </span>
+                          }
+                          className="w-full sm:col-span-3"
+                          size="sm"
+                          isInvalid={Boolean(errors.items?.[i]?.amount)}
+                          errorMessage={errors.items?.[i]?.amount?.message}
+                          isWheelDisabled
+                          hideStepper
+                          isClearable
+                        />
+                      )}
+                    />
+                    <Controller
+                      name={`items.${i}.quantity`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <NumberInput
+                          label="Qty"
+                          type="number"
+                          placeholder="1"
+                          value={toNumberInputValue(f.value)}
+                          onValueChange={(value) =>
+                            f.onChange(toFormNumberString(value))
+                          }
+                          onBlur={f.onBlur}
+                          className="w-full sm:col-span-2"
+                          size="sm"
+                          isInvalid={Boolean(errors.items?.[i]?.quantity)}
+                          errorMessage={errors.items?.[i]?.quantity?.message}
+                          hideStepper
+                          isWheelDisabled
+                          isClearable
+                        />
+                      )}
+                    />
+                  </div>
+                  {parsedQuantity > 1 && parsedAmount > 0 && (
                     <span className="flex justify-end">
                       <p className="text-caption">
-                        {currencySymbol}
-                        {(
-                          parseNumber(watchedItems[i]?.amount ?? '0') /
-                          parseInteger(watchedItems[i]?.quantity ?? '1')
-                        ).toFixed(2)}{' '}
-                        each
+                        {`${formatCurrency({
+                          value: amountPerUnit,
+                          currency: watchedCurrency,
+                          decimal: 2,
+                        })} each`}
                       </p>
                     </span>
                   )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <Button
@@ -512,8 +523,11 @@ export function ItemEditor({
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Subtotal</p>
             <h3 className="title-subsection">
-              {currencySymbol}
-              {subtotal.toFixed(2)}
+              {formatCurrency({
+                value: subtotal,
+                currency: watchedCurrency,
+                decimal: 2,
+              })}
             </h3>
           </div>
 
@@ -586,8 +600,11 @@ export function ItemEditor({
                   <p className="text-caption">
                     {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
                       <span>
-                        {currencySymbol}
-                        {taxValue.toFixed(2)}
+                        {formatCurrency({
+                          value: taxValue,
+                          currency: watchedCurrency,
+                          decimal: 2,
+                        })}
                       </span>
                     )}
                   </p>
@@ -665,8 +682,11 @@ export function ItemEditor({
                   <p className="text-caption flex">
                     {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
                       <span>
-                        {currencySymbol}
-                        {tipValue.toFixed(2)}
+                        {formatCurrency({
+                          value: tipValue,
+                          currency: watchedCurrency,
+                          decimal: 2,
+                        })}
                       </span>
                     )}
                   </p>
@@ -678,8 +698,11 @@ export function ItemEditor({
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Total</p>
             <h2 className="title-section">
-              {currencySymbol}
-              {total.toFixed(2)}
+              {formatCurrency({
+                value: total,
+                currency: watchedCurrency,
+                decimal: 2,
+              })}
             </h2>
           </div>
         </div>
