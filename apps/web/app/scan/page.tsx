@@ -134,7 +134,7 @@ function ScanPageInner() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
-        <h1 className="title-section">New Split</h1>
+        <h3 className="title-section">New Split</h3>
         <p className="text-description-lg">
           Scan a receipt or enter items manually to start splitting.
         </p>

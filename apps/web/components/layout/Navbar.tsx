@@ -45,7 +45,7 @@ export function Navbar() {
               className="rounded-md"
               priority
             />
-            <h2 className="title-card">{APP.NAME}</h2>
+            <h4 className="title-card">{APP.NAME}</h4>
           </Link>
         </NavbarBrand>
       </NavbarContent>
@@ -53,13 +53,13 @@ export function Navbar() {
       <NavbarContent className="hidden gap-4 sm:flex" justify="center">
         <NavbarItem>
           <Link href="/scan">
-            <h3 className="title-subsection">Scan Receipt</h3>
+            <h5 className="title-subsection">Scan Receipt</h5>
           </Link>
         </NavbarItem>
         {user && (
           <NavbarItem>
             <Link href="/dashboard">
-              <h3 className="title-subsection">Dashboard</h3>
+              <h5 className="title-subsection">Dashboard</h5>
             </Link>
           </NavbarItem>
         )}
@@ -91,7 +91,7 @@ export function Navbar() {
             size="lg"
             onPress={() => setIsMenuOpen(false)}
           >
-            <h3 className="title-card">Scan Receipt</h3>
+            <h4 className="title-card">Scan Receipt</h4>
           </Link>
         </NavbarMenuItem>
         {user && (
@@ -102,7 +102,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              <h3 className="title-card">Dashboard</h3>
+              <h4 className="title-card">Dashboard</h4>
             </Link>
           </NavbarMenuItem>
         )}
@@ -114,7 +114,7 @@ export function Navbar() {
               size="lg"
               onPress={() => setIsMenuOpen(false)}
             >
-              <h3 className="title-card">Log In</h3>
+              <h4 className="title-card">Log In</h4>
             </Link>
           </NavbarMenuItem>
         )}

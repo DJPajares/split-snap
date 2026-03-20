@@ -165,7 +165,7 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">
-            <h1 className="title-section">Edit Items</h1>
+            <h3 className="title-section">Edit Items</h3>
             <p className="text-description-lg">Session {code}</p>
           </div>
           <Button

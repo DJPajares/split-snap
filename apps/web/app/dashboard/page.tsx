@@ -66,7 +66,7 @@ export default function DashboardPage() {
     <div className="mx-auto flex flex-col gap-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="title-section">Welcome, {user.name}</h1>
+          <h3 className="title-section">Welcome, {user.name}</h3>
           <p className="text-description-lg">
             Manage your bill-splitting sessions
           </p>
@@ -113,13 +113,13 @@ export default function DashboardPage() {
         <Card>
           <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
             <IconClipboardText size={48} className="text-default" />
-            <h3 className="title-subsection">
+            <h5 className="title-subsection">
               {roleFilter === 'all'
                 ? 'No sessions yet'
                 : roleFilter === 'host'
                   ? 'No hosted sessions'
                   : 'No joined sessions'}
-            </h3>
+            </h5>
             <p className="text-description text-center">
               {roleFilter === 'all'
                 ? 'Start by scanning a receipt or entering items manually. Your sessions will appear here.'
@@ -146,7 +146,7 @@ export default function DashboardPage() {
               <CardBody className="flex flex-row items-center justify-between gap-4 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="title-subsection">{session.code}</h3>
+                    <h5 className="title-subsection">{session.code}</h5>
                     <Chip
                       size="sm"
                       color={session.role === 'host' ? 'warning' : 'primary'}
@@ -177,13 +177,13 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <h3 className="title-subsection">
+                  <h5 className="title-subsection">
                     {formatCurrency({
                       value: session.total,
                       currency: session.currency,
                       decimal: 2,
                     })}
-                  </h3>
+                  </h5>
                   <p className="text-description">{session.currency}</p>
                 </div>
               </CardBody>

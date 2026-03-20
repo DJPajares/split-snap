@@ -115,7 +115,7 @@ export default function LoginPage() {
             className="rounded-md"
             priority
           />
-          <h2 className="title-section">{`Welcome to ${APP.NAME}`}</h2>
+          <h3 className="title-section">{`Welcome to ${APP.NAME}`}</h3>
           <p className="text-description">
             Sign in to save your sessions and access them later
           </p>

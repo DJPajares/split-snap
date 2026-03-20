@@ -58,14 +58,14 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
     <Card>
       <CardHeader>
         <div className="flex w-full items-center justify-between">
-          <h3 className="title-subsection">{summary.displayName}</h3>
-          <h3 className="text-primary title-card">
+          <h5 className="title-subsection">{summary.displayName}</h5>
+          <h4 className="title-card text-primary">
             {formatCurrency({
               value: summary.total,
               currency,
               decimal: 2,
             })}
-          </h3>
+          </h4>
         </div>
       </CardHeader>
 

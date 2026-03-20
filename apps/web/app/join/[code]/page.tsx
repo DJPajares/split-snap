@@ -275,7 +275,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <IconHourglassLow size={48} className="text-warning" />
-            <h2 className="title-card">Temporarily Removed</h2>
+            <h4 className="title-card">Temporarily Removed</h4>
             <p className="text-description-lg text-center">
               You were removed from this session.
               {hasCountdown
@@ -305,7 +305,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <IconBan size={48} className="text-danger" />
-            <h2 className="title-card">Request Rejected</h2>
+            <h4 className="title-card">Request Rejected</h4>
             <p className="text-description-lg text-center">
               The host has rejected your join request.
             </p>
@@ -325,7 +325,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <Spinner size="lg" variant="wave" />
-            <h2 className="title-card">Waiting for Approval</h2>
+            <h4 className="title-card">Waiting for Approval</h4>
             <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.
             </p>
@@ -352,7 +352,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <Card>
         <CardHeader className="flex flex-col items-center gap-2">
           <IconArrowBigRightLines size={40} />
-          <h1 className="title-section">Join Session</h1>
+          <h3 className="title-section">Join Session</h3>
           <p className="text-description-lg">
             {user
               ? `Joining as ${user.name}`

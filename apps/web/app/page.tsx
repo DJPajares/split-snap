@@ -102,7 +102,7 @@ export default function HomePage() {
               <Card key={i}>
                 <CardBody className="p-6 text-center">
                   <span className="mb-4 block text-4xl">{step.icon}</span>
-                  <h3 className="title-card">{step.title}</h3>
+                  <h4 className="title-card">{step.title}</h4>
                   <p className="text-description">{step.description}</p>
                 </CardBody>
               </Card>
@@ -119,7 +119,7 @@ export default function HomePage() {
             {FEATURES.map((feature, i) => (
               <div key={i}>
                 <span className="mb-4 block text-4xl">{feature.icon}</span>
-                <h3 className="title-card">{feature.title}</h3>
+                <h4 className="title-card">{feature.title}</h4>
                 <p className="text-description">{feature.description}</p>
               </div>
             ))}

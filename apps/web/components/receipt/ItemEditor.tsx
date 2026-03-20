@@ -342,7 +342,7 @@ export function ItemEditor({
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-2">
-        <h3 className="title-card">Review Items</h3>
+        <h4 className="title-card">Review Items</h4>
         <p className="text-description">
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </p>
@@ -522,13 +522,13 @@ export function ItemEditor({
         <div className="space-y-3">
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Subtotal</p>
-            <h3 className="title-subsection">
+            <h5 className="title-subsection">
               {formatCurrency({
                 value: subtotal,
                 currency: watchedCurrency,
                 decimal: 2,
               })}
-            </h3>
+            </h5>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -697,13 +697,13 @@ export function ItemEditor({
 
           <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Total</p>
-            <h2 className="title-section">
+            <h3 className="title-section">
               {formatCurrency({
                 value: total,
                 currency: watchedCurrency,
                 decimal: 2,
               })}
-            </h2>
+            </h3>
           </div>
         </div>
 

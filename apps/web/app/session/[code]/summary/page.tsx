@@ -105,7 +105,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
     <div className="flex flex-col gap-6">
       <div className="flex justify-between gap-3">
         <div className="flex flex-col">
-          <h1 className="title-section">Bill Summary</h1>
+          <h3 className="title-section">Bill Summary</h3>
           <p className="text-description-lg">Session {code}</p>
         </div>
         <Button
@@ -169,14 +169,14 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
       <Card>
         <CardBody className="p-4">
           <div className="flex items-center justify-between">
-            <h2 className="title-section">Grand Total</h2>
-            <h2 className="title-section">
+            <h3 className="title-section">Grand Total</h3>
+            <h3 className="title-section">
               {formatCurrency({
                 value: session.total,
                 currency: session.currency,
                 decimal: 2,
               })}
-            </h2>
+            </h3>
           </div>
         </CardBody>
       </Card>

@@ -409,7 +409,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="title-section">Session {code}</h1>
+            <h3 className="title-section">Session {code}</h3>
             <Chip
               size="sm"
               color={
