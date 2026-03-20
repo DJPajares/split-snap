@@ -11,6 +11,7 @@ import {
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { Session } from '@split-snap/shared/types';
+import { IconClipboardText } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -111,7 +112,7 @@ export default function DashboardPage() {
       ) : filteredSessions.length === 0 ? (
         <Card>
           <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
-            <span className="text-5xl">📋</span>
+            <IconClipboardText size={48} className="text-default" />
             <h3 className="title-subsection">
               {roleFilter === 'all'
                 ? 'No sessions yet'

@@ -17,7 +17,11 @@ import {
   joinSessionSchema,
 } from '@split-snap/shared/schemas';
 import { ParamsCodeProps } from '@split-snap/shared/types';
-import { IconArrowBigRightLines } from '@tabler/icons-react';
+import {
+  IconArrowBigRightLines,
+  IconBan,
+  IconHourglassLow,
+} from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -270,8 +274,8 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
-            <span className="text-5xl">⏳</span>
-            <h2 className="text-xl font-bold">Temporarily Removed</h2>
+            <IconHourglassLow size={48} className="text-warning" />
+            <h2 className="title-card">Temporarily Removed</h2>
             <p className="text-description-lg text-center">
               You were removed from this session.
               {hasCountdown
@@ -300,8 +304,8 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
-            <span className="text-5xl">❌</span>
-            <h2 className="text-xl font-bold">Request Rejected</h2>
+            <IconBan size={48} className="text-danger" />
+            <h2 className="title-card">Request Rejected</h2>
             <p className="text-description-lg text-center">
               The host has rejected your join request.
             </p>
@@ -321,7 +325,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
             <Spinner size="lg" />
-            <h2 className="text-xl font-bold">Waiting for Approval</h2>
+            <h2 className="title-card">Waiting for Approval</h2>
             <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.
             </p>
