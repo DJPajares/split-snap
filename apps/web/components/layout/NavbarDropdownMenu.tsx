@@ -105,10 +105,10 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
           </DropdownItem>
         )}
 
-        <DropdownItem key="app-version" isReadOnly>
+        <DropdownItem key="app-version" aria-label="App version" isReadOnly>
           <div className="flex flex-col gap-2">
             <Divider />
-            <p className="text-caption text-end">{`${APP.NAME} v${packageInfo.version}`}</p>
+            <p className="text-caption">{`${APP.NAME} v${packageInfo.version}`}</p>
           </div>
         </DropdownItem>
       </DropdownMenu>
