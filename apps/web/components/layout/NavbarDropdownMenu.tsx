@@ -1,12 +1,11 @@
 import {
   addToast,
-  Divider,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
-import { APP, STORAGE_KEYS } from '@split-snap/shared/constants';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   IconLogin,
   IconLogout,
@@ -86,9 +85,12 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             onPress={handleLogout}
             color="danger"
           >
-            <div className="flex flex-row items-center gap-2">
-              <IconLogout size={20} />
-              <p>Log Out</p>
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-row items-center gap-2">
+                <IconLogout size={20} />
+                <p>Log Out</p>
+              </div>
+              <p className="text-caption">{`v${packageInfo.version}`}</p>
             </div>
           </DropdownItem>
         ) : (
@@ -98,19 +100,15 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             onPress={handleLogin}
             color="primary"
           >
-            <div className="flex flex-row items-center gap-2">
-              <IconLogin size={20} />
-              <p>Log In</p>
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-row items-center gap-2">
+                <IconLogin size={20} />
+                <p>Log In</p>
+              </div>
+              <p className="text-caption">{`v${packageInfo.version}`}</p>
             </div>
           </DropdownItem>
         )}
-
-        <DropdownItem key="app-version" aria-label="App version" isReadOnly>
-          <div className="flex flex-col gap-2">
-            <Divider />
-            <p className="text-caption">{`${APP.NAME} v${packageInfo.version}`}</p>
-          </div>
-        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );
