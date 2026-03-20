@@ -324,7 +324,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="flex flex-col items-center gap-4 py-12">
-            <Spinner size="lg" />
+            <Spinner size="lg" variant="wave" />
             <h2 className="title-card">Waiting for Approval</h2>
             <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.

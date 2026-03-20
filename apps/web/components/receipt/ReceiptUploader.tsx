@@ -66,7 +66,7 @@ export function ReceiptUploader({
 
         {isLoading ? (
           <>
-            <Spinner size="lg" color="primary" />
+            <Spinner size="lg" variant="wave" />
             <p className="text-description-lg">Scanning receipt with AI...</p>
           </>
         ) : preview ? (

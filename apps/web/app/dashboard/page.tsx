@@ -107,7 +107,7 @@ export default function DashboardPage() {
 
       {loadingSessions ? (
         <div className="flex items-center justify-center py-16">
-          <Spinner size="lg" />
+          <Spinner size="lg" variant="wave" />
         </div>
       ) : filteredSessions.length === 0 ? (
         <Card>
