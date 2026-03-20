@@ -148,7 +148,7 @@ export function ParticipantSidebar({
             );
             const isCurrentUser = participant.id === currentParticipantId;
             const isParticipantInitiator = isInitiator(participant);
-            const canKickThis =
+            const isKickable =
               canKick && !isCurrentUser && !isParticipantInitiator;
             const isKicking = kickingId === participant.id;
 
@@ -160,57 +160,44 @@ export function ParticipantSidebar({
                   setConfirmId(open ? participant.id : null)
                 }
                 placement="bottom"
+                triggerScaleOnOpen={isKickable ? true : false}
               >
                 <PopoverTrigger>
                   <div
                     className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
                       isCurrentUser
                         ? 'bg-primary/10'
-                        : canKickThis
+                        : isKickable
                           ? 'hover:bg-danger/10 cursor-pointer'
                           : ''
                     }`}
                     onClick={() => {
-                      if (canKickThis && !isKicking) {
-                        setConfirmId(participant.id);
-                      }
-                    }}
-                    role={canKickThis ? 'button' : undefined}
-                    tabIndex={canKickThis ? 0 : undefined}
-                    onKeyDown={(e) => {
-                      if (
-                        canKickThis &&
-                        !isKicking &&
-                        (e.key === 'Enter' || e.key === ' ')
-                      ) {
-                        e.preventDefault();
+                      if (isKickable && !isKicking) {
                         setConfirmId(participant.id);
                       }
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <UserAvatar
-                        name={participant.displayName}
-                        description={
-                          isParticipantInitiator
-                            ? 'Host'
-                            : isCurrentUser
-                              ? 'You'
-                              : participant.isAnonymous
-                                ? 'Guest'
-                                : 'Member'
-                        }
-                        avatarProps={{
-                          name: participant.displayName[0],
-                          size: 'sm',
-                          color: isParticipantInitiator
-                            ? 'warning'
-                            : isCurrentUser
-                              ? 'primary'
-                              : 'default',
-                        }}
-                      />
-                    </div>
+                    <UserAvatar
+                      name={participant.displayName}
+                      description={
+                        isParticipantInitiator
+                          ? 'Host'
+                          : isCurrentUser
+                            ? 'You'
+                            : participant.isAnonymous
+                              ? 'Guest'
+                              : 'Member'
+                      }
+                      avatarProps={{
+                        name: participant.displayName[0],
+                        size: 'sm',
+                        color: isParticipantInitiator
+                          ? 'warning'
+                          : isCurrentUser
+                            ? 'primary'
+                            : 'default',
+                      }}
+                    />
                     <div className="flex items-center gap-2">
                       <div className="text-right">
                         <p className="text-sm font-semibold">
@@ -228,7 +215,7 @@ export function ParticipantSidebar({
                     </div>
                   </div>
                 </PopoverTrigger>
-                {canKickThis && (
+                {isKickable && (
                   <PopoverContent>
                     <div className="space-y-2 p-3">
                       <p className="text-sm font-medium">
