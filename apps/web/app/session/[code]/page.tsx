@@ -459,8 +459,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           {session.status === 'active' && (
             <>
               <Button
-                color="success"
-                variant="solid"
+                color="primary"
                 size="md"
                 className="w-full sm:w-auto"
                 startContent={<IconCheck size={16} />}
@@ -483,8 +482,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           )}
           {session.status === 'settled' && (
             <Button
-              color="warning"
-              variant="flat"
+              color="secondary"
               size="md"
               className="w-full sm:w-auto"
               startContent={<IconArrowBack size={16} />}
@@ -568,7 +566,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                   Cancel
                 </Button>
                 <Button
-                  color="success"
+                  color="primary"
                   onPress={async () => {
                     await handleSettle();
                     onClose();
