@@ -197,7 +197,6 @@ export default function LoginPage() {
                 />
                 <Button
                   type="submit"
-                  variant="primary"
                   size="lg"
                   className="font-semibold"
                   isPending={loading}
@@ -307,7 +306,6 @@ export default function LoginPage() {
                 />
                 <Button
                   type="submit"
-                  variant="primary"
                   size="lg"
                   className="font-semibold"
                   isPending={loading}

@@ -47,7 +47,7 @@ export function Navbar() {
               )}
             </svg>
           </button>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 no-underline">
             <Image
               src="/logo.png"
               alt={`${APP.NAME} logo`}
@@ -63,12 +63,12 @@ export function Navbar() {
         {/* Menu Items */}
         <ul className="hidden items-center gap-4 md:flex">
           <li>
-            <Link href="/scan">
+            <Link href="/scan" className="no-underline">
               <h5 className="title-subsection">Scan Receipt</h5>
             </Link>
           </li>
           <li>
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="no-underline">
               <h5 className="title-subsection">Dashboard</h5>
             </Link>
           </li>
@@ -78,7 +78,7 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <NavbarDropdownMenu>
             {user ? (
-              <Avatar size="sm" variant="soft" className="ring-primary ring-2">
+              <Avatar size="sm" variant="soft" className="ring-accent ring-2">
                 <Avatar.Image src="https://i.pravatar.cc/150?u=a04258114e29026708c" />
                 <Avatar.Fallback>JD</Avatar.Fallback>
               </Avatar>

@@ -164,7 +164,7 @@ export function ParticipantSidebar({
                 <div
                   className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
                     isCurrentUser
-                      ? 'bg-primary/10'
+                      ? 'bg-accent/10'
                       : isKickable
                         ? 'hover:bg-danger/10 cursor-pointer'
                         : ''

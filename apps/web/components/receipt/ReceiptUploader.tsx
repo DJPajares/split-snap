@@ -40,7 +40,7 @@ export function ReceiptUploader({
   return (
     <Card
       className={`border-2 border-dashed transition-colors ${
-        isDragging ? 'border-primary bg-primary/10' : 'border-default-300'
+        isDragging ? 'border-accent bg-accent/10' : 'border-default-300'
       }`}
     >
       <Card.Content

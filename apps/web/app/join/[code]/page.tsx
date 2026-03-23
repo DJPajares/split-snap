@@ -285,9 +285,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
                 : ' You can try again shortly.'}
             </p>
             <div className="flex gap-2">
-              <Button variant="primary" onPress={() => router.push('/')}>
-                Go Home
-              </Button>
+              <Button onPress={() => router.push('/')}>Go Home</Button>
               {!hasCountdown && (
                 <Button variant="tertiary" onPress={() => setJoinState('idle')}>
                   Try Again
@@ -311,9 +309,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             <p className="text-description-lg text-center">
               The host has rejected your join request.
             </p>
-            <Button variant="primary" onPress={() => router.push('/')}>
-              Go Home
-            </Button>
+            <Button onPress={() => router.push('/')}>Go Home</Button>
           </Card.Content>
         </Card>
       </div>
@@ -331,7 +327,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.
             </p>
-            <div className="text-primary font-mono text-lg font-bold tracking-widest">
+            <div className="text-accent font-mono text-lg font-bold tracking-widest">
               {code.toUpperCase()}
             </div>
             <Button
@@ -360,7 +356,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
           </p>
-          <p className="text-primary font-mono text-lg font-bold tracking-widest">
+          <p className="text-accent font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
           </p>
         </CardHeader>
@@ -388,7 +384,6 @@ export default function JoinPage({ params }: ParamsCodeProps) {
                 />
                 <Button
                   type="submit"
-                  variant="primary"
                   size="lg"
                   isPending={joinState === 'joining'}
                   isDisabled={!nameForm.formState.isValid}
@@ -400,7 +395,6 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           )}
           {user && (
             <Button
-              variant="primary"
               size="lg"
               onPress={() => void joinSession(user.name, user.id)}
               isPending={joinState === 'joining'}

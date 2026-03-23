@@ -70,11 +70,7 @@ export default function DashboardPage() {
             Manage your bill-splitting sessions
           </p>
         </div>
-        <Button
-          variant="primary"
-          className="font-semibold"
-          onPress={() => router.push('/scan')}
-        >
+        <Button className="font-semibold" onPress={() => router.push('/scan')}>
           <IconPlus />
           New Split
         </Button>

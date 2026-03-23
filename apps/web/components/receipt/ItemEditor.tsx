@@ -788,7 +788,6 @@ export function ItemEditor({
         </div>
 
         <Button
-          variant="primary"
           size="lg"
           onPress={() => rhfHandleSubmit(onFormSubmit)()}
           isPending={isSubmitting}

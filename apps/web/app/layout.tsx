@@ -35,7 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html className="light" data-theme="light" suppressHydrationWarning>
+      {/* <html lang="en" className="dark" suppressHydrationWarning> */}
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} bg-background text-foreground flex min-h-screen flex-col font-sans antialiased`}
       >

@@ -93,7 +93,7 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
                     <p className="text-description-lg">{modal?.message}</p>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button variant="primary" onPress={handleClose}>
+                    <Button onPress={handleClose}>
                       {modal?.options?.actionLabel ??
                         (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
                     </Button>

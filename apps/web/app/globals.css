@@ -1,74 +1,96 @@
-/* @layer theme, base, components, utilities; */
-
 @import 'tailwindcss';
 @import '@heroui/styles';
 
-/* @source '../node_modules/@heroui/theme/dist'; */
+/*
+ * HeroUI Theme Customization
+ * Add this to your global.css after importing @heroui/styles
+ * Only includes base variables from variables.css
+ * @see https://v3.heroui.com/docs/react/getting-started/theming
+ */
 
-:root {
-  --primary: oklch(0.62 0.18 248);
-  --primary-foreground: oklch(0.97 0.01 240);
-  --secondary: oklch(0.72 0.15 40);
-  --secondary-foreground: oklch(0.97 0.01 240);
-  --tertiary: oklch(0.68 0.14 96);
-  --tertiary-foreground: oklch(0.2 0.02 240);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --surface: oklch(0.97 0 0);
-  --surface-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+:root,
+.light,
+.default,
+[data-theme='light'],
+[data-theme='default'] {
+  /* Theme Colors (Light Mode) */
+  --accent: oklch(58.14% 0.2349 27.99);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(97.02% 0 27.99);
+  --border: oklch(90% 0 27.99);
+  --danger: oklch(0.4823 0.1938 27.64);
+  --danger-foreground: oklch(98% 0.0194 27.64);
+  --default: oklch(94% 0 27.99);
+  --default-foreground: oklch(21.03% 0.0059 27.99);
+  --field-background: oklch(100% 0 27.99);
+  --field-foreground: oklch(21.03% 0 27.99);
+  --field-placeholder: oklch(55.17% 0 27.99);
+  --focus: oklch(58.14% 0.2349 27.99);
+  --foreground: oklch(21.03% 0 27.99);
+  --muted: oklch(55.17% 0 27.99);
+  --overlay: oklch(100% 0 27.99);
+  --overlay-foreground: oklch(21.03% 0 27.99);
+  --scrollbar: oklch(87.1% 0 27.99);
+  --segment: oklch(100% 0 27.99);
+  --segment-foreground: oklch(21.03% 0 27.99);
+  --separator: oklch(92% 0 27.99);
+  --success: oklch(0.5148 0.1337 146.82);
+  --success-foreground: oklch(98% 0.0134 146.82);
+  --surface: oklch(100% 0 27.99);
+  --surface-foreground: oklch(21.03% 0 27.99);
+  --surface-secondary: oklch(95.24% 0 27.99);
+  --surface-secondary-foreground: oklch(21.03% 0 27.99);
+  --surface-tertiary: oklch(93.73% 0 27.99);
+  --surface-tertiary-foreground: oklch(21.03% 0 27.99);
+  --warning: oklch(0.561 0.116571 78.9352);
+  --warning-foreground: oklch(98% 0.0117 78.94);
+
+  /* Border Radius */
+  --radius: 0.125rem;
+  --field-radius: 0.125rem;
+
+  /* Font Family */
+  /* Make sure to load Inter font in your app */
+  --font-sans: var(--font-inter);
 }
 
-.dark {
-  --primary: oklch(0.7 0.15 166);
-  --primary-foreground: oklch(0.97 0.01 240);
-  --secondary: oklch(0.72 0.15 320);
-  --secondary-foreground: oklch(0.97 0.01 240);
-  --tertiary: oklch(0.69 0.14 20);
-  --tertiary-foreground: oklch(0.2 0.02 240);
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --surface: oklch(0.269 0.0188 250);
-  --surface-foreground: oklch(0.97 0.01 240);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-}
-
-@theme inline {
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-tertiary: var(--tertiary);
-  --color-tertiary-foreground: var(--tertiary-foreground);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-surface: var(--surface);
-  --color-surface-foreground: var(--surface-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+  /* Theme Colors (Dark Mode) */
+  --accent: oklch(58.14% 0.2349 27.99);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(12% 0 27.99);
+  --border: oklch(28% 0 27.99);
+  --danger: oklch(0.4964 0.1994 28.56);
+  --danger-foreground: oklch(98% 0.0199 28.56);
+  --default: oklch(27.4% 0 27.99);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: oklch(21.03% 0 27.99);
+  --field-foreground: oklch(99.11% 0 27.99);
+  --field-placeholder: oklch(70.5% 0 27.99);
+  --focus: oklch(58.14% 0.2349 27.99);
+  --foreground: oklch(99.11% 0 27.99);
+  --muted: oklch(70.5% 0 27.99);
+  --overlay: oklch(21.03% 0 27.99);
+  --overlay-foreground: oklch(99.11% 0 27.99);
+  --scrollbar: oklch(70.5% 0 27.99);
+  --segment: oklch(39.64% 0 27.99);
+  --segment-foreground: oklch(99.11% 0 27.99);
+  --separator: oklch(25% 0 27.99);
+  --success: oklch(0.7677 0.1899 148.1);
+  --success-foreground: oklch(15% 0.05 148.1);
+  --surface: oklch(21.03% 0 27.99);
+  --surface-foreground: oklch(99.11% 0 27.99);
+  --surface-secondary: oklch(25.7% 0 27.99);
+  --surface-secondary-foreground: oklch(99.11% 0 27.99);
+  --surface-tertiary: oklch(27.21% 0 27.99);
+  --surface-tertiary-foreground: oklch(99.11% 0 27.99);
+  --warning: oklch(0.8239 0.153 74.6);
+  --warning-foreground: oklch(15% 0.0459 74.6);
 }
 
 @layer components {
-  .button {
-    @apply rounded-lg;
-  }
-
-  .dropdown__popover {
-    @apply rounded-lg;
-  }
-
-  .card {
-    @apply rounded-lg;
-  }
-
   .title-hero {
     @apply text-foreground text-4xl font-extrabold tracking-tight;
   }
@@ -98,15 +120,15 @@
   }
 
   .text-description {
-    @apply text-muted-foreground text-sm;
+    @apply text-muted text-sm;
   }
 
   .text-description-lg {
-    @apply text-muted-foreground text-base;
+    @apply text-muted text-base;
   }
 
   .text-muted {
-    @apply text-muted-foreground;
+    @apply text-muted;
   }
 
   .text-label {
@@ -114,6 +136,6 @@
   }
 
   .text-caption {
-    @apply text-muted-foreground text-xs;
+    @apply text-muted text-xs;
   }
 }

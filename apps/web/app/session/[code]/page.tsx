@@ -448,7 +448,6 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           {session.status === 'active' && (
             <>
               <Button
-                variant="primary"
                 size="md"
                 onPress={onSettleOpen}
                 isDisabled={hasUnclaimedItems}
@@ -551,7 +550,6 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                       Cancel
                     </Button>
                     <Button
-                      variant="primary"
                       isPending={settleLoading}
                       onPress={async () => {
                         await handleSettle();

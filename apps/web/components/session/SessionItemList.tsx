@@ -61,7 +61,7 @@ export function SessionItemList({
             isDisabled={isSettled || allItemsLoading}
             onChange={handleToggleAll}
           >
-            <Checkbox.Control className="data-[selected=true]:bg-primary data-[selected=true]:border-primary size-4">
+            <Checkbox.Control className="data-[selected=true]:bg-accent data-[selected=true]:border-accent size-4">
               <Checkbox.Indicator />
             </Checkbox.Control>
             <Checkbox.Content>
@@ -86,7 +86,7 @@ export function SessionItemList({
               isLoading
                 ? 'opacity-70'
                 : isClaimed
-                  ? 'border-primary bg-primary/5 border-2'
+                  ? 'border-accent bg-accent/5 border-2'
                   : 'border-2 border-transparent'
             }`}
           >
@@ -104,7 +104,7 @@ export function SessionItemList({
                     isDisabled={isSettled || isLoading}
                     onChange={() => handleClaimToggle(item.id)}
                   >
-                    <Checkbox.Control className="data-[selected=true]:bg-primary data-[selected=true]:border-primary size-6">
+                    <Checkbox.Control className="data-[selected=true]:bg-accent data-[selected=true]:border-accent size-6">
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                   </Checkbox>

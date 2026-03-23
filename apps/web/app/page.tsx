@@ -67,7 +67,7 @@ export default function HomePage() {
         />
         <div className="flex flex-col gap-2">
           <h1 className="title-hero">
-            Split bills, <span className="text-primary">not friendships</span>
+            Split bills, <span className="text-accent">not friendships</span>
           </h1>
           <p className="text-description-lg">
             Scan a receipt, share a link, and let everyone pick their items. Tax
@@ -76,7 +76,6 @@ export default function HomePage() {
         </div>
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Button
-            variant="primary"
             size="lg"
             className="px-8 text-base font-semibold"
             onPress={() => router.push('/scan')}

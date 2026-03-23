@@ -48,7 +48,6 @@ export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
                     <div className="flex gap-2">
                       <Input value={shareUrl} className="flex-1" readOnly />
                       <Button
-                        variant="primary"
                         size="sm"
                         onPress={() => {
                           copyLink();
