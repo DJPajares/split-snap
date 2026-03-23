@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, CardBody, Spinner } from '@heroui/react';
+import { Button, Card, Spinner } from '@heroui/react';
 import { IconCamera } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
 
@@ -43,7 +43,7 @@ export function ReceiptUploader({
         isDragging ? 'border-primary bg-primary/10' : 'border-default-300'
       }`}
     >
-      <CardBody
+      <Card.Content
         className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8 text-center"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -66,7 +66,7 @@ export function ReceiptUploader({
 
         {isLoading ? (
           <>
-            <Spinner size="lg" variant="wave" />
+            <Spinner size="lg" />
             <p className="text-description-lg">Scanning receipt with AI...</p>
           </>
         ) : preview ? (
@@ -87,15 +87,14 @@ export function ReceiptUploader({
             </p>
             <p className="text-description">Supports JPEG, PNG, HEIC</p>
             <Button
-              color="primary"
-              variant="flat"
+              variant="tertiary"
               onPress={() => inputRef.current?.click()}
             >
               Choose File
             </Button>
           </>
         )}
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

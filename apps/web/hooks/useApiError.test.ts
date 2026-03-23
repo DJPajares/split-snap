@@ -5,13 +5,15 @@ import { ApiError } from '@/lib/errors';
 
 import { useApiError } from './useApiError';
 
-const { addToastMock, showErrorModalMock } = vi.hoisted(() => ({
-  addToastMock: vi.fn(),
+const { toastDangerMock, showErrorModalMock } = vi.hoisted(() => ({
+  toastDangerMock: vi.fn(),
   showErrorModalMock: vi.fn(),
 }));
 
 vi.mock('@heroui/react', () => ({
-  addToast: addToastMock,
+  toast: {
+    danger: toastDangerMock,
+  },
 }));
 
 vi.mock('@/components/error/error-modal-context', () => ({
@@ -22,7 +24,7 @@ vi.mock('@/components/error/error-modal-context', () => ({
 
 describe('useApiError', () => {
   beforeEach(() => {
-    addToastMock.mockReset();
+    toastDangerMock.mockReset();
     showErrorModalMock.mockReset();
   });
 
@@ -43,7 +45,7 @@ describe('useApiError', () => {
       'Session missing',
       { redirectTo: '/' },
     );
-    expect(addToastMock).not.toHaveBeenCalled();
+    expect(toastDangerMock).not.toHaveBeenCalled();
   });
 
   it('shows toast for non-ApiError values', () => {
@@ -53,10 +55,8 @@ describe('useApiError', () => {
       result.current.handleError(new Error('Unexpected failure'));
     });
 
-    expect(addToastMock).toHaveBeenCalledWith({
-      title: 'Error',
+    expect(toastDangerMock).toHaveBeenCalledWith('Error', {
       description: 'Unexpected failure',
-      color: 'danger',
     });
     expect(showErrorModalMock).not.toHaveBeenCalled();
   });

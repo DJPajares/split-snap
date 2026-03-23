@@ -1,8 +1,9 @@
 'use client';
 
-import { Button, Card, CardBody, Link } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const STEPS = [
   {
@@ -50,6 +51,8 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col gap-20 py-6 sm:gap-40">
       {/* Hero */}
@@ -73,20 +76,18 @@ export default function HomePage() {
         </div>
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Button
-            as={Link}
-            href="/scan"
-            color="primary"
+            variant="primary"
             size="lg"
             className="px-8 text-base font-semibold"
+            onPress={() => router.push('/scan')}
           >
             Scan a Receipt
           </Button>
           <Button
-            as={Link}
-            href="/scan?manual=true"
-            variant="bordered"
+            variant="secondary"
             size="lg"
             className="px-8 text-base font-semibold"
+            onPress={() => router.push('/scan?manual=true')}
           >
             Enter Manually
           </Button>
@@ -94,17 +95,17 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="bg-accent -mx-4 px-4 py-12 sm:-mx-8 sm:px-8">
+      <section className="bg-surface -mx-4 px-4 py-12 sm:-mx-8 sm:px-8">
         <div className="mx-auto flex flex-col gap-8 text-center">
           <h2 className="title-page">How It Works</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <Card key={i}>
-                <CardBody className="p-6 text-center">
+                <Card.Content className="p-6 text-center">
                   <span className="mb-4 block text-4xl">{step.icon}</span>
                   <h4 className="title-card">{step.title}</h4>
                   <p className="text-description">{step.description}</p>
-                </CardBody>
+                </Card.Content>
               </Card>
             ))}
           </div>

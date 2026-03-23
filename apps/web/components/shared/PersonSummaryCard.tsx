@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
+import { Card, CardHeader, Separator } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { PersonSummary } from '@split-snap/shared/types';
 
@@ -69,9 +69,9 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
         </div>
       </CardHeader>
 
-      <Divider />
+      <Separator />
 
-      <CardBody className="gap-2">
+      <Card.Content className="gap-2">
         {summary.items.map((item, i) => (
           <div key={i} className="flex justify-between">
             <p className="text-description-lg">
@@ -88,7 +88,7 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
           </div>
         ))}
 
-        {summary.items.length > 0 && <Divider className="my-1" />}
+        {summary.items.length > 0 && <Separator className="my-1" />}
 
         <div className="flex justify-between">
           <span className="text-description-lg">Items subtotal</span>
@@ -122,7 +122,7 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
             })}
           </span>
         </div>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 };

@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from '@heroui/react';
+import { Button, Modal } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -80,33 +73,36 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
     <ErrorModalContext.Provider value={{ showErrorModal }}>
       {children}
 
-      <Modal
-        isOpen={modal !== null}
-        onOpenChange={(open) => {
-          if (!open) handleClose();
-        }}
-        isDismissable={false}
-        hideCloseButton
-      >
-        <ModalContent>
-          {() => (
-            <>
-              <ModalHeader className="flex items-center gap-2">
-                <span className="text-danger text-xl">⚠️</span>
-                {modal?.title}
-              </ModalHeader>
-              <ModalBody>
-                <p className="text-description-lg">{modal?.message}</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="primary" onPress={handleClose}>
-                  {modal?.options?.actionLabel ??
-                    (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
+      <Modal>
+        <Modal.Backdrop
+          isOpen={modal !== null}
+          onOpenChange={(open) => {
+            if (!open) handleClose();
+          }}
+          isDismissable={false}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              {() => (
+                <>
+                  <Modal.Header className="flex items-center gap-2">
+                    <span className="text-danger text-xl">⚠️</span>
+                    {modal?.title}
+                  </Modal.Header>
+                  <Modal.Body>
+                    <p className="text-description-lg">{modal?.message}</p>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="primary" onPress={handleClose}>
+                      {modal?.options?.actionLabel ??
+                        (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </ErrorModalContext.Provider>
   );

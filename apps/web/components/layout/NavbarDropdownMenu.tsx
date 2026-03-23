@@ -1,10 +1,4 @@
-import {
-  addToast,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-} from '@heroui/react';
+import { Dropdown, toast } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   IconLogin,
@@ -44,10 +38,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
       // Ignore
     }
 
-    addToast({
-      title: 'You have been logged out',
-      color: 'success',
-    });
+    toast.success('You have been logged out');
 
     router.push('/');
   };
@@ -58,58 +49,60 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
 
   return (
     <Dropdown>
-      <DropdownTrigger>{children}</DropdownTrigger>
-      <DropdownMenu aria-label="User menu">
-        <DropdownItem
-          key="dark-mode"
-          aria-label="Toggle dark mode"
-          onPress={handleDarkModeToggle}
-        >
-          {isDarkMode ? (
-            <div className="flex flex-row items-center gap-2">
-              <IconSunFilled size={20} />
-              <p>Light Mode</p>
-            </div>
-          ) : (
-            <div className="flex flex-row items-center gap-2">
-              <IconMoon size={20} />
-              <p>Dark Mode</p>
-            </div>
-          )}
-        </DropdownItem>
+      <Dropdown.Trigger>{children}</Dropdown.Trigger>
+      <Dropdown.Popover>
+        <Dropdown.Menu aria-label="User menu">
+          <Dropdown.Item
+            id="dark-mode"
+            textValue="New file"
+            onPress={handleDarkModeToggle}
+            aria-label="Toggle dark mode"
+          >
+            {isDarkMode ? (
+              <div className="flex flex-row items-center gap-2">
+                <IconSunFilled size={20} />
+                <p>Light Mode</p>
+              </div>
+            ) : (
+              <div className="flex flex-row items-center gap-2">
+                <IconMoon size={20} />
+                <p>Dark Mode</p>
+              </div>
+            )}
+          </Dropdown.Item>
 
-        {user ? (
-          <DropdownItem
-            key="logout"
-            aria-label="Log out"
-            onPress={handleLogout}
-            color="danger"
-          >
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-row items-center gap-2">
-                <IconLogout size={20} />
-                <p>Log Out</p>
+          {user ? (
+            <Dropdown.Item
+              key="logout"
+              aria-label="Log out"
+              onPress={handleLogout}
+              variant="danger"
+            >
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-row items-center gap-2">
+                  <IconLogout size={20} />
+                  <p>Log Out</p>
+                </div>
+                <p className="text-caption">{`v${packageInfo.version}`}</p>
               </div>
-              <p className="text-caption">{`v${packageInfo.version}`}</p>
-            </div>
-          </DropdownItem>
-        ) : (
-          <DropdownItem
-            key="login"
-            aria-label="Log in"
-            onPress={handleLogin}
-            color="primary"
-          >
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-row items-center gap-2">
-                <IconLogin size={20} />
-                <p>Log In</p>
+            </Dropdown.Item>
+          ) : (
+            <Dropdown.Item
+              key="login"
+              aria-label="Log in"
+              onPress={handleLogin}
+            >
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-row items-center gap-2">
+                  <IconLogin size={20} />
+                  <p>Log In</p>
+                </div>
+                <p className="text-caption">{`v${packageInfo.version}`}</p>
               </div>
-              <p className="text-caption">{`v${packageInfo.version}`}</p>
-            </div>
-          </DropdownItem>
-        )}
-      </DropdownMenu>
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown.Popover>
     </Dropdown>
   );
 }

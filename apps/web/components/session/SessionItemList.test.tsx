@@ -8,11 +8,6 @@ import { SessionItemList } from './SessionItemList';
 interface MockCardProps {
   children: React.ReactNode;
   onPress?: () => void;
-  isPressable?: boolean;
-}
-
-interface MockCardBodyProps {
-  children: React.ReactNode;
 }
 
 interface MockChipProps {
@@ -29,33 +24,38 @@ interface MockCheckboxProps {
 }
 
 vi.mock('@heroui/react', () => ({
-  Card: ({ children, onPress, isPressable }: MockCardProps) => (
-    <button onClick={onPress} disabled={!isPressable}>
-      {children}
-    </button>
-  ),
-  CardBody: ({ children }: MockCardBodyProps) => <div>{children}</div>,
+  Card: Object.assign(({ children }: MockCardProps) => <div>{children}</div>, {
+    Content: ({ children }: MockCardProps) => <div>{children}</div>,
+  }),
   Chip: ({ children }: MockChipProps) => <span>{children}</span>,
-  Checkbox: ({
-    children,
-    isSelected,
-    isDisabled,
-    isIndeterminate,
-    onChange,
-    'aria-label': ariaLabel,
-  }: MockCheckboxProps) => (
-    <label>
-      <input
-        aria-label={ariaLabel ?? 'claim-item'}
-        type="checkbox"
-        checked={isSelected}
-        disabled={isDisabled}
-        data-indeterminate={isIndeterminate ? 'true' : 'false'}
-        onChange={onChange}
-      />
-      {children}
-    </label>
+  Checkbox: Object.assign(
+    ({
+      children,
+      isSelected,
+      isDisabled,
+      isIndeterminate,
+      onChange,
+      'aria-label': ariaLabel,
+    }: MockCheckboxProps) => (
+      <label>
+        <input
+          aria-label={ariaLabel ?? 'claim-item'}
+          type="checkbox"
+          checked={isSelected}
+          disabled={isDisabled}
+          data-indeterminate={isIndeterminate ? 'true' : 'false'}
+          onChange={onChange}
+        />
+        {children}
+      </label>
+    ),
+    {
+      Control: ({ children }: MockCheckboxProps) => <span>{children}</span>,
+      Indicator: () => <span />,
+      Content: ({ children }: MockCheckboxProps) => <span>{children}</span>,
+    },
   ),
+  Label: ({ children }: MockCheckboxProps) => <span>{children}</span>,
 }));
 
 const baseSession: Session = {

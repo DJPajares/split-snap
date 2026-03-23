@@ -1,6 +1,6 @@
 'use client';
 
-import { addToast, Button, Spinner } from '@heroui/react';
+import { Button, Spinner, toast } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type {
   ParamsCodeProps,
@@ -122,7 +122,7 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
         currency: data.currency,
       });
 
-      addToast({ title: 'Items updated!', color: 'success' });
+      toast.success('Items updated!');
       router.push(`/session/${normalizedCode}`);
     } catch (err) {
       handleError(err, 'Failed to update items');
@@ -169,11 +169,11 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
             <p className="text-description-lg">Session {code}</p>
           </div>
           <Button
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<IconArrowBigLeft size={16} />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
+            <IconArrowBigLeft size={16} />
             Back
           </Button>
         </div>

@@ -1,16 +1,18 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Card,
-  CardBody,
   CardHeader,
-  Divider,
+  FieldError,
   Input,
+  InputGroup,
+  Label,
   Link,
-  Tab,
+  Separator,
   Tabs,
+  TextField,
+  toast,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { APP, STORAGE_KEYS } from '@split-snap/shared/constants';
@@ -81,7 +83,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(data.email, data.password);
-      addToast({ title: 'Welcome back!', color: 'success' });
+      toast.success('Welcome back!');
       router.push(getPostAuthRedirect());
     } catch (err) {
       handleError(err, 'Login failed');
@@ -94,7 +96,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await register(data.email, data.password, data.name);
-      addToast({ title: 'Account created!', color: 'success' });
+      toast.success('Account created!');
       router.push(getPostAuthRedirect());
     } catch (err) {
       handleError(err, 'Registration failed');
@@ -121,16 +123,27 @@ export default function LoginPage() {
           </p>
         </CardHeader>
 
-        <Divider />
+        <Separator />
 
-        <CardBody className="px-6 pb-8">
+        <Card.Content className="px-6 pb-8">
           <Tabs
+            className="w-full"
             selectedKey={tab}
             onSelectionChange={(key) => setTab(key as string)}
-            fullWidth
-            className="mb-4"
           >
-            <Tab key="login" title="Log In">
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="Authentication">
+                <Tabs.Tab id="login">
+                  Log In
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="register">
+                  Sign Up
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+            <Tabs.Panel id="login">
               <form
                 className="mt-4 flex flex-col gap-4"
                 onSubmit={loginForm.handleSubmit(handleLogin)}
@@ -138,58 +151,63 @@ export default function LoginPage() {
                 <Controller
                   name="email"
                   control={loginForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
+                  render={({ field }) => (
+                    <TextField type="email">
+                      <Label>Email</Label>
+                      <Input
+                        placeholder="you@example.com"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Controller
                   name="password"
                   control={loginForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Password"
+                  render={({ field }) => (
+                    <TextField
+                      name="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
-                    />
+                    >
+                      <Label>Password</Label>
+                      <InputGroup>
+                        <InputGroup.Input
+                          placeholder="Enter your password"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <InputGroup.Suffix>
+                          <button
+                            aria-label="toggle password visibility"
+                            className="outline-transparent focus:outline-solid"
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? <IconEyeOff /> : <IconEye />}
+                          </button>
+                        </InputGroup.Suffix>
+                      </InputGroup>
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Button
                   type="submit"
-                  color="primary"
+                  variant="primary"
                   size="lg"
                   className="font-semibold"
-                  isLoading={loading}
+                  isPending={loading}
                   isDisabled={!loginForm.formState.isValid}
                 >
                   Log In
                 </Button>
               </form>
-            </Tab>
-            <Tab key="register" title="Sign Up">
+            </Tabs.Panel>
+            <Tabs.Panel id="register">
               <form
                 className="mt-4 flex flex-col gap-4"
                 onSubmit={registerForm.handleSubmit(handleRegister)}
@@ -197,109 +215,117 @@ export default function LoginPage() {
                 <Controller
                   name="name"
                   control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Name"
-                      placeholder="Your name"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
+                  render={({ field }) => (
+                    <TextField type="text">
+                      <Label>Name</Label>
+                      <Input
+                        placeholder="Your name"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Controller
                   name="email"
                   control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
+                  render={({ field }) => (
+                    <TextField type="email">
+                      <Label>Email</Label>
+                      <Input
+                        placeholder="you@example.com"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Controller
                   name="password"
                   control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
-                    />
+                  render={({ field }) => (
+                    <TextField type={showPassword ? 'text' : 'password'}>
+                      <Label>Password</Label>
+                      <InputGroup>
+                        <InputGroup.Input
+                          placeholder="Enter your password"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <InputGroup.Suffix>
+                          <button
+                            aria-label="toggle password visibility"
+                            className="outline-transparent focus:outline-solid"
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? <IconEyeOff /> : <IconEye />}
+                          </button>
+                        </InputGroup.Suffix>
+                      </InputGroup>
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Controller
                   name="confirmPassword"
                   control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Confirm Password"
+                  render={({ field }) => (
+                    <TextField
+                      name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Re-enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() =>
-                            setShowConfirmPassword((prev) => !prev)
-                          }
-                        >
-                          {showConfirmPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
-                    />
+                    >
+                      <Label>Confirm Password</Label>
+                      <InputGroup>
+                        <InputGroup.Input
+                          placeholder="Enter your password"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <InputGroup.Suffix>
+                          <button
+                            aria-label="toggle password visibility"
+                            className="outline-transparent focus:outline-solid"
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                          >
+                            {showPassword ? <IconEyeOff /> : <IconEye />}
+                          </button>
+                        </InputGroup.Suffix>
+                      </InputGroup>
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Button
                   type="submit"
-                  color="primary"
+                  variant="primary"
                   size="lg"
                   className="font-semibold"
-                  isLoading={loading}
+                  isPending={loading}
                   isDisabled={!registerForm.formState.isValid}
                 >
                   Create Account
                 </Button>
               </form>
-            </Tab>
+            </Tabs.Panel>
           </Tabs>
 
           <p className="text-description text-center">
             You don&apos;t need an account to join sessions.{' '}
-            <Link href="/" size="sm" className="font-semibold">
+            <Link href="/" className="font-semibold">
               Go back
             </Link>
           </p>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

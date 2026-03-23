@@ -1,14 +1,16 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Card,
-  CardBody,
   CardHeader,
-  Divider,
+  FieldError,
   Input,
+  Label,
+  Separator,
   Spinner,
+  TextField,
+  toast,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
@@ -132,7 +134,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           // Host approval required — wait
           setPendingParticipantId(result.pendingParticipantId ?? null);
           setJoinState('pending');
-          addToast({ title: 'Waiting for host approval...', color: 'warning' });
+          toast.warning('Waiting for host approval...');
           return;
         }
 
@@ -142,7 +144,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
             result.participantId,
           );
-          addToast({ title: `Welcome, ${displayName}!`, color: 'success' });
+          toast.success(`Welcome, ${displayName}!`);
           router.push(`/session/${code}`);
         }
       } catch (err) {
@@ -200,7 +202,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
           approvedParticipant.id,
         );
-        addToast({ title: 'You have been approved!', color: 'success' });
+        toast.success('You have been approved!');
         router.push(`/session/${code}`);
         return;
       }
@@ -208,7 +210,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       // Check if rejected (no longer in pending and not in participants)
       if (!isStillPending && !approvedParticipant) {
         setJoinState('rejected');
-        addToast({ title: 'Your join request was rejected', color: 'danger' });
+        toast.danger('Your join request was rejected');
       }
     },
   });
@@ -273,7 +275,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconHourglassLow size={48} className="text-warning" />
             <h4 className="title-card">Temporarily Removed</h4>
             <p className="text-description-lg text-center">
@@ -283,16 +285,16 @@ export default function JoinPage({ params }: ParamsCodeProps) {
                 : ' You can try again shortly.'}
             </p>
             <div className="flex gap-2">
-              <Button color="primary" onPress={() => router.push('/')}>
+              <Button variant="primary" onPress={() => router.push('/')}>
                 Go Home
               </Button>
               {!hasCountdown && (
-                <Button variant="flat" onPress={() => setJoinState('idle')}>
+                <Button variant="tertiary" onPress={() => setJoinState('idle')}>
                   Try Again
                 </Button>
               )}
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -303,16 +305,16 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconBan size={48} className="text-danger" />
             <h4 className="title-card">Request Rejected</h4>
             <p className="text-description-lg text-center">
               The host has rejected your join request.
             </p>
-            <Button color="primary" onPress={() => router.push('/')}>
+            <Button variant="primary" onPress={() => router.push('/')}>
               Go Home
             </Button>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -323,8 +325,8 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
-            <Spinner size="lg" variant="wave" />
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
+            <Spinner size="lg" />
             <h4 className="title-card">Waiting for Approval</h4>
             <p className="text-description-lg text-center">
               The host needs to approve your request to join this session.
@@ -333,7 +335,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
               {code.toUpperCase()}
             </div>
             <Button
-              variant="flat"
+              variant="tertiary"
               onPress={() => {
                 setJoinState('idle');
                 setPendingParticipantId(null);
@@ -341,7 +343,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             >
               Cancel
             </Button>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -362,33 +364,33 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             {code.toUpperCase()}
           </p>
         </CardHeader>
-        <Divider />
-        <CardBody className="gap-4 px-6 pb-8">
+        <Separator />
+        <Card.Content className="gap-4 px-6 pb-8">
           {!user && (
             <form onSubmit={nameForm.handleSubmit(handleJoin)}>
               <div className="flex flex-col gap-4">
                 <Controller
                   name="name"
                   control={nameForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Your Name"
-                      placeholder="e.g. DJ"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      size="lg"
-                      autoFocus
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
+                  render={({ field }) => (
+                    <TextField type="text">
+                      <Label>Your Name</Label>
+                      <Input
+                        placeholder="e.g. DJ"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        autoFocus
+                      />
+                      <FieldError />
+                    </TextField>
                   )}
                 />
                 <Button
                   type="submit"
-                  color="primary"
+                  variant="primary"
                   size="lg"
-                  isLoading={joinState === 'joining'}
+                  isPending={joinState === 'joining'}
                   isDisabled={!nameForm.formState.isValid}
                 >
                   Join & Start Picking
@@ -398,10 +400,10 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           )}
           {user && (
             <Button
-              color="primary"
+              variant="primary"
               size="lg"
               onPress={() => void joinSession(user.name, user.id)}
-              isLoading={joinState === 'joining'}
+              isPending={joinState === 'joining'}
             >
               Join as Account
             </Button>
@@ -411,8 +413,12 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           )}
           {!user && (
             <>
-              <Divider />
-              <Button variant="flat" size="md" onPress={handleLoginRedirect}>
+              <Separator />
+              <Button
+                variant="tertiary"
+                size="md"
+                onPress={handleLoginRedirect}
+              >
                 Log in to join with your account
               </Button>
             </>
@@ -420,7 +426,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           <p className="text-caption text-center">
             No account needed — just pick a name.
           </p>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

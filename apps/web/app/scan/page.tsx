@@ -1,6 +1,6 @@
 'use client';
 
-import { addToast, Spinner, Tab, Tabs } from '@heroui/react';
+import { Spinner, Tabs, toast } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { ScannedItem, ScanResult } from '@split-snap/shared/types';
 import { IconCamera, IconPencil } from '@tabler/icons-react';
@@ -65,10 +65,7 @@ function ScanPageInner() {
         setActiveTab('manual'); // Switch to editor after scan
       } catch (err) {
         handleError(err, 'Scan failed');
-        addToast({
-          description: 'You can enter items manually.',
-          color: 'warning',
-        });
+        toast.warning('You can enter items manually.');
       } finally {
         setScanning(false);
       }
@@ -144,43 +141,43 @@ function ScanPageInner() {
         selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
       >
-        <Tab
-          key="scan"
-          title={
-            <div className="flex flex-row items-center gap-2">
-              <IconCamera size={16} />
-              <p>Scan Receipt</p>
-            </div>
-          }
-        >
+        <Tabs.ListContainer>
+          <Tabs.List aria-label="Scan or Manual Entry">
+            <Tabs.Tab id="scan">
+              <div className="flex flex-row items-center gap-2">
+                <IconCamera size={16} />
+                <p>Scan Receipt</p>
+              </div>
+              <Tabs.Indicator />
+            </Tabs.Tab>
+            <Tabs.Tab id="manual">
+              <div className="flex flex-row items-center gap-2">
+                <IconPencil size={16} />
+                <p>Manual Entry</p>
+              </div>
+              <Tabs.Indicator />
+            </Tabs.Tab>
+          </Tabs.List>
+        </Tabs.ListContainer>
+        <Tabs.Panel id="scan">
           <ReceiptUploader
             onFileSelected={handleFileSelected}
             isLoading={scanning}
           />
-        </Tab>
-        <Tab
-          key="manual"
-          title={
-            <div className="flex flex-row items-center gap-2">
-              <IconPencil size={16} />
-              <p>Manual Entry</p>
-            </div>
-          }
-        >
-          <div>
-            <ItemEditor
-              initialItems={scanResult?.items ?? []}
-              initialSubtotal={scanResult?.subtotal ?? 0}
-              initialTax={scanResult?.tax ?? 0}
-              initialTip={scanResult?.tip ?? 0}
-              initialTotal={scanResult?.total ?? 0}
-              initialPriceInterpretation="line-total"
-              onSubmit={handleCreateSession}
-              isSubmitting={creating || isRouting}
-              receiptImageUrl={receiptImageUrl}
-            />
-          </div>
-        </Tab>
+        </Tabs.Panel>
+        <Tabs.Panel id="manual">
+          <ItemEditor
+            initialItems={scanResult?.items ?? []}
+            initialSubtotal={scanResult?.subtotal ?? 0}
+            initialTax={scanResult?.tax ?? 0}
+            initialTip={scanResult?.tip ?? 0}
+            initialTotal={scanResult?.total ?? 0}
+            initialPriceInterpretation="line-total"
+            onSubmit={handleCreateSession}
+            isSubmitting={creating || isRouting}
+            receiptImageUrl={receiptImageUrl}
+          />
+        </Tabs.Panel>
       </Tabs>
     </div>
   );

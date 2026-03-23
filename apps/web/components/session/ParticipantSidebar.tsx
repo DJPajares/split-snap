@@ -1,16 +1,13 @@
 'use client';
 
 import {
+  Avatar,
   Button,
   Card,
-  CardBody,
   Chip,
-  Divider,
   Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Separator,
   Spinner,
-  User as UserAvatar,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
@@ -81,7 +78,7 @@ export function ParticipantSidebar({
 
   return (
     <Card>
-      <CardBody className="gap-3">
+      <Card.Content className="gap-3">
         {/* Pending participants (only visible to host) */}
         {isCreator &&
           session.pendingParticipants &&
@@ -91,7 +88,7 @@ export function ParticipantSidebar({
                 <p className="text-warning text-sm font-semibold">
                   Pending Requests
                 </p>
-                <Chip size="sm" variant="flat" color="warning">
+                <Chip size="sm" variant="tertiary" color="warning">
                   {session.pendingParticipants.length}
                 </Chip>
               </div>
@@ -100,32 +97,34 @@ export function ParticipantSidebar({
                   key={pending.id}
                   className="bg-warning/10 flex items-center justify-between rounded-lg p-2"
                 >
-                  <UserAvatar
-                    name={pending.displayName}
-                    description={pending.isAnonymous ? 'Guest' : 'Member'}
-                    avatarProps={{
-                      name: pending.displayName[0],
-                      size: 'sm',
-                      color: 'warning',
-                    }}
-                  />
+                  <div className="inline-flex items-center gap-2">
+                    <Avatar color="warning" size="sm">
+                      <Avatar.Fallback>
+                        {pending.displayName[0]}
+                      </Avatar.Fallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm">{pending.displayName}</span>
+                      <span className="text-muted text-xs">
+                        {pending.isAnonymous ? 'Guest' : 'Member'}
+                      </span>
+                    </div>
+                  </div>
                   <div className="flex gap-1">
                     <Button
                       size="sm"
-                      color="success"
-                      variant="flat"
+                      variant="tertiary"
                       onPress={() => handleApprove(pending.id)}
-                      isLoading={approvingId === pending.id}
+                      isPending={approvingId === pending.id}
                       isDisabled={rejectingId === pending.id}
                     >
                       Accept
                     </Button>
                     <Button
                       size="sm"
-                      color="danger"
-                      variant="flat"
+                      variant="danger"
                       onPress={() => handleReject(pending.id)}
-                      isLoading={rejectingId === pending.id}
+                      isPending={rejectingId === pending.id}
                       isDisabled={approvingId === pending.id}
                     >
                       Reject
@@ -133,7 +132,7 @@ export function ParticipantSidebar({
                   </div>
                 </div>
               ))}
-              <Divider />
+              <Separator />
             </>
           )}
 
@@ -159,64 +158,73 @@ export function ParticipantSidebar({
                 onOpenChange={(open) =>
                   setConfirmId(open ? participant.id : null)
                 }
-                placement="bottom"
-                triggerScaleOnOpen={isKickable ? true : false}
+                // triggerScaleOnOpen={isKickable ? true : false}
               >
-                <PopoverTrigger>
-                  <div
-                    className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
-                      isCurrentUser
-                        ? 'bg-primary/10'
-                        : isKickable
-                          ? 'hover:bg-danger/10 cursor-pointer'
-                          : ''
-                    }`}
-                    onClick={() => {
-                      if (isKickable && !isKicking) {
-                        setConfirmId(participant.id);
-                      }
-                    }}
-                  >
-                    <UserAvatar
-                      name={participant.displayName}
-                      description={
+                {/* Trigger */}
+                <div
+                  className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
+                    isCurrentUser
+                      ? 'bg-primary/10'
+                      : isKickable
+                        ? 'hover:bg-danger/10 cursor-pointer'
+                        : ''
+                  }`}
+                  onClick={() => {
+                    if (isKickable && !isKicking) {
+                      setConfirmId(participant.id);
+                    }
+                  }}
+                >
+                  {/* User Avatar */}
+                  <div className="inline-flex items-center gap-2">
+                    <Avatar
+                      size="sm"
+                      color={
                         isParticipantInitiator
+                          ? 'warning'
+                          : isCurrentUser
+                            ? 'accent'
+                            : 'default'
+                      }
+                    >
+                      <Avatar.Fallback>
+                        {participant.displayName[0]}
+                      </Avatar.Fallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm">{participant.displayName}</span>
+                      <span className="text-muted text-xs">
+                        {isParticipantInitiator
                           ? 'Host'
                           : isCurrentUser
                             ? 'You'
                             : participant.isAnonymous
                               ? 'Guest'
-                              : 'Member'
-                      }
-                      avatarProps={{
-                        name: participant.displayName[0],
-                        size: 'sm',
-                        color: isParticipantInitiator
-                          ? 'warning'
-                          : isCurrentUser
-                            ? 'primary'
-                            : 'default',
-                      }}
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">
-                          {formatCurrency({
-                            value: summary?.total ?? 0,
-                            currency: session.currency,
-                            decimal: 2,
-                          })}
-                        </p>
-                        <p className="text-description">
-                          {summary?.items.length ?? 0} items
-                        </p>
-                      </div>
-                      {isKicking && <Spinner size="sm" color="danger" />}
+                              : 'Member'}
+                      </span>
                     </div>
                   </div>
-                </PopoverTrigger>
+                  {/* Amount */}
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">
+                        {formatCurrency({
+                          value: summary?.total ?? 0,
+                          currency: session.currency,
+                          decimal: 2,
+                        })}
+                      </p>
+                      <p className="text-description">
+                        {summary?.items.length ?? 0} items
+                      </p>
+                    </div>
+                    {isKicking && <Spinner size="sm" color="danger" />}
+                  </div>
+                </div>
+
+                {/* Content */}
                 {isKickable && (
-                  <PopoverContent>
+                  <Popover.Content placement="bottom">
                     <div className="space-y-2 p-3">
                       <p className="text-sm font-medium">
                         Remove {participant.displayName}?
@@ -227,22 +235,22 @@ export function ParticipantSidebar({
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
-                          variant="flat"
+                          variant="tertiary"
                           onPress={() => setConfirmId(null)}
                         >
                           Cancel
                         </Button>
                         <Button
                           size="sm"
-                          color="danger"
+                          variant="danger"
                           onPress={() => handleKick(participant.id)}
-                          isLoading={isKicking}
+                          isPending={isKicking}
                         >
                           Remove
                         </Button>
                       </div>
                     </div>
-                  </PopoverContent>
+                  </Popover.Content>
                 )}
               </Popover>
             );
@@ -250,7 +258,7 @@ export function ParticipantSidebar({
         )}
 
         {/* Session totals */}
-        <Divider />
+        <Separator />
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-description-lg">Subtotal</span>
@@ -282,7 +290,7 @@ export function ParticipantSidebar({
               })}
             </span>
           </div>
-          <Divider />
+          <Separator />
           <div className="flex justify-between font-bold">
             <span>Total</span>
             <span>
@@ -294,7 +302,7 @@ export function ParticipantSidebar({
             </span>
           </div>
         </div>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

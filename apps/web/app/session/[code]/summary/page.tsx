@@ -1,16 +1,15 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Card,
-  CardBody,
   Chip,
+  ListBox,
   Select,
-  SelectItem,
   Spinner,
+  // toast,
 } from '@heroui/react';
-import { STORAGE_KEYS } from '@split-snap/shared/constants';
+// import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
@@ -42,50 +41,46 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
       .finally(() => setLoading(false));
   }, [code, handleError]);
 
-  const handleConvertExchangeRates = async (currency: string) => {
-    if (!session) return;
+  // const handleConvertExchangeRates = async (currency: string) => {
+  //   if (!session) return;
 
-    const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
+  //   const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
 
-    if (!rates) {
-      addToast({
-        title: 'Exchange rates not available',
-        description:
-          'Unable to fetch exchange rates. Please try again later or refresh the page.',
-        color: 'danger',
-      });
-      return;
-    }
+  //   if (!rates) {
+  //     toast.danger('Exchange rates not available', {
+  //       description:
+  //         'Unable to fetch exchange rates. Please try again later or refresh the page.',
+  //     });
+  //     return;
+  //   }
 
-    const parsedRates = JSON.parse(rates);
-    const rate = parsedRates[currency];
+  //   const parsedRates = JSON.parse(rates);
+  //   const rate = parsedRates[currency];
 
-    if (!rate) {
-      addToast({
-        title: 'Currency not supported',
-        description: `Exchange rate for ${currency} is not available.`,
-        color: 'danger',
-      });
-      return;
-    }
+  //   if (!rate) {
+  //     toast.danger('Currency not supported', {
+  //       description: `Exchange rate for ${currency} is not available.`,
+  //     });
+  //     return;
+  //   }
 
-    const baseCurrency = session.currency;
-    const conversionRate = rate / parsedRates[baseCurrency];
+  //   const baseCurrency = session.currency;
+  //   const conversionRate = rate / parsedRates[baseCurrency];
 
-    const convertedSession = {
-      ...session,
-      items: session.items.map((item) => ({
-        ...item,
-        price: item.price * conversionRate,
-      })),
-      tip: session.tip * conversionRate,
-      tax: session.tax * conversionRate,
-      total: session.total * conversionRate,
-      currency,
-    };
+  //   const convertedSession = {
+  //     ...session,
+  //     items: session.items.map((item) => ({
+  //       ...item,
+  //       price: item.price * conversionRate,
+  //     })),
+  //     tip: session.tip * conversionRate,
+  //     tax: session.tax * conversionRate,
+  //     total: session.total * conversionRate,
+  //     currency,
+  //   };
 
-    setSession(convertedSession);
-  };
+  //   setSession(convertedSession);
+  // };
 
   if (loading) {
     return (
@@ -109,17 +104,17 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
           <p className="text-description-lg">Session {code}</p>
         </div>
         <Button
-          variant="flat"
+          variant="tertiary"
           size="sm"
-          startContent={<IconArrowBigLeft size={16} />}
           onPress={() => router.push(`/session/${code}`)}
         >
+          <IconArrowBigLeft size={16} />
           Back
         </Button>
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <p className="text-description-lg">Convert currency to:</p>
+        {/* <p className="text-description-lg">Convert currency to:</p>
         <Select
           className="w-24"
           aria-label="convert currency to"
@@ -129,18 +124,48 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
           {CURRENCIES.map((currency) => (
             <SelectItem key={currency.code}>{currency.code}</SelectItem>
           ))}
+        </Select> */}
+
+        <p className="text-description-lg">Convert currency to:</p>
+        <Select
+          aria-label="convert currency to"
+          // value={singleValue}
+          // onChange={setSingleValue}
+          // value={[`${session.currency}`]}
+          // onChange={(e) => handleConvertExchangeRates(e.target.value)}
+          className="w-24"
+        >
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {CURRENCIES.map((currency) => (
+                <ListBox.Item key={currency.code} textValue={currency.code}>
+                  {currency.code}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
         </Select>
       </div>
 
       {unclaimedItems.length > 0 && (
         <Card className="border-warning border-2">
-          <CardBody className="flex flex-col gap-2 p-4">
+          <Card.Content className="flex flex-col gap-2 p-4">
             <p className="text-warning font-semibold">
               ⚠️ {unclaimedItems.length} unclaimed item(s)
             </p>
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
-                <Chip key={item.id} size="sm" variant="flat" color="warning">
+                <Chip
+                  key={item.id}
+                  size="sm"
+                  variant="tertiary"
+                  color="warning"
+                >
                   {item.name} (
                   {formatCurrency({
                     value: item.price * item.quantity,
@@ -151,7 +176,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
                 </Chip>
               ))}
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       )}
 
@@ -167,7 +192,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
 
       {/* Grand total */}
       <Card>
-        <CardBody className="p-4">
+        <Card.Content className="p-4">
           <div className="flex items-center justify-between">
             <h3 className="title-section">Grand Total</h3>
             <h3 className="title-section">
@@ -178,7 +203,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
               })}
             </h3>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

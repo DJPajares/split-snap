@@ -1,4 +1,4 @@
-import { Button, Card, CardBody } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
 import { IconMinus, IconPlus, IconReceiptFilled } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -12,7 +12,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
 
   return (
     <Card>
-      <CardBody className="flex flex-col gap-4 py-4">
+      <Card.Content className="flex flex-col gap-4 py-4">
         <button
           className="flex w-full items-center gap-2 text-left"
           onClick={() => setReceiptExpanded(!receiptExpanded)}
@@ -28,11 +28,11 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-2">
                 <Button
-                  isIconOnly
                   size="sm"
-                  variant="flat"
+                  variant="tertiary"
                   onPress={() => setReceiptZoom((z) => Math.max(0.5, z - 0.25))}
                   aria-label="Zoom out"
+                  isIconOnly
                 >
                   <IconMinus size={12} />
                 </Button>
@@ -40,10 +40,10 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                   {Math.round(receiptZoom * 100)}%
                 </span>
                 <Button
-                  isIconOnly
                   size="sm"
-                  variant="flat"
+                  variant="tertiary"
                   onPress={() => setReceiptZoom((z) => Math.min(3, z + 0.25))}
+                  isIconOnly
                   aria-label="Zoom in"
                 >
                   <IconPlus size={12} />
@@ -52,7 +52,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
               {receiptZoom !== 1 && (
                 <Button
                   size="sm"
-                  variant="light"
+                  variant="tertiary"
                   onPress={() => setReceiptZoom(1)}
                 >
                   Reset
@@ -70,7 +70,7 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
             </div>
           </div>
         )}
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

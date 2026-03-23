@@ -4,9 +4,8 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
   Chip,
-  Link,
+  IconPlus,
   Spinner,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
@@ -72,32 +71,32 @@ export default function DashboardPage() {
           </p>
         </div>
         <Button
-          as={Link}
-          href="/scan"
-          color="primary"
+          variant="primary"
           className="font-semibold"
+          onPress={() => router.push('/scan')}
         >
-          + New Split
+          <IconPlus />
+          New Split
         </Button>
       </div>
 
       {/* Filter chips */}
       <div>
-        <ButtonGroup variant="flat" size="sm">
+        <ButtonGroup variant="tertiary" size="sm">
           <Button
-            color={roleFilter === 'all' ? 'primary' : 'default'}
+            variant={roleFilter === 'all' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('all')}
           >
             All ({sessions.length})
           </Button>
           <Button
-            color={roleFilter === 'host' ? 'primary' : 'default'}
+            variant={roleFilter === 'host' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('host')}
           >
             Hosted ({sessions.filter((s) => s.role === 'host').length})
           </Button>
           <Button
-            color={roleFilter === 'participant' ? 'primary' : 'default'}
+            variant={roleFilter === 'participant' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('participant')}
           >
             Joined ({sessions.filter((s) => s.role === 'participant').length})
@@ -107,11 +106,11 @@ export default function DashboardPage() {
 
       {loadingSessions ? (
         <div className="flex items-center justify-center py-16">
-          <Spinner size="lg" variant="wave" />
+          <Spinner size="lg" />
         </div>
       ) : filteredSessions.length === 0 ? (
         <Card>
-          <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
+          <Card.Content className="flex flex-col items-center justify-center gap-4 py-16">
             <IconClipboardText size={48} className="text-default" />
             <h5 className="title-subsection">
               {roleFilter === 'all'
@@ -128,65 +127,66 @@ export default function DashboardPage() {
                   : 'Sessions you join will appear here.'}
             </p>
             {(roleFilter === 'all' || roleFilter === 'host') && (
-              <Button as={Link} href="/scan" color="primary" variant="flat">
+              <Button variant="tertiary" onPress={() => router.push('/scan')}>
                 Create Your First Split
               </Button>
             )}
-          </CardBody>
+          </Card.Content>
         </Card>
       ) : (
         <div className="space-y-3">
           {filteredSessions.map((session) => (
-            <Card
-              key={session.id}
-              isPressable
-              onPress={() => router.push(`/session/${session.code}`)}
-              className="w-full"
-            >
-              <CardBody className="flex flex-row items-center justify-between gap-4 py-4">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <h5 className="title-subsection">{session.code}</h5>
-                    <Chip
-                      size="sm"
-                      color={session.role === 'host' ? 'warning' : 'primary'}
-                      variant="flat"
-                    >
-                      {session.role === 'host' ? 'Host' : 'Participant'}
-                    </Chip>
-                    <Chip
-                      size="sm"
-                      color={
-                        session.status === 'active'
-                          ? 'success'
-                          : session.status === 'settled'
-                            ? 'default'
-                            : 'warning'
-                      }
-                      variant="flat"
-                    >
-                      {session.status}
-                    </Chip>
+            <Card key={session.id} className="w-full">
+              <button
+                type="button"
+                className="cursor-pointer"
+                onClick={() => router.push(`/session/${session.code}`)}
+              >
+                <Card.Content className="flex flex-row items-center justify-between gap-4 py-4">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <h5 className="title-subsection">{session.code}</h5>
+                      <Chip
+                        size="sm"
+                        color={session.role === 'host' ? 'warning' : 'default'}
+                        variant="tertiary"
+                      >
+                        {session.role === 'host' ? 'Host' : 'Participant'}
+                      </Chip>
+                      <Chip
+                        size="sm"
+                        color={
+                          session.status === 'active'
+                            ? 'success'
+                            : session.status === 'settled'
+                              ? 'default'
+                              : 'warning'
+                        }
+                        variant="tertiary"
+                      >
+                        {session.status}
+                      </Chip>
+                    </div>
+                    <p className="text-description">
+                      {session.items.length} item
+                      {session.items.length !== 1 ? 's' : ''} ·{' '}
+                      {session.participants.length} participant
+                      {session.participants.length !== 1 ? 's' : ''} ·{' '}
+                      {new Date(session.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
-                  <p className="text-description">
-                    {session.items.length} item
-                    {session.items.length !== 1 ? 's' : ''} ·{' '}
-                    {session.participants.length} participant
-                    {session.participants.length !== 1 ? 's' : ''} ·{' '}
-                    {new Date(session.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <h5 className="title-subsection">
-                    {formatCurrency({
-                      value: session.total,
-                      currency: session.currency,
-                      decimal: 2,
-                    })}
-                  </h5>
-                  <p className="text-description">{session.currency}</p>
-                </div>
-              </CardBody>
+                  <div className="text-right">
+                    <h5 className="title-subsection">
+                      {formatCurrency({
+                        value: session.total,
+                        currency: session.currency,
+                        decimal: 2,
+                      })}
+                    </h5>
+                    <p className="text-description">{session.currency}</p>
+                  </div>
+                </Card.Content>
+              </button>
             </Card>
           ))}
         </div>

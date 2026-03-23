@@ -3,28 +3,23 @@
 import {
   Button,
   Card,
-  CardBody,
   CardHeader,
-  Divider,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
+  // Dropdown,
+  FieldError,
   Input,
+  Label,
+  ListBox,
   Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  NumberInput,
+  NumberField,
   Select,
-  SelectItem,
+  Separator,
+  TextField,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CURRENCIES,
   formatCurrency,
-  getCurrencySymbol,
+  // getCurrencySymbol,
 } from '@split-snap/shared/currency';
 import {
   type AmountMode,
@@ -32,6 +27,7 @@ import {
   itemEditorSchema,
 } from '@split-snap/shared/schemas';
 import type { ScannedItem } from '@split-snap/shared/types';
+import { IconPlus, IconX } from '@tabler/icons-react';
 import { useCallback, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
@@ -88,46 +84,48 @@ const roundTo = (value: number, decimals = 2) => {
   return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
-interface ModeDropdownProps {
-  mode: AmountMode;
-  currencySymbol?: string;
-  ariaLabel: string;
-  onChange: (mode: AmountMode) => void;
-}
+// interface ModeDropdownProps {
+//   mode: AmountMode;
+//   currencySymbol?: string;
+//   ariaLabel: string;
+//   onChange: (mode: AmountMode) => void;
+// }
 
-const ModeDropdown = ({
-  mode,
-  currencySymbol,
-  ariaLabel,
-  onChange,
-}: ModeDropdownProps) => (
-  <Dropdown placement="bottom-end">
-    <DropdownTrigger>
-      <div
-        role="button"
-        tabIndex={0}
-        className="hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1"
-      >
-        <p className="text-description">
-          {mode === '$' ? (currencySymbol ?? '$') : '%'}
-          <span className="ml-1 text-xs">▾</span>
-        </p>
-      </div>
-    </DropdownTrigger>
-    <DropdownMenu
-      aria-label={ariaLabel}
-      selectionMode="single"
-      selectedKeys={[mode]}
-      onSelectionChange={(keys) => {
-        const selected = Array.from(keys)[0] as AmountMode | undefined;
-        if (selected) onChange(selected);
-      }}
-    >
-      <DropdownItem key="$">{currencySymbol ?? '$'}</DropdownItem>
-      <DropdownItem key="%">%</DropdownItem>
-    </DropdownMenu>
-  </Dropdown>
-);
+// const ModeDropdown = ({
+//   mode,
+//   currencySymbol,
+//   ariaLabel,
+//   onChange,
+// }: ModeDropdownProps) => (
+//   <Dropdown>
+//     {/* Trigger */}
+//     <div
+//       role="button"
+//       tabIndex={0}
+//       className="hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1"
+//     >
+//       <p className="text-description">
+//         {mode === '$' ? (currencySymbol ?? '$') : '%'}
+//         <span className="ml-1 text-xs">▾</span>
+//       </p>
+//     </div>
+//     {/* Menu */}
+//     <Dropdown.Popover placement="end bottom">
+//       <Dropdown.Menu
+//         aria-label={ariaLabel}
+//         selectionMode="single"
+//         selectedKeys={[mode]}
+//         onSelectionChange={(keys) => {
+//           const selected = Array.from(keys)[0] as AmountMode | undefined;
+//           if (selected) onChange(selected);
+//         }}
+//       >
+//         <Dropdown.Item key="$">{currencySymbol ?? '$'}</Dropdown.Item>
+//         <Dropdown.Item key="%">%</Dropdown.Item>
+//       </Dropdown.Menu>
+//     </Dropdown.Popover>
+//   </Dropdown>
+// );
 
 export function ItemEditor({
   initialItems,
@@ -187,8 +185,8 @@ export function ItemEditor({
   const {
     control,
     handleSubmit: rhfHandleSubmit,
-    setValue,
-    formState: { errors },
+    // setValue,
+    // formState: { errors },
   } = useForm<ItemEditorFormData>({
     resolver: zodResolver(itemEditorSchema),
     defaultValues: {
@@ -236,7 +234,7 @@ export function ItemEditor({
     name: 'currency',
     defaultValue: initialCurrency,
   });
-  const currencySymbol = getCurrencySymbol(watchedCurrency);
+  // const currencySymbol = getCurrencySymbol(watchedCurrency);
 
   const subtotal = useMemo(
     () => watchedItems.reduce((sum, item) => sum + parseNumber(item.amount), 0),
@@ -351,27 +349,45 @@ export function ItemEditor({
           control={control}
           render={({ field }) => (
             <Select
-              label="Currency"
-              selectedKeys={[field.value]}
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys)[0] as string;
-                if (selected) field.onChange(selected);
-              }}
-              size="sm"
+              // label="Currency"
+              // selectedKeys={[field.value]}
+              // onSelectionChange={(keys) => {
+              //   const selected = Array.from(keys)[0] as string;
+              //   if (selected) field.onChange(selected);
+              // }}
+              // size="sm"
+              // value={singleValue}
+              // onChange={setSingleValue}
+              // value={[field.value]}
+              // onChange={(keys) => {
+              //   const selected = Array.from(keys)[0] as string;
+              //   if (selected) field.onChange(selected);
+              // }}
+              value={field.value}
+              onChange={field.onChange}
             >
-              {CURRENCIES.map((c) => (
-                <SelectItem key={c.code} textValue={`${c.code} (${c.name})`}>
-                  {c.code} ({c.name})
-                </SelectItem>
-              ))}
+              <Label>Currency</Label>
+              <Select.Popover>
+                <ListBox>
+                  {CURRENCIES.map((c) => (
+                    <ListBox.Item
+                      key={c.code}
+                      textValue={`${c.code} (${c.name})`}
+                    >
+                      {c.code} ({c.name})
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
             </Select>
           )}
         />
       </CardHeader>
 
-      <Divider />
+      <Separator />
 
-      <CardBody className="gap-5">
+      <Card.Content className="gap-5">
         {/* Receipt reference image */}
         {receiptImageUrl && <ReceiptImage receiptImageUrl={receiptImageUrl} />}
 
@@ -395,7 +411,7 @@ export function ItemEditor({
                 onDrop={() => onDropItem(i)}
                 onDragEnd={() => setDraggingIndex(null)}
               >
-                <div className="border-default-200 bg-content1/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
+                <div className="border-default-200 bg-surface/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-caption flex items-center gap-2 font-medium tracking-wide uppercase">
                       <span
@@ -408,84 +424,115 @@ export function ItemEditor({
                     </p>
                     <Button
                       isIconOnly
-                      variant="light"
-                      color="danger"
+                      variant="danger-soft"
                       size="sm"
                       onPress={() => requestRemoveItem(i)}
                       isDisabled={fields.length <= 1}
                       aria-label="Remove item"
                     >
-                      ✕
+                      <IconX size={16} />
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
                     <Controller
                       name={`items.${i}.name`}
                       control={control}
-                      render={({ field: f }) => (
-                        <Input
-                          label="Item"
-                          placeholder="e.g. Burger"
-                          value={f.value}
-                          onValueChange={f.onChange}
-                          onBlur={f.onBlur}
-                          className="w-full sm:col-span-7"
-                          size="sm"
-                          isInvalid={Boolean(errors.items?.[i]?.name)}
-                          errorMessage={errors.items?.[i]?.name?.message}
-                          isClearable
-                        />
+                      render={({ field }) => (
+                        <TextField type="text">
+                          <Label>Item</Label>
+                          <Input
+                            placeholder="Burger"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            className="w-full sm:col-span-7"
+                          />
+                          <FieldError />
+                        </TextField>
                       )}
                     />
                     <Controller
                       name={`items.${i}.amount`}
                       control={control}
-                      render={({ field: f }) => (
-                        <NumberInput
-                          label="Amount"
-                          type="number"
-                          placeholder="0.00"
-                          value={toNumberInputValue(f.value)}
-                          onValueChange={(value) =>
-                            f.onChange(toFormNumberString(value))
-                          }
-                          onBlur={f.onBlur}
-                          startContent={
-                            <span className="text-description">
-                              {currencySymbol}
-                            </span>
-                          }
+                      render={({ field }) => (
+                        // <NumberInput
+                        //   label="Amount"
+                        //   type="number"
+                        //   placeholder="0.00"
+                        //   value={toNumberInputValue(f.value)}
+                        //   onValueChange={(value) =>
+                        //     f.onChange(toFormNumberString(value))
+                        //   }
+                        //   onBlur={f.onBlur}
+                        //   startContent={
+                        //     <span className="text-description">
+                        //       {currencySymbol}
+                        //     </span>
+                        //   }
+                        //   className="w-full sm:col-span-3"
+                        //   size="sm"
+                        //   isInvalid={Boolean(errors.items?.[i]?.amount)}
+                        //   errorMessage={errors.items?.[i]?.amount?.message}
+                        //   isWheelDisabled
+                        //   hideStepper
+                        //   isClearable
+                        // />
+
+                        <NumberField
                           className="w-full sm:col-span-3"
-                          size="sm"
-                          isInvalid={Boolean(errors.items?.[i]?.amount)}
-                          errorMessage={errors.items?.[i]?.amount?.message}
+                          value={toNumberInputValue(field.value)}
+                          onChange={(value) =>
+                            field.onChange(toFormNumberString(value))
+                          }
                           isWheelDisabled
-                          hideStepper
-                          isClearable
-                        />
+                        >
+                          <Label>Amount</Label>
+                          <NumberField.Group>
+                            <NumberField.Input
+                              placeholder="0.00"
+                              type="number"
+                            />
+                          </NumberField.Group>
+                          <FieldError />
+                        </NumberField>
                       )}
                     />
                     <Controller
                       name={`items.${i}.quantity`}
                       control={control}
-                      render={({ field: f }) => (
-                        <NumberInput
-                          label="Qty"
-                          type="number"
-                          placeholder="1"
-                          value={toNumberInputValue(f.value)}
-                          onValueChange={(value) =>
-                            f.onChange(toFormNumberString(value))
-                          }
-                          onBlur={f.onBlur}
+                      render={({ field }) => (
+                        // <NumberInput
+                        //   label="Qty"
+                        //   type="number"
+                        //   placeholder="1"
+                        //   value={toNumberInputValue(f.value)}
+                        //   onValueChange={(value) =>
+                        //     f.onChange(toFormNumberString(value))
+                        //   }
+                        //   onBlur={f.onBlur}
+                        //   className="w-full sm:col-span-2"
+                        //   size="sm"
+                        //   isInvalid={Boolean(errors.items?.[i]?.quantity)}
+                        //   errorMessage={errors.items?.[i]?.quantity?.message}
+                        //   hideStepper
+                        //   isWheelDisabled
+                        //   isClearable
+                        // />
+
+                        <NumberField
                           className="w-full sm:col-span-2"
-                          size="sm"
-                          isInvalid={Boolean(errors.items?.[i]?.quantity)}
-                          errorMessage={errors.items?.[i]?.quantity?.message}
-                          hideStepper
+                          value={toNumberInputValue(field.value)}
+                          onChange={(value) =>
+                            field.onChange(toFormNumberString(value))
+                          }
                           isWheelDisabled
-                          isClearable
-                        />
+                        >
+                          <Label>Qty</Label>
+                          <NumberField.Group>
+                            <NumberField.Input placeholder="1" type="number" />
+                          </NumberField.Group>
+                          <FieldError />
+                        </NumberField>
                       )}
                     />
                   </div>
@@ -507,20 +554,21 @@ export function ItemEditor({
         </div>
 
         <Button
-          variant="flat"
+          variant="tertiary"
           size="sm"
           onPress={addItem}
           isDisabled={!canAddItem}
           className="self-start"
         >
-          + Add Item
+          <IconPlus size={12} />
+          Add Item
         </Button>
 
-        <Divider />
+        <Separator />
 
         {/* Totals */}
         <div className="space-y-3">
-          <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
+          <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Subtotal</p>
             <h5 className="title-subsection">
               {formatCurrency({
@@ -537,60 +585,76 @@ export function ItemEditor({
                 <Controller
                   name="tax"
                   control={control}
-                  render={({ field: f }) => (
-                    <NumberInput
-                      label={
-                        watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
+                  render={({ field }) => (
+                    // <NumberInput
+                    //   label={
+                    //     watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'
+                    //   }
+                    //   type="number"
+                    //   placeholder="0.00"
+                    //   value={toNumberInputValue(f.value)}
+                    //   onValueChange={(value) =>
+                    //     f.onChange(toFormNumberString(value))
+                    //   }
+                    //   startContent={
+                    //     <span className="text-description">
+                    //       {watchedTaxMode === '$' ? currencySymbol : '%'}
+                    //     </span>
+                    //   }
+                    //   size="sm"
+                    //   isInvalid={
+                    //     Boolean(errors.tax) ||
+                    //     (f.value !== '' && parseNumber(f.value) < 0) ||
+                    //     (watchedTaxMode === '%' && parseNumber(f.value) > 100)
+                    //   }
+                    //   errorMessage={
+                    //     errors.tax?.message ||
+                    //     (f.value !== '' && parseNumber(f.value) < 0
+                    //       ? 'Tax cannot be negative.'
+                    //       : watchedTaxMode === '%' && parseNumber(f.value) > 100
+                    //         ? 'Percentage cannot exceed 100%.'
+                    //         : undefined)
+                    //   }
+                    //   className="flex-1"
+                    //   endContent={
+                    //     <div
+                    //       className="flex items-center"
+                    //       onMouseDown={(event) => event.stopPropagation()}
+                    //       onClick={(event) => event.stopPropagation()}
+                    //     >
+                    //       <ModeDropdown
+                    //         mode={watchedTaxMode}
+                    //         currencySymbol={currencySymbol}
+                    //         ariaLabel="Tax mode"
+                    //         onChange={(mode) =>
+                    //           setValue('taxMode', mode, {
+                    //             shouldTouch: true,
+                    //             shouldDirty: true,
+                    //             shouldValidate: true,
+                    //           })
+                    //         }
+                    //       />
+                    //     </div>
+                    //   }
+                    //   hideStepper
+                    //   isWheelDisabled
+                    // />
+
+                    // to-do
+                    <NumberField
+                      className="w-full sm:col-span-2"
+                      value={toNumberInputValue(field.value)}
+                      onChange={(value) =>
+                        field.onChange(toFormNumberString(value))
                       }
-                      type="number"
-                      placeholder="0.00"
-                      value={toNumberInputValue(f.value)}
-                      onValueChange={(value) =>
-                        f.onChange(toFormNumberString(value))
-                      }
-                      startContent={
-                        <span className="text-description">
-                          {watchedTaxMode === '$' ? currencySymbol : '%'}
-                        </span>
-                      }
-                      size="sm"
-                      isInvalid={
-                        Boolean(errors.tax) ||
-                        (f.value !== '' && parseNumber(f.value) < 0) ||
-                        (watchedTaxMode === '%' && parseNumber(f.value) > 100)
-                      }
-                      errorMessage={
-                        errors.tax?.message ||
-                        (f.value !== '' && parseNumber(f.value) < 0
-                          ? 'Tax cannot be negative.'
-                          : watchedTaxMode === '%' && parseNumber(f.value) > 100
-                            ? 'Percentage cannot exceed 100%.'
-                            : undefined)
-                      }
-                      className="flex-1"
-                      endContent={
-                        <div
-                          className="flex items-center"
-                          onMouseDown={(event) => event.stopPropagation()}
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <ModeDropdown
-                            mode={watchedTaxMode}
-                            currencySymbol={currencySymbol}
-                            ariaLabel="Tax mode"
-                            onChange={(mode) =>
-                              setValue('taxMode', mode, {
-                                shouldTouch: true,
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                        </div>
-                      }
-                      hideStepper
                       isWheelDisabled
-                    />
+                    >
+                      <Label>Qty</Label>
+                      <NumberField.Group>
+                        <NumberField.Input placeholder="1" type="number" />
+                      </NumberField.Group>
+                      <FieldError />
+                    </NumberField>
                   )}
                 />
               </div>
@@ -617,62 +681,78 @@ export function ItemEditor({
                 <Controller
                   name="tip"
                   control={control}
-                  render={({ field: f }) => (
-                    <NumberInput
-                      label={
-                        watchedTipMode === '%'
-                          ? 'Service Charge/Tip (% of subtotal)'
-                          : 'Service Charge/Tip'
+                  render={({ field }) => (
+                    // <NumberInput
+                    //   label={
+                    //     watchedTipMode === '%'
+                    //       ? 'Service Charge/Tip (% of subtotal)'
+                    //       : 'Service Charge/Tip'
+                    //   }
+                    //   type="number"
+                    //   placeholder="0.00"
+                    //   value={toNumberInputValue(f.value)}
+                    //   onValueChange={(value) =>
+                    //     f.onChange(toFormNumberString(value))
+                    //   }
+                    //   startContent={
+                    //     <span className="text-description">
+                    //       {watchedTipMode === '$' ? currencySymbol : '%'}
+                    //     </span>
+                    //   }
+                    //   size="sm"
+                    //   isInvalid={
+                    //     Boolean(errors.tip) ||
+                    //     (f.value !== '' && parseNumber(f.value) < 0) ||
+                    //     (watchedTipMode === '%' && parseNumber(f.value) > 100)
+                    //   }
+                    //   errorMessage={
+                    //     errors.tip?.message ||
+                    //     (f.value !== '' && parseNumber(f.value) < 0
+                    //       ? 'Tip cannot be negative.'
+                    //       : watchedTipMode === '%' && parseNumber(f.value) > 100
+                    //         ? 'Percentage cannot exceed 100%.'
+                    //         : undefined)
+                    //   }
+                    //   className="flex-1"
+                    //   endContent={
+                    //     <div
+                    //       className="flex items-center"
+                    //       onMouseDown={(event) => event.stopPropagation()}
+                    //       onClick={(event) => event.stopPropagation()}
+                    //     >
+                    //       <ModeDropdown
+                    //         mode={watchedTipMode}
+                    //         currencySymbol={currencySymbol}
+                    //         ariaLabel="Tip mode"
+                    //         onChange={(mode) =>
+                    //           setValue('tipMode', mode, {
+                    //             shouldTouch: true,
+                    //             shouldDirty: true,
+                    //             shouldValidate: true,
+                    //           })
+                    //         }
+                    //       />
+                    //     </div>
+                    //   }
+                    //   hideStepper
+                    //   isWheelDisabled
+                    // />
+
+                    // to-do
+                    <NumberField
+                      className="w-full sm:col-span-2"
+                      value={toNumberInputValue(field.value)}
+                      onChange={(value) =>
+                        field.onChange(toFormNumberString(value))
                       }
-                      type="number"
-                      placeholder="0.00"
-                      value={toNumberInputValue(f.value)}
-                      onValueChange={(value) =>
-                        f.onChange(toFormNumberString(value))
-                      }
-                      startContent={
-                        <span className="text-description">
-                          {watchedTipMode === '$' ? currencySymbol : '%'}
-                        </span>
-                      }
-                      size="sm"
-                      isInvalid={
-                        Boolean(errors.tip) ||
-                        (f.value !== '' && parseNumber(f.value) < 0) ||
-                        (watchedTipMode === '%' && parseNumber(f.value) > 100)
-                      }
-                      errorMessage={
-                        errors.tip?.message ||
-                        (f.value !== '' && parseNumber(f.value) < 0
-                          ? 'Tip cannot be negative.'
-                          : watchedTipMode === '%' && parseNumber(f.value) > 100
-                            ? 'Percentage cannot exceed 100%.'
-                            : undefined)
-                      }
-                      className="flex-1"
-                      endContent={
-                        <div
-                          className="flex items-center"
-                          onMouseDown={(event) => event.stopPropagation()}
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <ModeDropdown
-                            mode={watchedTipMode}
-                            currencySymbol={currencySymbol}
-                            ariaLabel="Tip mode"
-                            onChange={(mode) =>
-                              setValue('tipMode', mode, {
-                                shouldTouch: true,
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                        </div>
-                      }
-                      hideStepper
                       isWheelDisabled
-                    />
+                    >
+                      <Label>Qty</Label>
+                      <NumberField.Group>
+                        <NumberField.Input placeholder="1" type="number" />
+                      </NumberField.Group>
+                      <FieldError />
+                    </NumberField>
                   )}
                 />
               </div>
@@ -695,7 +775,7 @@ export function ItemEditor({
             </div>
           </div>
 
-          <div className="bg-content2 w-full rounded-lg px-3 py-2 text-center">
+          <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
             <p className="text-caption">Total</p>
             <h3 className="title-section">
               {formatCurrency({
@@ -708,53 +788,60 @@ export function ItemEditor({
         </div>
 
         <Button
-          color="primary"
+          variant="primary"
           size="lg"
           onPress={() => rhfHandleSubmit(onFormSubmit)()}
-          isLoading={isSubmitting}
+          isPending={isSubmitting}
         >
           {submitLabel}
         </Button>
-      </CardBody>
+      </Card.Content>
 
-      <Modal isOpen={removeIndex !== null} onOpenChange={cancelRemoveItem}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Remove item?</ModalHeader>
-              <ModalBody>
-                <p>
-                  This will remove{' '}
-                  {removeIndex !== null
-                    ? watchedItems[removeIndex]?.name?.trim() ||
-                      `Item ${removeIndex + 1}`
-                    : ''}
-                  . Continue?
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button
-                  variant="flat"
-                  onPress={() => {
-                    cancelRemoveItem();
-                    onClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="danger"
-                  onPress={() => {
-                    confirmRemoveItem();
-                    onClose();
-                  }}
-                >
-                  Remove
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
+      <Modal>
+        <Modal.Backdrop
+          isOpen={removeIndex !== null}
+          onOpenChange={cancelRemoveItem}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header>Remove item?</Modal.Header>
+                  <Modal.Body>
+                    <p>
+                      This will remove{' '}
+                      {removeIndex !== null
+                        ? watchedItems[removeIndex]?.name?.trim() ||
+                          `Item ${removeIndex + 1}`
+                        : ''}
+                      . Continue?
+                    </p>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="tertiary"
+                      onPress={() => {
+                        cancelRemoveItem();
+                        close();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onPress={() => {
+                        confirmRemoveItem();
+                        close();
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </Card>
   );
