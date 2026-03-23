@@ -145,7 +145,7 @@ export default function DashboardPage() {
                       <Chip
                         size="sm"
                         color={session.role === 'host' ? 'warning' : 'default'}
-                        variant="tertiary"
+                        variant="soft"
                       >
                         {session.role === 'host' ? 'Host' : 'Participant'}
                       </Chip>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                               ? 'default'
                               : 'warning'
                         }
-                        variant="tertiary"
+                        variant="soft"
                       >
                         {session.status}
                       </Chip>

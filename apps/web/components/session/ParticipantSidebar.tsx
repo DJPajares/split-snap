@@ -88,7 +88,7 @@ export function ParticipantSidebar({
                 <p className="text-warning text-sm font-semibold">
                   Pending Requests
                 </p>
-                <Chip size="sm" variant="tertiary" color="warning">
+                <Chip size="sm" variant="soft" color="warning">
                   {session.pendingParticipants.length}
                 </Chip>
               </div>

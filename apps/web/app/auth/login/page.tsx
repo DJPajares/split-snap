@@ -125,7 +125,7 @@ export default function LoginPage() {
 
         <Separator />
 
-        <Card.Content className="px-6 pb-8">
+        <Card.Content className="px-6">
           <Tabs
             className="w-full"
             selectedKey={tab}
@@ -201,6 +201,7 @@ export default function LoginPage() {
                   className="font-semibold"
                   isPending={loading}
                   isDisabled={!loginForm.formState.isValid}
+                  fullWidth
                 >
                   Log In
                 </Button>
@@ -296,7 +297,7 @@ export default function LoginPage() {
                               setShowConfirmPassword((prev) => !prev)
                             }
                           >
-                            {showPassword ? <IconEyeOff /> : <IconEye />}
+                            {showConfirmPassword ? <IconEyeOff /> : <IconEye />}
                           </button>
                         </InputGroup.Suffix>
                       </InputGroup>

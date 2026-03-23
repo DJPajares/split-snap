@@ -412,7 +412,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                     ? 'default'
                     : 'warning'
               }
-              variant="tertiary"
+              variant="soft"
             >
               {session.status}
             </Chip>

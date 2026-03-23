@@ -160,12 +160,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
             </p>
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
-                <Chip
-                  key={item.id}
-                  size="sm"
-                  variant="tertiary"
-                  color="warning"
-                >
+                <Chip key={item.id} size="sm" variant="soft" color="warning">
                   {item.name} (
                   {formatCurrency({
                     value: item.price * item.quantity,

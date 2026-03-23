@@ -61,7 +61,7 @@ export function SessionItemList({
             isDisabled={isSettled || allItemsLoading}
             onChange={handleToggleAll}
           >
-            <Checkbox.Control className="data-[selected=true]:bg-accent data-[selected=true]:border-accent size-4">
+            <Checkbox.Control>
               <Checkbox.Indicator />
             </Checkbox.Control>
             <Checkbox.Content>
@@ -96,54 +96,56 @@ export function SessionItemList({
               onClick={() => handleClaimToggle(item.id)}
               disabled={isSettled || !participantId || isLoading}
             >
-              <Card.Content className="flex flex-row items-center gap-3 p-3">
-                {participantId && (
-                  <Checkbox
-                    aria-label={`claim-item-${item.id}`}
-                    isSelected={isClaimed}
-                    isDisabled={isSettled || isLoading}
-                    onChange={() => handleClaimToggle(item.id)}
-                  >
-                    <Checkbox.Control className="data-[selected=true]:bg-accent data-[selected=true]:border-accent size-6">
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
-                  </Checkbox>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{item.name}</p>
-                  {item.quantity > 1 && (
-                    <p className="text-caption">
-                      {formatCurrency({
-                        value: item.price,
-                        currency: session.currency,
-                        decimal: 2,
-                      })}{' '}
-                      × {item.quantity}
-                    </p>
+              <Card.Content className="flex flex-row items-center justify-between gap-3 p-3">
+                <div className="flex flex-row gap-4">
+                  {participantId && (
+                    <Checkbox
+                      aria-label={`claim-item-${item.id}`}
+                      isSelected={isClaimed}
+                      isDisabled={isSettled || isLoading}
+                      onChange={() => handleClaimToggle(item.id)}
+                    >
+                      <Checkbox.Control className="size-6">
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                    </Checkbox>
                   )}
-                  {totalClaimers > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {item.claimedBy.map((claim) => (
-                        <Chip
-                          key={claim.participantId}
-                          size="sm"
-                          variant="tertiary"
-                          color={
-                            claim.participantId === participantId
-                              ? 'accent'
-                              : 'default'
-                          }
-                        >
-                          {claim.displayName}
-                          {totalClaimers > 1 && (
-                            <span className="ml-1 opacity-60">
-                              (1/{totalClaimers})
-                            </span>
-                          )}
-                        </Chip>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-start gap-1">
+                    <p className="truncate font-medium">{item.name}</p>
+                    {item.quantity > 1 && (
+                      <p className="text-caption">
+                        {formatCurrency({
+                          value: item.price,
+                          currency: session.currency,
+                          decimal: 2,
+                        })}{' '}
+                        × {item.quantity}
+                      </p>
+                    )}
+                    {totalClaimers > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {item.claimedBy.map((claim) => (
+                          <Chip
+                            key={claim.participantId}
+                            size="sm"
+                            variant="soft"
+                            color={
+                              claim.participantId === participantId
+                                ? 'accent'
+                                : 'default'
+                            }
+                          >
+                            {claim.displayName}
+                            {totalClaimers > 1 && (
+                              <span className="ml-1 opacity-60">
+                                (1/{totalClaimers})
+                              </span>
+                            )}
+                          </Chip>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-semibold">
