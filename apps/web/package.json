@@ -14,19 +14,18 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.10",
-    "@heroui/theme": "^2.4.26",
+    "@heroui/react": "^3.0.1",
+    "@heroui/styles": "^3.0.1",
     "@hookform/resolvers": "^5.2.2",
     "@split-snap/shared": "workspace:*",
     "@tabler/icons-react": "^3.40.0",
-    "framer-motion": "^12.38.0",
     "geist": "^1.7.0",
-    "next": "^16.2.0",
+    "next": "^16.2.1",
     "next-themes": "^0.4.6",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-hook-form": "^7.71.2",
+    "react-hook-form": "^7.72.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -38,10 +37,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.0",
+    "eslint-config-next": "^16.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "jsdom": "^29.0.0",
+    "jsdom": "^29.0.1",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"

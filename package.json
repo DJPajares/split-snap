@@ -8,7 +8,7 @@
     "start": "turbo start",
     "lint": "turbo lint",
     "lint:fix": "pnpm -r run lint:fix",
-    "clean": "turbo clean",
+    "clean": "turbo clean && rm -rf node_modules",
     "test": "turbo test",
     "prettier": "prettier --check . --ignore-path .gitignore",
     "prettier:fix": "prettier --write . --ignore-path .gitignore",
