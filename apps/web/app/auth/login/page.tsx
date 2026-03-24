@@ -311,6 +311,7 @@ export default function LoginPage() {
                   className="font-semibold"
                   isPending={loading}
                   isDisabled={!registerForm.formState.isValid}
+                  fullWidth
                 >
                   Create Account
                 </Button>

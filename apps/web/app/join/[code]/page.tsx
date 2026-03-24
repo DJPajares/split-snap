@@ -387,6 +387,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
                   size="lg"
                   isPending={joinState === 'joining'}
                   isDisabled={!nameForm.formState.isValid}
+                  fullWidth
                 >
                   Join & Start Picking
                 </Button>
@@ -398,6 +399,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
               size="lg"
               onPress={() => void joinSession(user.name, user.id)}
               isPending={joinState === 'joining'}
+              fullWidth
             >
               Join as Account
             </Button>
@@ -412,6 +414,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
                 variant="tertiary"
                 size="md"
                 onPress={handleLoginRedirect}
+                fullWidth
               >
                 Log in to join with your account
               </Button>
