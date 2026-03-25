@@ -17,7 +17,7 @@ import { IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
-import PersonSummaryCard from '@/components/shared/PersonSummaryCard';
+import SummaryCard from '@/app/session/[code]/summary/SummaryCard/SummaryCard';
 import { useApiError } from '@/hooks/useApiError';
 import { api } from '@/lib/api';
 
@@ -177,7 +177,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
 
       <div className="space-y-4">
         {summaries.map((summary) => (
-          <PersonSummaryCard
+          <SummaryCard
             key={summary.participantId}
             summary={summary}
             currency={session.currency}

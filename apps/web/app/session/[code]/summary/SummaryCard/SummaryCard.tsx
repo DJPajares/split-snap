@@ -2,12 +2,12 @@ import { Card, CardHeader, Separator } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { PersonSummary } from '@split-snap/shared/types';
 
-type PersonSummaryCardProps = {
+type SummaryCardProps = {
   summary: PersonSummary;
   currency: string;
 };
 
-const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
+const SummaryCard = ({ summary, currency }: SummaryCardProps) => {
   const quantityFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -127,4 +127,4 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
   );
 };
 
-export default PersonSummaryCard;
+export default SummaryCard;
