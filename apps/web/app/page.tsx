@@ -54,7 +54,7 @@ export default function HomePage() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col gap-20 py-6 sm:gap-40">
+    <div className="flex flex-col gap-20 py-6">
       {/* Hero */}
       <section className="mx-auto max-w-5xl p-4 sm:p-8">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -97,7 +97,7 @@ export default function HomePage() {
       {/* How it works */}
       <Surface variant="secondary">
         <section className="mx-auto max-w-5xl p-4 sm:p-8">
-          <div className="flex flex-col gap-8 text-center">
+          <div className="flex flex-col gap-8 py-4 text-center sm:py-8">
             <h2 className="title-page">How It Works</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step, i) => (

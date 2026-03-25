@@ -1,4 +1,4 @@
-import { Dropdown, toast } from '@heroui/react';
+import { Dropdown, Label, toast } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import {
   IconLogin,
@@ -52,7 +52,7 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
     <Dropdown>
       <Dropdown.Trigger>{children}</Dropdown.Trigger>
       <Dropdown.Popover>
-        <Dropdown.Menu aria-label="User menu">
+        <Dropdown.Menu aria-label="user menu">
           <Dropdown.Item
             id="dark-mode"
             textValue="New file"
@@ -60,40 +60,37 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
             aria-label="Toggle dark mode"
           >
             {isDarkMode ? (
-              <div className="flex flex-row items-center gap-2">
-                <IconSunFilled size={20} />
-                <p>Light Mode</p>
-              </div>
+              <>
+                <IconSunFilled className="text-muted size-4 shrink-0" />
+                <Label>Light Mode</Label>
+              </>
             ) : (
-              <div className="flex flex-row items-center gap-2">
-                <IconMoon size={20} />
-                <p>Dark Mode</p>
-              </div>
+              <>
+                <IconMoon className="text-muted size-4 shrink-0" />
+                <Label>Dark Mode</Label>
+              </>
             )}
           </Dropdown.Item>
 
           {user ? (
             <Dropdown.Item
-              key="logout"
-              aria-label="Log out"
+              id="logout"
+              textValue="Log Out"
+              aria-label="log out"
               onPress={handleLogout}
-              variant="danger"
             >
-              <div className="flex flex-row items-center gap-2">
-                <IconLogout size={20} />
-                <p>Log Out</p>
-              </div>
+              <IconLogout className="text-muted size-4 shrink-0" />
+              <Label>Log Out</Label>
             </Dropdown.Item>
           ) : (
             <Dropdown.Item
-              key="login"
-              aria-label="Log in"
+              id="login"
+              textValue="Log In"
+              aria-label="log in"
               onPress={handleLogin}
             >
-              <div className="flex flex-row items-center gap-2">
-                <IconLogin size={20} />
-                <p>Log In</p>
-              </div>
+              <IconLogin className="text-muted size-4 shrink-0" />
+              <Label>Log In</Label>
             </Dropdown.Item>
           )}
         </Dropdown.Menu>

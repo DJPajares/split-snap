@@ -91,25 +91,38 @@ export function Navbar({
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label="Toggle menu"
               aria-expanded={isSidebarOpen}
-              className="cursor-pointer"
+              className="cursor-pointer sm:hidden"
             >
               <span className="sr-only">Menu</span>
               <IconMenu2 size={24} />
             </button>
 
-            <div className="sm:hidden">
-              <Link
-                href={brand.href || '/'}
-                className="flex items-center gap-2 no-underline"
-              >
-                {brand.logo && <>{brand.logo}</>}
-                <p className="font-bold">{brand.name}</p>
-              </Link>
-            </div>
+            <Link
+              href={brand.href || '/'}
+              className="flex items-center gap-2 no-underline"
+            >
+              {brand.logo && <>{brand.logo}</>}
+              <p className="font-bold">{brand.name}</p>
+            </Link>
           </div>
 
-          {/* Header title */}
-          <div className="hidden sm:flex">{brand.name}</div>
+          {/* Header menu */}
+          <ul className="hidden items-center gap-4 sm:flex">
+            {items.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'no-underline',
+                    item.isActive && 'text-accent font-medium',
+                  )}
+                  aria-current={item.isActive ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
           {/* Right side (user avatar, etc.) */}
           {rightContent && (
@@ -118,6 +131,7 @@ export function Navbar({
         </header>
       </nav>
 
+      {/* Mobile view only */}
       <Sidebar
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
