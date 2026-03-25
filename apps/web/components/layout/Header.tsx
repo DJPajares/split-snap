@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Link } from '@heroui/react';
+import { Avatar } from '@heroui/react';
 import { APP } from '@split-snap/shared/constants';
 import {
   IconLayoutDashboardFilled,
@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 import { useAuth } from '@/hooks/useAuth';
 
-import { MenuItemsProps, Navbar } from './Navbar';
+import { BrandProps, MenuItemsProps, Navbar } from './Navbar';
 import { NavbarDropdownMenu } from './NavbarDropdownMenu';
 
 const MENU_ITEMS: MenuItemsProps[] = [
@@ -27,6 +27,21 @@ const AUTH_MENU_ITEMS: MenuItemsProps[] = [
   { icon: <IconLogin />, label: 'Log In', href: '/auth/login' },
 ];
 
+const brand: BrandProps = {
+  name: APP.NAME,
+  logo: () => (
+    <Image
+      src="/logo.png"
+      alt={`${APP.NAME} logo`}
+      width={28}
+      height={28}
+      className="rounded-md"
+      priority
+    />
+  ),
+  href: '/',
+};
+
 export default function Header() {
   const { user } = useAuth();
 
@@ -34,19 +49,7 @@ export default function Header() {
     <Navbar
       maxWidth="full"
       position="hide-on-scroll"
-      brand={
-        <Link href="/" className="flex items-center gap-2 no-underline">
-          <Image
-            src="/logo.png"
-            alt={`${APP.NAME} logo`}
-            width={28}
-            height={28}
-            className="rounded-md"
-            priority
-          />
-          <p className="font-bold">{APP.NAME}</p>
-        </Link>
-      }
+      brand={brand}
       items={!user ? [...MENU_ITEMS, ...AUTH_MENU_ITEMS] : MENU_ITEMS}
       rightContent={
         <>

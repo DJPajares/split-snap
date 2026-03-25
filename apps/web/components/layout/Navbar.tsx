@@ -1,5 +1,6 @@
 'use client';
 
+import { Link } from '@heroui/react';
 import { IconMenu2 } from '@tabler/icons-react';
 import { ReactNode, useEffect, useState } from 'react';
 
@@ -14,8 +15,14 @@ export type MenuItemsProps = {
   isActive?: boolean;
 };
 
+export type BrandProps = {
+  name: string;
+  logo?: React.ComponentType;
+  href?: string;
+};
+
 type NavbarProps = {
-  brand: ReactNode;
+  brand: BrandProps;
   items: MenuItemsProps[];
   rightContent?: ReactNode;
   className?: string;
@@ -83,7 +90,6 @@ export function Navbar({
           {/* Left side (brand and menu button) */}
           <div className="flex items-center gap-4">
             <button
-              // className="sm:hidden"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label="Toggle menu"
               aria-expanded={isSidebarOpen}
@@ -92,26 +98,20 @@ export function Navbar({
               <span className="sr-only">Menu</span>
               <IconMenu2 size={24} />
             </button>
-            {brand}
+
+            <div className="sm:hidden">
+              <Link
+                href={brand.href || '/'}
+                className="flex items-center gap-2 no-underline"
+              >
+                {brand.logo && <brand.logo />}
+                <p className="font-bold">{brand.name}</p>
+              </Link>
+            </div>
           </div>
 
           {/* Header title */}
-          {/* <ul className="hidden items-center gap-4 sm:flex">
-            {items.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'no-underline',
-                    item.isActive && 'text-accent font-medium',
-                  )}
-                  aria-current={item.isActive ? 'page' : undefined}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul> */}
+          <div className="hidden sm:flex">{brand.name}</div>
 
           {/* Right side (user avatar, etc.) */}
           {rightContent && (
