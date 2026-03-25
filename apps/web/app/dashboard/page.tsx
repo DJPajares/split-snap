@@ -62,7 +62,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="title-section">Welcome, {user.name}</h3>

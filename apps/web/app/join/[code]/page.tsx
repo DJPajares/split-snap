@@ -5,6 +5,8 @@ import {
   Card,
   CardHeader,
   FieldError,
+  Fieldset,
+  Form,
   Input,
   Label,
   Separator,
@@ -363,36 +365,41 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Separator />
         <Card.Content className="gap-4 px-6 pb-8">
           {!user && (
-            <form onSubmit={nameForm.handleSubmit(handleJoin)}>
-              <div className="flex flex-col gap-4">
-                <Controller
-                  name="name"
-                  control={nameForm.control}
-                  render={({ field }) => (
-                    <TextField type="text">
-                      <Label>Your Name</Label>
-                      <Input
-                        placeholder="e.g. DJ"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        autoFocus
-                      />
-                      <FieldError />
-                    </TextField>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  size="lg"
-                  isPending={joinState === 'joining'}
-                  isDisabled={!nameForm.formState.isValid}
-                  fullWidth
-                >
-                  Join & Start Picking
-                </Button>
-              </div>
-            </form>
+            <Form onSubmit={nameForm.handleSubmit(handleJoin)}>
+              <Fieldset>
+                <Fieldset.Group>
+                  <Controller
+                    name="name"
+                    control={nameForm.control}
+                    render={({ field }) => (
+                      <TextField type="text">
+                        <Label>Your Name</Label>
+                        <Input
+                          variant="secondary"
+                          placeholder="e.g. DJ"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          autoFocus
+                        />
+                        <FieldError />
+                      </TextField>
+                    )}
+                  />
+                </Fieldset.Group>
+                <Fieldset.Actions>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    isPending={joinState === 'joining'}
+                    isDisabled={!nameForm.formState.isValid}
+                    fullWidth
+                  >
+                    Join & Start Picking
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           )}
           {user && (
             <Button
