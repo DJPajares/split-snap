@@ -17,7 +17,7 @@ export type MenuItemsProps = {
 
 export type BrandProps = {
   name: string;
-  logo?: React.ComponentType;
+  logo?: React.ReactNode;
   href?: string;
 };
 
@@ -69,9 +69,7 @@ export function Navbar({
     <>
       <nav
         className={cn(
-          // 'bg-background/70 z-40 w-full backdrop-blur-lg',
           'bg-background/70 z-40 w-full backdrop-blur-lg transition-transform duration-300',
-          // isHidden && '-translate-y-full',
           position === 'sticky' && 'sticky top-0',
           position === 'fixed' && 'fixed top-0',
           position === 'hide-on-scroll' &&
@@ -104,7 +102,7 @@ export function Navbar({
                 href={brand.href || '/'}
                 className="flex items-center gap-2 no-underline"
               >
-                {brand.logo && <brand.logo />}
+                {brand.logo && <>{brand.logo}</>}
                 <p className="font-bold">{brand.name}</p>
               </Link>
             </div>

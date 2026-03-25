@@ -29,7 +29,7 @@ const AUTH_MENU_ITEMS: MenuItemsProps[] = [
 
 const brand: BrandProps = {
   name: APP.NAME,
-  logo: () => (
+  logo: (
     <Image
       src="/logo.png"
       alt={`${APP.NAME} logo`}
