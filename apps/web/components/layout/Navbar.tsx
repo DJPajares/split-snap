@@ -1,183 +1,130 @@
 'use client';
 
-import { Avatar, Link } from '@heroui/react';
-import { APP } from '@split-snap/shared/constants';
-import Image from 'next/image';
-import { useState } from 'react';
+import { IconMenu2 } from '@tabler/icons-react';
+import { ReactNode, useEffect, useState } from 'react';
 
-import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils'; // or your cn utility
 
-import { NavbarDropdownMenu } from './NavbarDropdownMenu';
+import Sidebar from './Sidebar';
 
-export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+export type MenuItemsProps = {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  isActive?: boolean;
+};
+
+type NavbarProps = {
+  brand: ReactNode;
+  items: MenuItemsProps[];
+  rightContent?: ReactNode;
+  className?: string;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  position?: 'static' | 'sticky' | 'fixed' | 'hide-on-scroll';
+};
+
+const maxWidthClasses = {
+  sm: 'max-w-[640px]',
+  md: 'max-w-[768px]',
+  lg: 'max-w-[1024px]',
+  xl: 'max-w-[1280px]',
+  '2xl': 'max-w-[1536px]',
+  full: 'max-w-full',
+};
+
+function useScrollDirection() {
+  const [isHidden, setIsHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsHidden(currentScrollY > lastScrollY && currentScrollY > 64);
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+  return isHidden;
+}
+
+export function Navbar({
+  brand,
+  items,
+  rightContent,
+  className,
+  maxWidth = 'lg',
+  position = 'hide-on-scroll',
+}: NavbarProps) {
+  const isHidden = useScrollDirection();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <nav className="border-separator bg-background/70 sticky top-0 z-40 w-full border-b backdrop-blur-lg">
-      <header className="flex h-16 items-center justify-between px-6">
-        {/* Brand */}
-        <div className="flex items-center gap-4">
-          <button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="sr-only">Menu</span>
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
-          <Link href="/" className="flex items-center gap-2 no-underline">
-            <Image
-              src="/logo.png"
-              alt={`${APP.NAME} logo`}
-              width={28}
-              height={28}
-              className="rounded-md"
-              priority
-            />
-            <h4 className="title-card">{APP.NAME}</h4>
-          </Link>
-        </div>
-
-        {/* Menu Items */}
-        <ul className="hidden items-center gap-4 md:flex">
-          <li>
-            <Link href="/scan" className="no-underline">
-              <h5 className="title-subsection">Scan Receipt</h5>
-            </Link>
-          </li>
-          <li>
-            <Link href="/dashboard" className="no-underline">
-              <h5 className="title-subsection">Dashboard</h5>
-            </Link>
-          </li>
-        </ul>
-
-        {/* User */}
-        <div className="flex items-center gap-4">
-          <NavbarDropdownMenu>
-            {user ? (
-              <Avatar size="sm" variant="soft" className="ring-accent ring-2">
-                <Avatar.Image src="https://i.pravatar.cc/150?u=a04258114e29026708c" />
-                <Avatar.Fallback>JD</Avatar.Fallback>
-              </Avatar>
-            ) : (
-              <Avatar size="sm" />
-            )}
-          </NavbarDropdownMenu>
-        </div>
-      </header>
-
-      {/* <NavbarContent>
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="sm:hidden"
-        />
-        <NavbarBrand>
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt={`${APP.NAME} logo`}
-              width={28}
-              height={28}
-              className="rounded-md"
-              priority
-            />
-            <h4 className="title-card">{APP.NAME}</h4>
-          </Link>
-        </NavbarBrand>
-      </NavbarContent> */}
-
-      {/* <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-        <NavbarItem>
-          <Link href="/scan">
-            <h5 className="title-subsection">Scan Receipt</h5>
-          </Link>
-        </NavbarItem>
-        {user && (
-          <NavbarItem>
-            <Link href="/dashboard">
-              <h5 className="title-subsection">Dashboard</h5>
-            </Link>
-          </NavbarItem>
+    <>
+      <nav
+        className={cn(
+          // 'bg-background/70 z-40 w-full backdrop-blur-lg',
+          'bg-background/70 z-40 w-full backdrop-blur-lg transition-transform duration-300',
+          // isHidden && '-translate-y-full',
+          position === 'sticky' && 'sticky top-0',
+          position === 'fixed' && 'fixed top-0',
+          position === 'hide-on-scroll' &&
+            isHidden &&
+            'sticky top-0 -translate-y-full',
+          className,
         )}
-      </NavbarContent> */}
-
-      {/* <NavbarContent justify="end">
-        <NavbarItem>
-          <NavbarDropdownMenu>
-            {user ? (
-              <Avatar
-                isBordered
-                size="sm"
-                color="primary"
-                src="https://i.pravatar.cc/150?u=a04258114e29026708c"
-              />
-            ) : (
-              <Avatar size="sm" />
-            )}
-          </NavbarDropdownMenu>
-        </NavbarItem>
-      </NavbarContent> */}
-
-      {/* Mobile menu */}
-      {/* <NavbarMenu>
-        <NavbarMenuItem>
-          <Link
-            href="/scan"
-            className="w-full"
-            size="lg"
-            onPress={() => setIsMenuOpen(false)}
-          >
-            <h4 className="title-card">Scan Receipt</h4>
-          </Link>
-        </NavbarMenuItem>
-        {user && (
-          <NavbarMenuItem>
-            <Link
-              href="/dashboard"
-              className="w-full"
-              size="lg"
-              onPress={() => setIsMenuOpen(false)}
+      >
+        <header
+          className={cn(
+            'flex h-16 items-center justify-between px-6',
+            maxWidth !== 'full' && maxWidthClasses[maxWidth],
+            'mx-auto',
+          )}
+        >
+          {/* Left side (brand and menu button) */}
+          <div className="flex items-center gap-4">
+            <button
+              // className="sm:hidden"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label="Toggle menu"
+              aria-expanded={isSidebarOpen}
+              className="cursor-pointer"
             >
-              <h4 className="title-card">Dashboard</h4>
-            </Link>
-          </NavbarMenuItem>
-        )}
-        {!user && (
-          <NavbarMenuItem>
-            <Link
-              href="/auth/login"
-              className="w-full"
-              size="lg"
-              onPress={() => setIsMenuOpen(false)}
-            >
-              <h4 className="title-card">Log In</h4>
-            </Link>
-          </NavbarMenuItem>
-        )}
-      </NavbarMenu> */}
-    </nav>
+              <span className="sr-only">Menu</span>
+              <IconMenu2 size={24} />
+            </button>
+            {brand}
+          </div>
+
+          {/* Header title */}
+          {/* <ul className="hidden items-center gap-4 sm:flex">
+            {items.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'no-underline',
+                    item.isActive && 'text-accent font-medium',
+                  )}
+                  aria-current={item.isActive ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul> */}
+
+          {/* Right side (user avatar, etc.) */}
+          {rightContent && (
+            <div className="flex items-center gap-4">{rightContent}</div>
+          )}
+        </header>
+      </nav>
+
+      <Sidebar
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+        menuItems={items}
+      />
+    </>
   );
 }

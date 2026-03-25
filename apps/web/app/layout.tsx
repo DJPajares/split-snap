@@ -6,7 +6,7 @@ import { GeistSans } from 'geist/font/sans';
 import type { Metadata } from 'next';
 
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import Header from '@/components/layout/Header';
 
 import { Providers } from './providers';
 
@@ -41,7 +41,7 @@ export default function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable} bg-background text-foreground flex min-h-screen flex-col font-sans antialiased`}
       >
         <Providers>
-          <Navbar />
+          <Header />
 
           <main className="flex-1">{children}</main>
 

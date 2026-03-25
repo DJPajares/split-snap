@@ -11,7 +11,6 @@ import { useTheme } from 'next-themes';
 import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
-import packageInfo from '@/package.json';
 
 type NavbarDropdownMenuProps = {
   children: React.ReactNode;
@@ -34,6 +33,8 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
     // Clear receipt image from sessionStorage
     try {
       sessionStorage.removeItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
+
+      router.push('/auth/login');
     } catch {
       // Ignore
     }
@@ -78,12 +79,9 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
               onPress={handleLogout}
               variant="danger"
             >
-              <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center gap-2">
-                  <IconLogout size={20} />
-                  <p>Log Out</p>
-                </div>
-                <p className="text-caption">{`v${packageInfo.version}`}</p>
+              <div className="flex flex-row items-center gap-2">
+                <IconLogout size={20} />
+                <p>Log Out</p>
               </div>
             </Dropdown.Item>
           ) : (
@@ -92,12 +90,9 @@ export function NavbarDropdownMenu({ children }: NavbarDropdownMenuProps) {
               aria-label="Log in"
               onPress={handleLogin}
             >
-              <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center gap-2">
-                  <IconLogin size={20} />
-                  <p>Log In</p>
-                </div>
-                <p className="text-caption">{`v${packageInfo.version}`}</p>
+              <div className="flex flex-row items-center gap-2">
+                <IconLogin size={20} />
+                <p>Log In</p>
               </div>
             </Dropdown.Item>
           )}
