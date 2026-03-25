@@ -56,7 +56,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-20 py-6 sm:gap-40">
       {/* Hero */}
-      <section className="mx-auto max-w-5xl">
+      <section className="mx-auto max-w-5xl p-4 sm:p-8">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <Image
             src="/logo.png"
@@ -115,7 +115,7 @@ export default function HomePage() {
       </Surface>
 
       {/* Features */}
-      <section className="mx-auto max-w-5xl">
+      <section className="mx-auto max-w-5xl p-4 sm:p-8">
         <div className="flex flex-col gap-8 text-center">
           <h2 className="title-page">{`Why ${APP.NAME}?`}</h2>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
