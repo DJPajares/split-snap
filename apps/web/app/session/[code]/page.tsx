@@ -533,7 +533,11 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       </div>
 
       {/* Share modal */}
-      <ShareLinkModal isOpen={showShare} sessionCode={code} />
+      <ShareLinkModal
+        isOpen={showShare}
+        onOpenChange={setShowShare}
+        sessionCode={code}
+      />
 
       <Modal>
         <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>

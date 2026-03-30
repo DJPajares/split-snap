@@ -7,10 +7,15 @@ import { TypographyCaption, TypographyMuted } from '../shared/Typography';
 
 interface ShareLinkModalProps {
   isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
   sessionCode: string;
 }
 
-export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
+export function ShareLinkModal({
+  isOpen,
+  onOpenChange,
+  sessionCode,
+}: ShareLinkModalProps) {
   const shareUrl =
     typeof window !== 'undefined'
       ? `${window.location.origin}/join/${sessionCode}`
@@ -19,6 +24,7 @@ export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
+      onOpenChange(false);
       toast.success('Link copied!');
     } catch {
       toast.danger('Failed to copy');
@@ -27,7 +33,7 @@ export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
 
   return (
     <Modal>
-      <Modal.Backdrop isOpen={isOpen}>
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container placement="center">
           <Modal.Dialog>
             {({ close }) => (
