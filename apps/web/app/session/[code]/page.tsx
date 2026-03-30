@@ -418,11 +418,14 @@ export default function SessionPage({ params }: ParamsCodeProps) {
               }
               variant="soft"
             >
-              {session.status}
+              <Chip.Label>{session.status}</Chip.Label>
             </Chip>
-            <Chip size="sm" color={connected ? 'success' : 'danger'}>
-              <IconCircleFilled size={8} />
-              {connected ? 'Live' : 'Reconnecting...'}
+            <Chip size="sm">
+              <IconCircleFilled
+                size={6}
+                className={connected ? 'text-success' : 'text-danger'}
+              />
+              <Chip.Label>{connected ? 'Live' : 'Reconnecting...'}</Chip.Label>
             </Chip>
           </div>
         </div>
@@ -539,6 +542,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
         sessionCode={code}
       />
 
+      {/* Settle confirmation modal */}
       <Modal>
         <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
           <Modal.Container>

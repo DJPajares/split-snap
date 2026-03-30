@@ -98,7 +98,7 @@ export function SessionItemList({
               onClick={() => handleClaimToggle(item.id)}
               disabled={isSettled || !participantId || isLoading}
             >
-              <Card.Content className="flex flex-row items-center justify-between gap-3 p-3">
+              <Card.Content className="flex flex-row items-center justify-between gap-3">
                 <div className="flex flex-row gap-4">
                   {participantId && (
                     <Checkbox

@@ -6,6 +6,7 @@ import {
   Card,
   Chip,
   IconPlus,
+  Skeleton,
   Spinner,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
@@ -106,12 +107,10 @@ export default function DashboardPage() {
       </div>
 
       {loadingSessions ? (
-        <div className="flex items-center justify-center py-16">
-          <Spinner size="lg" />
-        </div>
+        <Skeleton className="h-80 rounded-xl" />
       ) : filteredSessions.length === 0 ? (
         <Card>
-          <Card.Content className="flex flex-col items-center justify-center gap-4 py-16">
+          <Card.Content className="flex flex-col items-center justify-center gap-4 py-8">
             <IconClipboardText size={48} className="text-default" />
             <TypographySubsectionTitle>
               {roleFilter === 'all'
@@ -143,7 +142,7 @@ export default function DashboardPage() {
                 className="cursor-pointer"
                 onClick={() => router.push(`/session/${session.code}`)}
               >
-                <Card.Content className="flex flex-row items-center justify-between gap-4 py-4">
+                <Card.Content className="flex flex-row items-center justify-between gap-4">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <TypographySubsectionTitle>
