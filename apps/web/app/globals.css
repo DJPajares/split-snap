@@ -37,7 +37,7 @@
   --segment-foreground: oklch(21.03% 0 224.36);
   --separator: oklch(92% 0 224.36);
   --success: oklch(73.29% 0.1935 147.27);
-  --success-foreground: oklch(21.03% 0.0059 147.27);
+  --success-foreground: oklch(99.11% 0 0);
   --surface: oklch(100% 0 224.36);
   --surface-foreground: oklch(21.03% 0 224.36);
   --surface-secondary: oklch(95.24% 0 224.36);
@@ -81,7 +81,7 @@
   --segment-foreground: oklch(99.11% 0 224.36);
   --separator: oklch(25% 0 224.36);
   --success: oklch(73.29% 0.1935 147.27);
-  --success-foreground: oklch(21.03% 0.0059 147.27);
+  --success-foreground: oklch(99.11% 0 0);
   --surface: oklch(21.03% 0 224.36);
   --surface-foreground: oklch(99.11% 0 224.36);
   --surface-secondary: oklch(25.7% 0 224.36);

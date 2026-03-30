@@ -97,11 +97,11 @@ export function ParticipantSidebar({
               {session.pendingParticipants.map((pending) => (
                 <div
                   key={pending.id}
-                  className="bg-warning/10 flex items-center justify-between rounded-lg p-2"
+                  className="bg-warning/10 flex items-center justify-between rounded-2xl p-2"
                 >
                   <div className="inline-flex items-center gap-2">
-                    <Avatar color="warning" size="sm">
-                      <Avatar.Fallback>
+                    <Avatar size="sm">
+                      <Avatar.Fallback className="bg-warning text-warning-foreground">
                         {pending.displayName[0]}
                       </Avatar.Fallback>
                     </Avatar>
@@ -115,10 +115,10 @@ export function ParticipantSidebar({
                   <div className="flex gap-1">
                     <Button
                       size="sm"
-                      variant="tertiary"
                       onPress={() => handleApprove(pending.id)}
                       isPending={approvingId === pending.id}
                       isDisabled={rejectingId === pending.id}
+                      className="bg-success hover:bg-success/90 text-success-foreground"
                     >
                       Accept
                     </Button>
@@ -160,11 +160,11 @@ export function ParticipantSidebar({
                 onOpenChange={(open) =>
                   setConfirmId(open ? participant.id : null)
                 }
-                // triggerScaleOnOpen={isKickable ? true : false}
               >
                 {/* Trigger */}
-                <div
-                  className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
+                <Button
+                  variant="ghost"
+                  className={`flex w-full items-center justify-between rounded-2xl px-4 py-8 transition-colors ${
                     isCurrentUser
                       ? 'bg-accent/10'
                       : isKickable
@@ -176,20 +176,19 @@ export function ParticipantSidebar({
                       setConfirmId(participant.id);
                     }
                   }}
+                  isPending={isKicking}
                 >
-                  {/* User Avatar */}
                   <div className="inline-flex items-center gap-2">
-                    <Avatar
-                      size="sm"
-                      color={
-                        isParticipantInitiator
-                          ? 'warning'
-                          : isCurrentUser
-                            ? 'accent'
-                            : 'default'
-                      }
-                    >
-                      <Avatar.Fallback>
+                    <Avatar size="sm">
+                      <Avatar.Fallback
+                        className={`${
+                          isParticipantInitiator
+                            ? 'bg-warning text-warning-foreground'
+                            : isCurrentUser
+                              ? 'bg-accent text-accent-foreground'
+                              : ''
+                        }`}
+                      >
                         {participant.displayName[0]}
                       </Avatar.Fallback>
                     </Avatar>
@@ -208,7 +207,6 @@ export function ParticipantSidebar({
                       </TypographyMuted>
                     </div>
                   </div>
-                  {/* Amount */}
                   <div className="flex items-center gap-2">
                     <div className="text-right">
                       <p className="text-sm font-semibold">
@@ -224,18 +222,21 @@ export function ParticipantSidebar({
                     </div>
                     {isKicking && <Spinner size="sm" color="danger" />}
                   </div>
-                </div>
+                </Button>
 
                 {/* Content */}
                 {isKickable && (
-                  <Popover.Content placement="bottom">
-                    <div className="space-y-2 p-3">
-                      <p className="text-sm font-medium">
+                  <Popover.Content>
+                    <Popover.Arrow />
+                    <Popover.Dialog className="flex flex-col gap-2">
+                      <Popover.Heading>
                         Remove {participant.displayName}?
-                      </p>
+                      </Popover.Heading>
+
                       <TypographyMuted>
                         All their claims will be removed.
                       </TypographyMuted>
+
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
@@ -253,7 +254,7 @@ export function ParticipantSidebar({
                           Remove
                         </Button>
                       </div>
-                    </div>
+                    </Popover.Dialog>
                   </Popover.Content>
                 )}
               </Popover>

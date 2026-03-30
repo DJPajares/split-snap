@@ -63,7 +63,7 @@ export function SessionItemList({
             isDisabled={isSettled || allItemsLoading}
             onChange={handleToggleAll}
           >
-            <Checkbox.Control>
+            <Checkbox.Control className="rounded-xl">
               <Checkbox.Indicator />
             </Checkbox.Control>
             <Checkbox.Content>
@@ -102,12 +102,13 @@ export function SessionItemList({
                 <div className="flex flex-row gap-4">
                   {participantId && (
                     <Checkbox
+                      variant="secondary"
                       aria-label={`claim-item-${item.id}`}
                       isSelected={isClaimed}
                       isDisabled={isSettled || isLoading}
                       onChange={() => handleClaimToggle(item.id)}
                     >
-                      <Checkbox.Control className="size-6">
+                      <Checkbox.Control className="size-6 rounded-2xl">
                         <Checkbox.Indicator />
                       </Checkbox.Control>
                     </Checkbox>

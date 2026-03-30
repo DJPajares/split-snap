@@ -34,7 +34,7 @@ const typographyDefaultElement = {
   cardTitle: 'h4',
   code: 'code',
   hero: 'h1',
-  label: 'label',
+  label: 'p',
   lead: 'p',
   muted: 'p',
   overline: 'span',
@@ -84,39 +84,28 @@ function TypographyHero({
   className,
   ...props
 }: Omit<TypographyProps<'h1'>, 'as' | 'variant'>) {
-  return <Typography as="h1" variant="hero" className={className} {...props} />;
+  return <Typography variant="hero" className={className} {...props} />;
 }
 
 function TypographyPageTitle({
   className,
   ...props
 }: Omit<TypographyProps<'h2'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="h2" variant="pageTitle" className={className} {...props} />
-  );
+  return <Typography variant="pageTitle" className={className} {...props} />;
 }
 
 function TypographySectionTitle({
   className,
   ...props
 }: Omit<TypographyProps<'h3'>, 'as' | 'variant'>) {
-  return (
-    <Typography
-      as="h3"
-      variant="sectionTitle"
-      className={className}
-      {...props}
-    />
-  );
+  return <Typography variant="sectionTitle" className={className} {...props} />;
 }
 
 function TypographyCardTitle({
   className,
   ...props
 }: Omit<TypographyProps<'h4'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="h4" variant="cardTitle" className={className} {...props} />
-  );
+  return <Typography variant="cardTitle" className={className} {...props} />;
 }
 
 function TypographySubsectionTitle({
@@ -124,12 +113,7 @@ function TypographySubsectionTitle({
   ...props
 }: Omit<TypographyProps<'h5'>, 'as' | 'variant'>) {
   return (
-    <Typography
-      as="h5"
-      variant="subsectionTitle"
-      className={className}
-      {...props}
-    />
+    <Typography variant="subsectionTitle" className={className} {...props} />
   );
 }
 
@@ -137,66 +121,56 @@ function TypographyLead({
   className,
   ...props
 }: Omit<TypographyProps<'p'>, 'as' | 'variant'>) {
-  return <Typography as="p" variant="lead" className={className} {...props} />;
+  return <Typography variant="lead" className={className} {...props} />;
 }
 
 function TypographyBody({
   className,
   ...props
 }: Omit<TypographyProps<'p'>, 'as' | 'variant'>) {
-  return <Typography as="p" variant="body" className={className} {...props} />;
+  return <Typography variant="body" className={className} {...props} />;
 }
 
 function TypographyBodySm({
   className,
   ...props
 }: Omit<TypographyProps<'p'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="p" variant="bodySm" className={className} {...props} />
-  );
+  return <Typography variant="bodySm" className={className} {...props} />;
 }
 
 function TypographyMuted({
   className,
   ...props
 }: Omit<TypographyProps<'p'>, 'as' | 'variant'>) {
-  return <Typography as="p" variant="muted" className={className} {...props} />;
+  return <Typography variant="muted" className={className} {...props} />;
 }
 
 function TypographyLabel({
   className,
   ...props
-}: Omit<TypographyProps<'label'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="label" variant="label" className={className} {...props} />
-  );
+}: Omit<TypographyProps<'p'>, 'as' | 'variant'>) {
+  return <Typography variant="label" className={className} {...props} />;
 }
 
 function TypographyCaption({
   className,
   ...props
 }: Omit<TypographyProps<'span'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="span" variant="caption" className={className} {...props} />
-  );
+  return <Typography variant="caption" className={className} {...props} />;
 }
 
 function TypographyOverline({
   className,
   ...props
 }: Omit<TypographyProps<'span'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="span" variant="overline" className={className} {...props} />
-  );
+  return <Typography variant="overline" className={className} {...props} />;
 }
 
 function TypographyCode({
   className,
   ...props
 }: Omit<TypographyProps<'code'>, 'as' | 'variant'>) {
-  return (
-    <Typography as="code" variant="code" className={className} {...props} />
-  );
+  return <Typography variant="code" className={className} {...props} />;
 }
 
 export {
