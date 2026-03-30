@@ -1,6 +1,5 @@
 'use client';
 
-import { Avatar } from '@heroui/react';
 import { APP } from '@split-snap/shared/constants';
 import {
   IconLayoutDashboardFilled,
@@ -51,20 +50,7 @@ export default function Header() {
       position="hide-on-scroll"
       brand={brand}
       items={!user ? [...MENU_ITEMS, ...AUTH_MENU_ITEMS] : MENU_ITEMS}
-      rightContent={
-        <>
-          <NavbarDropdownMenu>
-            {user ? (
-              <Avatar size="sm" variant="soft" className="ring-accent ring-2">
-                <Avatar.Image src="https://i.pravatar.cc/150?u=a04258114e29026708c" />
-                <Avatar.Fallback>JD</Avatar.Fallback>
-              </Avatar>
-            ) : (
-              <Avatar size="sm" />
-            )}
-          </NavbarDropdownMenu>
-        </>
-      }
+      rightContent={<NavbarDropdownMenu />}
     />
   );
 }
