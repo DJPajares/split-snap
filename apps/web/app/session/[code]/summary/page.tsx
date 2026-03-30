@@ -4,12 +4,13 @@ import {
   Button,
   Card,
   Chip,
+  Key,
   ListBox,
   Select,
   Spinner,
-  // toast,
+  toast,
 } from '@heroui/react';
-// import { STORAGE_KEYS } from '@split-snap/shared/constants';
+import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
@@ -19,6 +20,7 @@ import { use, useEffect, useMemo, useState } from 'react';
 
 import SummaryCard from '@/app/session/[code]/summary/SummaryCard/SummaryCard';
 import {
+  TypographyCardTitle,
   TypographyMuted,
   TypographySectionTitle,
 } from '@/components/shared/Typography';
@@ -30,6 +32,7 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedCurrency, setSelectedCurrency] = useState<Key | null>('');
   const { handleError } = useApiError({ redirectTo: '/' });
 
   const summaries = useMemo(
@@ -40,51 +43,54 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
   useEffect(() => {
     api.sessions
       .get(code)
-      .then(setSession)
+      .then((data) => {
+        setSession(data);
+        setSelectedCurrency(data.currency);
+      })
       .catch((err) => handleError(err, 'Session error'))
       .finally(() => setLoading(false));
   }, [code, handleError]);
 
-  // const handleConvertExchangeRates = async (currency: string) => {
-  //   if (!session) return;
+  const handleConvertExchangeRates = async (currency: string) => {
+    if (!session) return;
 
-  //   const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
+    const rates = sessionStorage.getItem(STORAGE_KEYS.KEY_EXCHANGE_RATES);
 
-  //   if (!rates) {
-  //     toast.danger('Exchange rates not available', {
-  //       description:
-  //         'Unable to fetch exchange rates. Please try again later or refresh the page.',
-  //     });
-  //     return;
-  //   }
+    if (!rates) {
+      toast.danger('Exchange rates not available', {
+        description:
+          'Unable to fetch exchange rates. Please try again later or refresh the page.',
+      });
+      return;
+    }
 
-  //   const parsedRates = JSON.parse(rates);
-  //   const rate = parsedRates[currency];
+    const parsedRates = JSON.parse(rates);
+    const rate = parsedRates[currency];
 
-  //   if (!rate) {
-  //     toast.danger('Currency not supported', {
-  //       description: `Exchange rate for ${currency} is not available.`,
-  //     });
-  //     return;
-  //   }
+    if (!rate) {
+      toast.danger('Currency not supported', {
+        description: `Exchange rate for ${currency} is not available.`,
+      });
+      return;
+    }
 
-  //   const baseCurrency = session.currency;
-  //   const conversionRate = rate / parsedRates[baseCurrency];
+    const baseCurrency = session.currency;
+    const conversionRate = rate / parsedRates[baseCurrency];
 
-  //   const convertedSession = {
-  //     ...session,
-  //     items: session.items.map((item) => ({
-  //       ...item,
-  //       price: item.price * conversionRate,
-  //     })),
-  //     tip: session.tip * conversionRate,
-  //     tax: session.tax * conversionRate,
-  //     total: session.total * conversionRate,
-  //     currency,
-  //   };
+    const convertedSession = {
+      ...session,
+      items: session.items.map((item) => ({
+        ...item,
+        price: item.price * conversionRate,
+      })),
+      tip: session.tip * conversionRate,
+      tax: session.tax * conversionRate,
+      total: session.total * conversionRate,
+      currency,
+    };
 
-  //   setSession(convertedSession);
-  // };
+    setSession(convertedSession);
+  };
 
   if (loading) {
     return (
@@ -120,27 +126,17 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        {/* <p className="text-description-lg">Convert currency to:</p>
-        <Select
-          className="w-24"
-          aria-label="convert currency to"
-          defaultSelectedKeys={[`${session.currency}`]}
-          onChange={(e) => handleConvertExchangeRates(e.target.value)}
-        >
-          {CURRENCIES.map((currency) => (
-            <SelectItem key={currency.code}>{currency.code}</SelectItem>
-          ))}
-        </Select> */}
-
         <TypographyMuted className="text-base">
           Convert currency to:
         </TypographyMuted>
         <Select
           aria-label="convert currency to"
-          // value={singleValue}
-          // onChange={setSingleValue}
-          // value={[`${session.currency}`]}
-          // onChange={(e) => handleConvertExchangeRates(e.target.value)}
+          value={selectedCurrency}
+          onChange={(value) => {
+            const newCurrency = value as string;
+            setSelectedCurrency(newCurrency);
+            handleConvertExchangeRates(newCurrency);
+          }}
           className="w-24"
         >
           <Select.Trigger>
@@ -150,7 +146,11 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
           <Select.Popover>
             <ListBox>
               {CURRENCIES.map((currency) => (
-                <ListBox.Item key={currency.code} textValue={currency.code}>
+                <ListBox.Item
+                  key={currency.code}
+                  id={currency.code}
+                  textValue={currency.code}
+                >
                   {currency.code}
                   <ListBox.ItemIndicator />
                 </ListBox.Item>
@@ -198,16 +198,16 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
 
       {/* Grand total */}
       <Card>
-        <Card.Content className="p-4">
+        <Card.Content>
           <div className="flex items-center justify-between">
-            <TypographySectionTitle>Grand Total</TypographySectionTitle>
-            <TypographySectionTitle>
+            <TypographyCardTitle>Grand Total</TypographyCardTitle>
+            <TypographyCardTitle>
               {formatCurrency({
                 value: session.total,
                 currency: session.currency,
                 decimal: 2,
               })}
-            </TypographySectionTitle>
+            </TypographyCardTitle>
           </div>
         </Card.Content>
       </Card>
