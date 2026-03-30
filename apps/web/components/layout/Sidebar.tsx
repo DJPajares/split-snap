@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import packageInfo from '@/package.json';
 
+import { TypographySubsectionTitle } from '../shared/Typography';
 import { MenuItemsProps } from './Navbar';
 
 type SidebarProps = {
@@ -33,7 +34,9 @@ export default function Sidebar({
                   className="rounded-md"
                   priority
                 />
-                <p className="font-bold">{APP.NAME}</p>
+                <TypographySubsectionTitle>
+                  {APP.NAME}
+                </TypographySubsectionTitle>
               </Link>
             </Drawer.Heading>
           </Drawer.Header>

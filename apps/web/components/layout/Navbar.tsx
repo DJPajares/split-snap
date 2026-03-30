@@ -103,7 +103,7 @@ export function Navbar({
               className="flex items-center gap-2 no-underline"
             >
               {brand.logo && <>{brand.logo}</>}
-              <TypographySubsectionTitle className="leading-none">
+              <TypographySubsectionTitle>
                 {brand.name}
               </TypographySubsectionTitle>
             </Link>
