@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Modal } from '@heroui/react';
+import { IconAlertTriangleFilled } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -88,7 +89,10 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
               {() => (
                 <>
                   <Modal.Header className="flex items-center gap-2">
-                    <span className="text-danger text-xl">⚠️</span>
+                    <IconAlertTriangleFilled
+                      size={20}
+                      className="text-warning"
+                    />
                     {modal?.title}
                   </Modal.Header>
                   <Modal.Body>

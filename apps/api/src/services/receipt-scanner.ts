@@ -534,9 +534,7 @@ export async function scanReceipt(
       const msg = err instanceof Error ? err.message : String(err);
       const cause =
         err instanceof Error && err.cause ? ` (cause: ${err.cause})` : '';
-      console.warn(
-        `⚠️  ${provider.name} failed: ${msg}${cause}, trying next...`,
-      );
+      console.warn(`${provider.name} failed: ${msg}${cause}, trying next...`);
       errors.push(`${provider.name}: ${msg}${cause}`);
     }
   }

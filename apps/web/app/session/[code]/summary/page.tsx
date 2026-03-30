@@ -13,7 +13,7 @@ import {
 import { CURRENCIES, formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
-import { IconArrowBigLeft } from '@tabler/icons-react';
+import { IconAlertTriangleFilled, IconArrowBigLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
@@ -163,9 +163,12 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
       {unclaimedItems.length > 0 && (
         <Card className="border-warning border-2">
           <Card.Content className="flex flex-col gap-2 p-4">
-            <p className="text-warning font-semibold">
-              ⚠️ {unclaimedItems.length} unclaimed item(s)
-            </p>
+            <div className="flex items-center gap-2">
+              <IconAlertTriangleFilled size={20} className="text-warning" />
+              <p className="text-warning font-semibold">
+                {unclaimedItems.length} unclaimed item(s)
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2">
               {unclaimedItems.map((item) => (
                 <Chip key={item.id} size="sm" variant="soft" color="warning">
