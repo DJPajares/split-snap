@@ -10,6 +10,8 @@ import {
   useState,
 } from 'react';
 
+import { TypographyMuted } from '../shared/Typography';
+
 // ─── Types ─────────────────────────────────────────────────
 
 interface ErrorModalOptions {
@@ -90,7 +92,9 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
                     {modal?.title}
                   </Modal.Header>
                   <Modal.Body>
-                    <p className="text-description-lg">{modal?.message}</p>
+                    <TypographyMuted className="text-base">
+                      {modal?.message}
+                    </TypographyMuted>
                   </Modal.Body>
                   <Modal.Footer>
                     <Button onPress={handleClose}>

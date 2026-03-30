@@ -31,6 +31,13 @@ import { IconPlus, IconX } from '@tabler/icons-react';
 import { useCallback, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
+import {
+  TypographyCaption,
+  TypographyCardTitle,
+  TypographyMuted,
+  TypographySectionTitle,
+  TypographySubsectionTitle,
+} from '../shared/Typography';
 import { ReceiptImage } from './ReceiptImage';
 
 interface ItemEditorProps {
@@ -340,10 +347,10 @@ export function ItemEditor({
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-2">
-        <h4 className="title-card">Review Items</h4>
-        <p className="text-description">
+        <TypographyCardTitle>Review Items</TypographyCardTitle>
+        <TypographyMuted>
           Enter each row amount as shown on the receipt, with quantity in Qty.
-        </p>
+        </TypographyMuted>
         <Controller
           name="currency"
           control={control}
@@ -413,7 +420,7 @@ export function ItemEditor({
               >
                 <div className="border-default-200 bg-surface/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-caption flex items-center gap-2 font-medium tracking-wide uppercase">
+                    <TypographyCaption className="flex items-center gap-2 font-medium tracking-wide uppercase">
                       <span
                         className="cursor-grab select-none"
                         aria-hidden="true"
@@ -421,7 +428,7 @@ export function ItemEditor({
                         ⋮⋮
                       </span>
                       Item {i + 1}
-                    </p>
+                    </TypographyCaption>
                     <Button
                       isIconOnly
                       variant="danger-soft"
@@ -538,13 +545,13 @@ export function ItemEditor({
                   </div>
                   {parsedQuantity > 1 && parsedAmount > 0 && (
                     <span className="flex justify-end">
-                      <p className="text-caption">
+                      <TypographyCaption>
                         {`${formatCurrency({
                           value: amountPerUnit,
                           currency: watchedCurrency,
                           decimal: 2,
                         })} each`}
-                      </p>
+                      </TypographyCaption>
                     </span>
                   )}
                 </div>
@@ -569,14 +576,14 @@ export function ItemEditor({
         {/* Totals */}
         <div className="space-y-3">
           <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
-            <p className="text-caption">Subtotal</p>
-            <h5 className="title-subsection">
+            <TypographyCaption>Subtotal</TypographyCaption>
+            <TypographySubsectionTitle>
               {formatCurrency({
                 value: subtotal,
                 currency: watchedCurrency,
                 decimal: 2,
               })}
-            </h5>
+            </TypographySubsectionTitle>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -661,7 +668,7 @@ export function ItemEditor({
               {/* Show resolved tax amount when in percentage mode */}
               {watchedTaxMode === '%' && subtotal > 0 && (
                 <span className="flex justify-end">
-                  <p className="text-caption">
+                  <TypographyCaption>
                     {watchedTaxMode === '%' && parseNumber(watchedTax) > 0 && (
                       <span>
                         {formatCurrency({
@@ -671,7 +678,7 @@ export function ItemEditor({
                         })}
                       </span>
                     )}
-                  </p>
+                  </TypographyCaption>
                 </span>
               )}
             </div>
@@ -759,7 +766,7 @@ export function ItemEditor({
               {/* Show resolved tip amount when in percentage mode */}
               {watchedTipMode === '%' && subtotal > 0 && (
                 <span className="flex justify-end">
-                  <p className="text-caption flex">
+                  <TypographyCaption className="flex">
                     {watchedTipMode === '%' && parseNumber(watchedTip) > 0 && (
                       <span>
                         {formatCurrency({
@@ -769,21 +776,21 @@ export function ItemEditor({
                         })}
                       </span>
                     )}
-                  </p>
+                  </TypographyCaption>
                 </span>
               )}
             </div>
           </div>
 
           <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
-            <p className="text-caption">Total</p>
-            <h3 className="title-section">
+            <TypographyCaption>Total</TypographyCaption>
+            <TypographySectionTitle>
               {formatCurrency({
                 value: total,
                 currency: watchedCurrency,
                 decimal: 2,
               })}
-            </h3>
+            </TypographySectionTitle>
           </div>
         </div>
 

@@ -4,6 +4,8 @@ import { Card, Checkbox, Chip, Label } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { Session } from '@split-snap/shared/types';
 
+import { TypographyCaption } from '../shared/Typography';
+
 interface SessionItemListProps {
   session: Session;
   participantId: string | null;
@@ -113,14 +115,14 @@ export function SessionItemList({
                   <div className="flex flex-col items-start gap-1">
                     <p className="truncate font-medium">{item.name}</p>
                     {item.quantity > 1 && (
-                      <p className="text-caption">
+                      <TypographyCaption>
                         {formatCurrency({
                           value: item.price,
                           currency: session.currency,
                           decimal: 2,
                         })}{' '}
                         × {item.quantity}
-                      </p>
+                      </TypographyCaption>
                     )}
                     {totalClaimers > 0 && (
                       <div className="flex flex-wrap gap-1">

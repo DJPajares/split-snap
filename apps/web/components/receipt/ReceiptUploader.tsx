@@ -4,6 +4,8 @@ import { Button, Card, Spinner } from '@heroui/react';
 import { IconCamera } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
 
+import { TypographyMuted } from '../shared/Typography';
+
 interface ReceiptUploaderProps {
   onFileSelected: (file: File) => void;
   isLoading: boolean;
@@ -67,7 +69,9 @@ export function ReceiptUploader({
         {isLoading ? (
           <>
             <Spinner size="lg" />
-            <p className="text-description-lg">Scanning receipt with AI...</p>
+            <TypographyMuted className="text-base">
+              Scanning receipt with AI...
+            </TypographyMuted>
           </>
         ) : preview ? (
           <>
@@ -77,7 +81,7 @@ export function ReceiptUploader({
               alt="Receipt preview"
               className="max-h-48 rounded-lg object-contain"
             />
-            <p className="text-description">Click or drop to replace</p>
+            <TypographyMuted>Click or drop to replace</TypographyMuted>
           </>
         ) : (
           <>
@@ -85,7 +89,7 @@ export function ReceiptUploader({
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>
-            <p className="text-description">Supports JPEG, PNG, HEIC</p>
+            <TypographyMuted>Supports JPEG, PNG, HEIC</TypographyMuted>
             <Button
               variant="tertiary"
               onPress={() => inputRef.current?.click()}

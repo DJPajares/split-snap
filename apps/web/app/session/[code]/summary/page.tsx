@@ -18,6 +18,10 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
 import SummaryCard from '@/app/session/[code]/summary/SummaryCard/SummaryCard';
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { api } from '@/lib/api';
 
@@ -100,8 +104,10 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
     <div className="flex flex-col gap-6">
       <div className="flex justify-between gap-3">
         <div className="flex flex-col">
-          <h3 className="title-section">Bill Summary</h3>
-          <p className="text-description-lg">Session {code}</p>
+          <TypographySectionTitle>Bill Summary</TypographySectionTitle>
+          <TypographyMuted className="text-base">
+            Session {code}
+          </TypographyMuted>
         </div>
         <Button
           variant="tertiary"
@@ -126,7 +132,9 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
           ))}
         </Select> */}
 
-        <p className="text-description-lg">Convert currency to:</p>
+        <TypographyMuted className="text-base">
+          Convert currency to:
+        </TypographyMuted>
         <Select
           aria-label="convert currency to"
           // value={singleValue}
@@ -189,14 +197,14 @@ export default function SummaryPage({ params }: ParamsCodeProps) {
       <Card>
         <Card.Content className="p-4">
           <div className="flex items-center justify-between">
-            <h3 className="title-section">Grand Total</h3>
-            <h3 className="title-section">
+            <TypographySectionTitle>Grand Total</TypographySectionTitle>
+            <TypographySectionTitle>
               {formatCurrency({
                 value: session.total,
                 currency: session.currency,
                 decimal: 2,
               })}
-            </h3>
+            </TypographySectionTitle>
           </div>
         </Card.Content>
       </Card>

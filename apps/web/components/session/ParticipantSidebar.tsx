@@ -14,6 +14,8 @@ import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
 import { useState } from 'react';
 
+import { TypographyLabel, TypographyMuted } from '../shared/Typography';
+
 interface ParticipantSidebarProps {
   session: Session;
   currentParticipantId: string | null;
@@ -104,10 +106,10 @@ export function ParticipantSidebar({
                       </Avatar.Fallback>
                     </Avatar>
                     <div className="flex flex-col items-start">
-                      <span className="text-sm">{pending.displayName}</span>
-                      <span className="text-muted text-xs">
+                      <TypographyLabel>{pending.displayName}</TypographyLabel>
+                      <TypographyMuted>
                         {pending.isAnonymous ? 'Guest' : 'Member'}
-                      </span>
+                      </TypographyMuted>
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -137,9 +139,9 @@ export function ParticipantSidebar({
           )}
 
         {session.participants.length === 0 ? (
-          <p className="text-description py-4 text-center">
+          <TypographyMuted className="py-4 text-center">
             No one has joined yet. Share the link!
-          </p>
+          </TypographyMuted>
         ) : (
           session.participants.map((participant) => {
             const summary = summaries.find(
@@ -192,8 +194,10 @@ export function ParticipantSidebar({
                       </Avatar.Fallback>
                     </Avatar>
                     <div className="flex flex-col items-start">
-                      <span className="text-sm">{participant.displayName}</span>
-                      <span className="text-muted text-xs">
+                      <TypographyLabel className="font-semibold">
+                        {participant.displayName}
+                      </TypographyLabel>
+                      <TypographyMuted className="text-xs">
                         {isParticipantInitiator
                           ? 'Host'
                           : isCurrentUser
@@ -201,7 +205,7 @@ export function ParticipantSidebar({
                             : participant.isAnonymous
                               ? 'Guest'
                               : 'Member'}
-                      </span>
+                      </TypographyMuted>
                     </div>
                   </div>
                   {/* Amount */}
@@ -214,9 +218,9 @@ export function ParticipantSidebar({
                           decimal: 2,
                         })}
                       </p>
-                      <p className="text-description">
+                      <TypographyMuted>
                         {summary?.items.length ?? 0} items
-                      </p>
+                      </TypographyMuted>
                     </div>
                     {isKicking && <Spinner size="sm" color="danger" />}
                   </div>
@@ -229,9 +233,9 @@ export function ParticipantSidebar({
                       <p className="text-sm font-medium">
                         Remove {participant.displayName}?
                       </p>
-                      <p className="text-description">
+                      <TypographyMuted>
                         All their claims will be removed.
-                      </p>
+                      </TypographyMuted>
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
@@ -259,9 +263,10 @@ export function ParticipantSidebar({
 
         {/* Session totals */}
         <Separator />
+
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-description-lg">Subtotal</span>
+            <TypographyMuted>Subtotal</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.subtotal,
@@ -271,7 +276,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-description-lg">Tax</span>
+            <TypographyMuted>Tax</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.tax,
@@ -281,7 +286,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-description-lg">Service Charge/Tip</span>
+            <TypographyMuted>Service Charge/Tip</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.tip,

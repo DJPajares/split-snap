@@ -2,6 +2,8 @@ import { Button, Card } from '@heroui/react';
 import { IconMinus, IconPlus, IconReceiptFilled } from '@tabler/icons-react';
 import { useState } from 'react';
 
+import { TypographyCaption } from '../shared/Typography';
+
 type ReceiptImageProps = {
   receiptImageUrl: string;
 };
@@ -19,9 +21,9 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
         >
           <IconReceiptFilled size={16} />
           <span className="flex-1 text-sm font-medium">Receipt Reference</span>
-          <span className="text-caption">
+          <TypographyCaption>
             {receiptExpanded ? 'Hide' : 'Show'}
-          </span>
+          </TypographyCaption>
         </button>
         {receiptExpanded && (
           <div className="space-y-2">
@@ -36,9 +38,9 @@ export function ReceiptImage({ receiptImageUrl }: ReceiptImageProps) {
                 >
                   <IconMinus size={12} />
                 </Button>
-                <span className="text-caption w-12 text-center">
+                <TypographyCaption className="w-12 text-center">
                   {Math.round(receiptZoom * 100)}%
-                </span>
+                </TypographyCaption>
                 <Button
                   size="sm"
                   variant="tertiary"

@@ -26,6 +26,10 @@ import { ReceiptImage } from '@/components/receipt/ReceiptImage';
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
 import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
@@ -402,7 +406,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
-            <h3 className="title-section">Session {code}</h3>
+            <TypographySectionTitle>Session {code}</TypographySectionTitle>
             <Chip
               size="sm"
               color={
@@ -540,10 +544,10 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                   <Modal.Header>Settle Session</Modal.Header>
                   <Modal.Body>
                     <p>Finalize this session now?</p>
-                    <p className="text-description">
+                    <TypographyMuted>
                       Participants will no longer be able to claim or unclaim
                       items until you undo settlement.
-                    </p>
+                    </TypographyMuted>
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="tertiary" onPress={close}>
@@ -576,10 +580,10 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                   <Modal.Header>Delete Session</Modal.Header>
                   <Modal.Body>
                     <p>Are you sure you want to delete this session?</p>
-                    <p className="text-description">
+                    <TypographyMuted>
                       This will permanently remove the session and disconnect
                       all participants. This action cannot be undone.
-                    </p>
+                    </TypographyMuted>
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="tertiary" onPress={close}>

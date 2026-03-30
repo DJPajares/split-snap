@@ -14,6 +14,11 @@ import { IconClipboardText } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+  TypographySubsectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -65,10 +70,10 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="title-section">Welcome, {user.name}</h3>
-          <p className="text-description-lg">
+          <TypographySectionTitle>Welcome, {user.name}</TypographySectionTitle>
+          <TypographyMuted className="text-base">
             Manage your bill-splitting sessions
-          </p>
+          </TypographyMuted>
         </div>
         <Button className="font-semibold" onPress={() => router.push('/scan')}>
           <IconPlus />
@@ -108,20 +113,20 @@ export default function DashboardPage() {
         <Card>
           <Card.Content className="flex flex-col items-center justify-center gap-4 py-16">
             <IconClipboardText size={48} className="text-default" />
-            <h5 className="title-subsection">
+            <TypographySubsectionTitle>
               {roleFilter === 'all'
                 ? 'No sessions yet'
                 : roleFilter === 'host'
                   ? 'No hosted sessions'
                   : 'No joined sessions'}
-            </h5>
-            <p className="text-description text-center">
+            </TypographySubsectionTitle>
+            <TypographyMuted className="text-center">
               {roleFilter === 'all'
                 ? 'Start by scanning a receipt or entering items manually. Your sessions will appear here.'
                 : roleFilter === 'host'
                   ? 'Sessions you create will appear here.'
                   : 'Sessions you join will appear here.'}
-            </p>
+            </TypographyMuted>
             {(roleFilter === 'all' || roleFilter === 'host') && (
               <Button variant="tertiary" onPress={() => router.push('/scan')}>
                 Create Your First Split
@@ -141,7 +146,9 @@ export default function DashboardPage() {
                 <Card.Content className="flex flex-row items-center justify-between gap-4 py-4">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <h5 className="title-subsection">{session.code}</h5>
+                      <TypographySubsectionTitle>
+                        {session.code}
+                      </TypographySubsectionTitle>
                       <Chip
                         size="sm"
                         color={session.role === 'host' ? 'warning' : 'default'}
@@ -163,23 +170,23 @@ export default function DashboardPage() {
                         {session.status}
                       </Chip>
                     </div>
-                    <p className="text-description">
+                    <TypographyMuted>
                       {session.items.length} item
                       {session.items.length !== 1 ? 's' : ''} ·{' '}
                       {session.participants.length} participant
                       {session.participants.length !== 1 ? 's' : ''} ·{' '}
                       {new Date(session.createdAt).toLocaleDateString()}
-                    </p>
+                    </TypographyMuted>
                   </div>
                   <div className="text-right">
-                    <h5 className="title-subsection">
+                    <TypographySubsectionTitle>
                       {formatCurrency({
                         value: session.total,
                         currency: session.currency,
                         decimal: 2,
                       })}
-                    </h5>
-                    <p className="text-description">{session.currency}</p>
+                    </TypographySubsectionTitle>
+                    <TypographyMuted>{session.currency}</TypographyMuted>
                   </div>
                 </Card.Content>
               </button>

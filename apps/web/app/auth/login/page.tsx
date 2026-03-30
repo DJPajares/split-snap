@@ -31,6 +31,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { TypographySectionTitle } from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -119,7 +120,7 @@ export default function LoginPage() {
             height={36}
             priority
           />
-          <h3 className="title-section">{`Welcome to ${APP.NAME}`}</h3>
+          <TypographySectionTitle>{`Welcome to ${APP.NAME}`}</TypographySectionTitle>
           <Card.Description>
             Sign in to save your sessions and access them later
           </Card.Description>

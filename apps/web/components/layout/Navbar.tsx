@@ -6,6 +6,7 @@ import { ReactNode, useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils'; // or your cn utility
 
+import { TypographySubsectionTitle } from '../shared/Typography';
 import Sidebar from './Sidebar';
 
 export type MenuItemsProps = {
@@ -102,7 +103,9 @@ export function Navbar({
               className="flex items-center gap-2 no-underline"
             >
               {brand.logo && <>{brand.logo}</>}
-              <p className="font-bold">{brand.name}</p>
+              <TypographySubsectionTitle className="leading-none">
+                {brand.name}
+              </TypographySubsectionTitle>
             </Link>
           </div>
 

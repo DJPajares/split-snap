@@ -12,6 +12,10 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
 import { ItemEditor } from '@/components/receipt/ItemEditor';
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -165,8 +169,10 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">
-            <h3 className="title-section">Edit Items</h3>
-            <p className="text-description-lg">Session {code}</p>
+            <TypographySectionTitle>Edit Items</TypographySectionTitle>
+            <TypographyMuted className="text-base">
+              Session {code}
+            </TypographyMuted>
           </div>
           <Button
             variant="tertiary"
@@ -177,10 +183,10 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
             Back
           </Button>
         </div>
-        <p className="text-description">
+        <TypographyMuted>
           Modify items, prices, or quantities. Claims on changed items will be
           cleared.
-        </p>
+        </TypographyMuted>
       </div>
 
       <ItemEditor

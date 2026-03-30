@@ -5,6 +5,13 @@ import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import {
+  TypographyCardTitle,
+  TypographyHero,
+  TypographyMuted,
+  TypographyPageTitle,
+} from '@/components/shared/Typography';
+
 const STEPS = [
   {
     icon: '📸',
@@ -66,13 +73,13 @@ export default function HomePage() {
             priority
           />
           <div className="flex flex-col gap-2">
-            <h1 className="title-hero">
+            <TypographyHero>
               Split bills, <span className="text-accent">not friendships</span>
-            </h1>
-            <p className="text-description-lg">
+            </TypographyHero>
+            <TypographyMuted className="text-base md:text-lg">
               Scan a receipt, share a link, and let everyone pick their items.
               Tax and tip are automatically distributed. No app download needed.
-            </p>
+            </TypographyMuted>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button
@@ -98,14 +105,14 @@ export default function HomePage() {
       <Surface variant="secondary">
         <section className="mx-auto max-w-5xl p-4 sm:p-8">
           <div className="flex flex-col gap-8 py-4 text-center sm:py-8">
-            <h2 className="title-page">How It Works</h2>
+            <TypographyPageTitle>How It Works</TypographyPageTitle>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step, i) => (
                 <Card key={i}>
                   <Card.Content className="p-6 text-center">
                     <span className="mb-4 block text-4xl">{step.icon}</span>
-                    <h4 className="title-card">{step.title}</h4>
-                    <p className="text-description">{step.description}</p>
+                    <TypographyCardTitle>{step.title}</TypographyCardTitle>
+                    <TypographyMuted>{step.description}</TypographyMuted>
                   </Card.Content>
                 </Card>
               ))}
@@ -117,13 +124,13 @@ export default function HomePage() {
       {/* Features */}
       <section className="mx-auto max-w-5xl p-4 sm:p-8">
         <div className="flex flex-col gap-8 text-center">
-          <h2 className="title-page">{`Why ${APP.NAME}?`}</h2>
+          <TypographyPageTitle>{`Why ${APP.NAME}?`}</TypographyPageTitle>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             {FEATURES.map((feature, i) => (
               <div key={i}>
                 <span className="mb-4 block text-4xl">{feature.icon}</span>
-                <h4 className="title-card">{feature.title}</h4>
-                <p className="text-description">{feature.description}</p>
+                <TypographyCardTitle>{feature.title}</TypographyCardTitle>
+                <TypographyMuted>{feature.description}</TypographyMuted>
               </div>
             ))}
           </div>

@@ -3,6 +3,8 @@
 import { Button, Input, Modal, toast } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
 
+import { TypographyCaption, TypographyMuted } from '../shared/Typography';
+
 interface ShareLinkModalProps {
   isOpen: boolean;
   sessionCode: string;
@@ -40,9 +42,9 @@ export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
                       <div className="rounded-xl bg-white p-4">
                         <QRCodeSVG value={shareUrl} size={200} level="M" />
                       </div>
-                      <p className="text-description text-center">
+                      <TypographyMuted className="text-center">
                         Scan this QR code or share the link below
-                      </p>
+                      </TypographyMuted>
                     </div>
 
                     <div className="flex gap-2">
@@ -62,7 +64,7 @@ export function ShareLinkModal({ isOpen, sessionCode }: ShareLinkModalProps) {
                       <p className="font-mono text-lg font-bold tracking-widest">
                         {sessionCode}
                       </p>
-                      <p className="text-caption">Session Code</p>
+                      <TypographyCaption>Session Code</TypographyCaption>
                     </div>
                   </div>
                 </Modal.Body>

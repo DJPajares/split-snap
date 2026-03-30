@@ -30,6 +30,12 @@ import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import {
+  TypographyCaption,
+  TypographyCardTitle,
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
@@ -279,13 +285,13 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconHourglassLow size={48} className="text-warning" />
-            <h4 className="title-card">Temporarily Removed</h4>
-            <p className="text-description-lg text-center">
+            <TypographyCardTitle>Temporarily Removed</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               You were removed from this session.
               {hasCountdown
                 ? ` You can rejoin in ${minutes}:${seconds.toString().padStart(2, '0')}.`
                 : ' You can try again shortly.'}
-            </p>
+            </TypographyMuted>
             <div className="flex gap-2">
               <Button onPress={() => router.push('/')}>Go Home</Button>
               {!hasCountdown && (
@@ -307,10 +313,10 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconBan size={48} className="text-danger" />
-            <h4 className="title-card">Request Rejected</h4>
-            <p className="text-description-lg text-center">
+            <TypographyCardTitle>Request Rejected</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               The host has rejected your join request.
-            </p>
+            </TypographyMuted>
             <Button onPress={() => router.push('/')}>Go Home</Button>
           </Card.Content>
         </Card>
@@ -325,10 +331,10 @@ export default function JoinPage({ params }: ParamsCodeProps) {
         <Card>
           <Card.Content className="flex flex-col items-center gap-4 py-12">
             <Spinner size="lg" />
-            <h4 className="title-card">Waiting for Approval</h4>
-            <p className="text-description-lg text-center">
+            <TypographyCardTitle>Waiting for Approval</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               The host needs to approve your request to join this session.
-            </p>
+            </TypographyMuted>
             <div className="text-accent font-mono text-lg font-bold tracking-widest">
               {code.toUpperCase()}
             </div>
@@ -352,12 +358,12 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <Card>
         <CardHeader className="flex flex-col items-center gap-2">
           <IconArrowBigRightLines size={40} />
-          <h3 className="title-section">Join Session</h3>
-          <p className="text-description-lg">
+          <TypographySectionTitle>Join Session</TypographySectionTitle>
+          <TypographyMuted className="text-center text-base">
             {user
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
-          </p>
+          </TypographyMuted>
           <p className="text-accent font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
           </p>
@@ -427,9 +433,9 @@ export default function JoinPage({ params }: ParamsCodeProps) {
               </Button>
             </>
           )}
-          <p className="text-caption text-center">
+          <TypographyCaption className="text-center">
             No account needed — just pick a name.
-          </p>
+          </TypographyCaption>
         </Card.Content>
       </Card>
     </div>
