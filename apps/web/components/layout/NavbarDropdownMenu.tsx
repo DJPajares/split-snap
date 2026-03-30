@@ -20,6 +20,7 @@ export function NavbarDropdownMenu() {
   const [isDarkMode, setIsDarkMode] = useState(theme === 'dark');
   const { user, logout } = useAuth();
   const router = useRouter();
+  const isAuthenticated = Boolean(user);
 
   const handleDarkModeToggle = () => {
     setTheme(isDarkMode ? 'light' : 'dark');
@@ -46,6 +47,10 @@ export function NavbarDropdownMenu() {
   const handleLogin = () => {
     router.push('/auth/login');
   };
+
+  const authActionLabel = isAuthenticated ? 'Log Out' : 'Log In';
+  const authActionAriaLabel = isAuthenticated ? 'log out' : 'log in';
+  const handleAuthAction = isAuthenticated ? handleLogout : handleLogin;
 
   return (
     <Dropdown>
@@ -103,35 +108,21 @@ export function NavbarDropdownMenu() {
             )}
           </Dropdown.Item>
 
-          {user ? (
-            <Dropdown.Item
-              id="logout"
-              textValue="Log Out"
-              aria-label="log out"
-              onPress={handleLogout}
-            >
-              {/* <IconLogout className="text-muted size-4 shrink-0" />
-              <Label>Log Out</Label> */}
-              <div className="flex w-full items-center justify-between gap-2">
-                <Label>Log Out</Label>
+          <Dropdown.Item
+            id="auth-action"
+            textValue={authActionLabel}
+            aria-label={authActionAriaLabel}
+            onPress={handleAuthAction}
+          >
+            <div className="flex w-full items-center justify-between gap-2">
+              <Label>{authActionLabel}</Label>
+              {isAuthenticated ? (
                 <IconLogout className="text-muted size-3.5" />
-              </div>
-            </Dropdown.Item>
-          ) : (
-            <Dropdown.Item
-              id="login"
-              textValue="Log In"
-              aria-label="log in"
-              onPress={handleLogin}
-            >
-              {/* <IconLogin className="text-muted size-4 shrink-0" />
-              <Label>Log In</Label> */}
-              <div className="flex w-full items-center justify-between gap-2">
-                <Label>Log In</Label>
+              ) : (
                 <IconLogin className="text-muted size-3.5" />
-              </div>
-            </Dropdown.Item>
-          )}
+              )}
+            </div>
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>
