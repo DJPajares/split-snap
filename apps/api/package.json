@@ -13,26 +13,26 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@google/genai": "^1.46.0",
-    "@hono/node-server": "^1.19.11",
+    "@google/genai": "^1.47.0",
+    "@hono/node-server": "^1.19.12",
     "@split-snap/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
-    "hono": "^4.12.8",
+    "hono": "^4.12.9",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.3.1",
-    "openai": "^6.32.0",
+    "mongoose": "^9.3.3",
+    "openai": "^6.33.0",
     "tesseract.js": "^7.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.1",
-    "@typescript-eslint/parser": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "eslint": "^10.1.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   }
 }
