@@ -4,22 +4,23 @@ import {
   Button,
   Card,
   CardHeader,
-  // Dropdown,
+  Dropdown,
   FieldError,
   Input,
+  InputGroup,
   Label,
   ListBox,
   Modal,
-  NumberField,
   Select,
   Separator,
+  Surface,
   TextField,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CURRENCIES,
   formatCurrency,
-  // getCurrencySymbol,
+  getCurrencySymbol,
 } from '@split-snap/shared/currency';
 import {
   type AmountMode,
@@ -27,7 +28,7 @@ import {
   itemEditorSchema,
 } from '@split-snap/shared/schemas';
 import type { ScannedItem } from '@split-snap/shared/types';
-import { IconPlus, IconX } from '@tabler/icons-react';
+import { IconGridDots, IconPlus, IconX } from '@tabler/icons-react';
 import { useCallback, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
@@ -35,6 +36,7 @@ import {
   TypographyCaption,
   TypographyCardTitle,
   TypographyMuted,
+  TypographyOverline,
   TypographySectionTitle,
   TypographySubsectionTitle,
 } from '../shared/Typography';
@@ -75,64 +77,68 @@ const parseInteger = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const toNumberInputValue = (value: string): number | undefined => {
-  if (value.trim() === '') return undefined;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
+// const toNumberInputValue = (value: string): number | undefined => {
+//   if (value.trim() === '') return undefined;
+//   const parsed = Number(value);
+//   return Number.isFinite(parsed) ? parsed : undefined;
+// };
 
-const toFormNumberString = (value: number): string => {
-  if (!Number.isFinite(value)) return '';
-  return value.toString();
-};
+// const toFormNumberString = (value: number): string => {
+//   if (!Number.isFinite(value)) return '';
+//   return value.toString();
+// };
 
 const roundTo = (value: number, decimals = 2) => {
   const factor = 10 ** decimals;
   return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
-// interface ModeDropdownProps {
-//   mode: AmountMode;
-//   currencySymbol?: string;
-//   ariaLabel: string;
-//   onChange: (mode: AmountMode) => void;
-// }
+interface ModeDropdownProps {
+  mode: AmountMode;
+  currencySymbol?: string;
+  ariaLabel: string;
+  onChange: (mode: AmountMode) => void;
+}
 
-// const ModeDropdown = ({
-//   mode,
-//   currencySymbol,
-//   ariaLabel,
-//   onChange,
-// }: ModeDropdownProps) => (
-//   <Dropdown>
-//     {/* Trigger */}
-//     <div
-//       role="button"
-//       tabIndex={0}
-//       className="hover:bg-default-100 rounded-medium cursor-pointer px-2 py-1"
-//     >
-//       <p className="text-description">
-//         {mode === '$' ? (currencySymbol ?? '$') : '%'}
-//         <span className="ml-1 text-xs">▾</span>
-//       </p>
-//     </div>
-//     {/* Menu */}
-//     <Dropdown.Popover placement="end bottom">
-//       <Dropdown.Menu
-//         aria-label={ariaLabel}
-//         selectionMode="single"
-//         selectedKeys={[mode]}
-//         onSelectionChange={(keys) => {
-//           const selected = Array.from(keys)[0] as AmountMode | undefined;
-//           if (selected) onChange(selected);
-//         }}
-//       >
-//         <Dropdown.Item key="$">{currencySymbol ?? '$'}</Dropdown.Item>
-//         <Dropdown.Item key="%">%</Dropdown.Item>
-//       </Dropdown.Menu>
-//     </Dropdown.Popover>
-//   </Dropdown>
-// );
+const ModeDropdown = ({
+  mode,
+  currencySymbol,
+  ariaLabel,
+  onChange,
+}: ModeDropdownProps) => (
+  <Dropdown>
+    {/* Trigger */}
+    <Dropdown.Trigger>
+      <div role="button" tabIndex={0}>
+        <p className="text-description">
+          {mode === '$' ? (currencySymbol ?? '$') : '%'}
+          <span className="ml-1 text-xs">▾</span>
+        </p>
+      </div>
+    </Dropdown.Trigger>
+    {/* Menu */}
+    <Dropdown.Popover className="min-w-32">
+      <Dropdown.Menu
+        aria-label={ariaLabel}
+        selectionMode="single"
+        selectedKeys={[mode]}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0] as AmountMode | undefined;
+          if (selected) onChange(selected);
+        }}
+      >
+        <Dropdown.Item id="$" textValue={currencySymbol ?? '$'}>
+          <Label>{currencySymbol ?? '$'}</Label>
+          <Dropdown.ItemIndicator />
+        </Dropdown.Item>
+        <Dropdown.Item id="%" textValue="%">
+          <Label>%</Label>
+          <Dropdown.ItemIndicator />
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>
+);
 
 export function ItemEditor({
   initialItems,
@@ -191,8 +197,8 @@ export function ItemEditor({
 
   const {
     control,
-    handleSubmit: rhfHandleSubmit,
-    // setValue,
+    handleSubmit,
+    setValue,
     // formState: { errors },
   } = useForm<ItemEditorFormData>({
     resolver: zodResolver(itemEditorSchema),
@@ -241,7 +247,8 @@ export function ItemEditor({
     name: 'currency',
     defaultValue: initialCurrency,
   });
-  // const currencySymbol = getCurrencySymbol(watchedCurrency);
+
+  const currencySymbol = getCurrencySymbol(watchedCurrency);
 
   const subtotal = useMemo(
     () => watchedItems.reduce((sum, item) => sum + parseNumber(item.amount), 0),
@@ -351,37 +358,38 @@ export function ItemEditor({
         <TypographyMuted>
           Enter each row amount as shown on the receipt, with quantity in Qty.
         </TypographyMuted>
+
         <Controller
           name="currency"
           control={control}
           render={({ field }) => (
             <Select
-              // label="Currency"
-              // selectedKeys={[field.value]}
-              // onSelectionChange={(keys) => {
-              //   const selected = Array.from(keys)[0] as string;
-              //   if (selected) field.onChange(selected);
-              // }}
-              // size="sm"
-              // value={singleValue}
-              // onChange={setSingleValue}
-              // value={[field.value]}
-              // onChange={(keys) => {
-              //   const selected = Array.from(keys)[0] as string;
-              //   if (selected) field.onChange(selected);
-              // }}
+              variant="secondary"
+              placeholder="Select currency"
+              name={field.name}
               value={field.value}
-              onChange={field.onChange}
+              onChange={(key) => {
+                if (key !== null) {
+                  field.onChange(String(key));
+                }
+              }}
+              onBlur={field.onBlur}
+              fullWidth
             >
               <Label>Currency</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
               <Select.Popover>
                 <ListBox>
-                  {CURRENCIES.map((c) => (
+                  {CURRENCIES.map((currency) => (
                     <ListBox.Item
-                      key={c.code}
-                      textValue={`${c.code} (${c.name})`}
+                      key={currency.code}
+                      id={currency.code}
+                      textValue={`${currency.code} (${currency.name})`}
                     >
-                      {c.code} ({c.name})
+                      {currency.code} ({currency.name})
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
                   ))}
@@ -421,12 +429,11 @@ export function ItemEditor({
                 <div className="border-default-200 bg-surface/90 flex flex-col gap-2 rounded-2xl border p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <TypographyCaption className="flex items-center gap-2 font-medium tracking-wide uppercase">
-                      <span
-                        className="cursor-grab select-none"
+                      <IconGridDots
+                        size={12}
+                        className="cursor-grab"
                         aria-hidden="true"
-                      >
-                        ⋮⋮
-                      </span>
+                      />
                       Item {i + 1}
                     </TypographyCaption>
                     <Button
@@ -437,7 +444,7 @@ export function ItemEditor({
                       isDisabled={fields.length <= 1}
                       aria-label="Remove item"
                     >
-                      <IconX size={16} />
+                      <IconX />
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:gap-3">
@@ -445,9 +452,10 @@ export function ItemEditor({
                       name={`items.${i}.name`}
                       control={control}
                       render={({ field }) => (
-                        <TextField type="text">
+                        <TextField type="text" className="w-full sm:col-span-6">
                           <Label>Item</Label>
                           <Input
+                            variant="secondary"
                             placeholder="Burger"
                             value={field.value}
                             onChange={field.onChange}
@@ -485,23 +493,28 @@ export function ItemEditor({
                         //   isClearable
                         // />
 
-                        <NumberField
-                          className="w-full sm:col-span-3"
-                          value={toNumberInputValue(field.value)}
-                          onChange={(value) =>
-                            field.onChange(toFormNumberString(value))
-                          }
-                          isWheelDisabled
-                        >
+                        <TextField className="w-full sm:col-span-4">
                           <Label>Amount</Label>
-                          <NumberField.Group>
-                            <NumberField.Input
+                          <InputGroup variant="secondary">
+                            <InputGroup.Prefix>
+                              <TypographyOverline>
+                                {currencySymbol}
+                              </TypographyOverline>
+                            </InputGroup.Prefix>
+                            <InputGroup.Input
                               placeholder="0.00"
                               type="number"
+                              inputMode="decimal"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
                             />
-                          </NumberField.Group>
+                            {/* <InputGroup.Suffix>
+                              {watchedCurrency}
+                            </InputGroup.Suffix> */}
+                          </InputGroup>
                           <FieldError />
-                        </NumberField>
+                        </TextField>
                       )}
                     />
                     <Controller
@@ -526,20 +539,19 @@ export function ItemEditor({
                         //   isClearable
                         // />
 
-                        <NumberField
-                          className="w-full sm:col-span-2"
-                          value={toNumberInputValue(field.value)}
-                          onChange={(value) =>
-                            field.onChange(toFormNumberString(value))
-                          }
-                          isWheelDisabled
-                        >
+                        <TextField className="w-full sm:col-span-2">
                           <Label>Qty</Label>
-                          <NumberField.Group>
-                            <NumberField.Input placeholder="1" type="number" />
-                          </NumberField.Group>
+                          <Input
+                            variant="secondary"
+                            placeholder="1"
+                            type="number"
+                            inputMode="numeric"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                          />
                           <FieldError />
-                        </NumberField>
+                        </TextField>
                       )}
                     />
                   </div>
@@ -567,7 +579,7 @@ export function ItemEditor({
           isDisabled={!canAddItem}
           className="self-start"
         >
-          <IconPlus size={12} />
+          <IconPlus />
           Add Item
         </Button>
 
@@ -575,7 +587,7 @@ export function ItemEditor({
 
         {/* Totals */}
         <div className="space-y-3">
-          <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
+          <Surface variant="secondary" className="rounded-lg p-2 text-center">
             <TypographyCaption>Subtotal</TypographyCaption>
             <TypographySubsectionTitle>
               {formatCurrency({
@@ -584,7 +596,7 @@ export function ItemEditor({
                 decimal: 2,
               })}
             </TypographySubsectionTitle>
-          </div>
+          </Surface>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -647,21 +659,62 @@ export function ItemEditor({
                     //   isWheelDisabled
                     // />
 
-                    // to-do
-                    <NumberField
-                      className="w-full sm:col-span-2"
-                      value={toNumberInputValue(field.value)}
-                      onChange={(value) =>
-                        field.onChange(toFormNumberString(value))
-                      }
-                      isWheelDisabled
-                    >
-                      <Label>Qty</Label>
-                      <NumberField.Group>
-                        <NumberField.Input placeholder="1" type="number" />
-                      </NumberField.Group>
+                    <TextField className="w-full sm:col-span-4">
+                      <Label>
+                        {watchedTaxMode === '%' ? 'Tax (% of subtotal)' : 'Tax'}
+                      </Label>
+                      <InputGroup variant="secondary">
+                        <InputGroup.Prefix>
+                          <TypographyOverline>
+                            {watchedTaxMode === '$' ? currencySymbol : '%'}
+                          </TypographyOverline>
+                        </InputGroup.Prefix>
+                        <InputGroup.Input
+                          placeholder="0.00"
+                          type="number"
+                          inputMode="decimal"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <InputGroup.Suffix>
+                          <div
+                            className="flex items-center"
+                            onMouseDown={(event) => event.stopPropagation()}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <ModeDropdown
+                              mode={watchedTaxMode}
+                              currencySymbol={currencySymbol}
+                              ariaLabel="Tax mode"
+                              onChange={(mode) =>
+                                setValue('taxMode', mode, {
+                                  shouldTouch: true,
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                })
+                              }
+                            />
+                          </div>
+                        </InputGroup.Suffix>
+                      </InputGroup>
                       <FieldError />
-                    </NumberField>
+                    </TextField>
+
+                    // <NumberField
+                    //   className="w-full sm:col-span-2"
+                    //   value={toNumberInputValue(field.value)}
+                    //   onChange={(value) =>
+                    //     field.onChange(toFormNumberString(value))
+                    //   }
+                    //   isWheelDisabled
+                    // >
+                    //   <Label>Qty</Label>
+                    //   <NumberField.Group>
+                    //     <NumberField.Input placeholder="1" type="number" />
+                    //   </NumberField.Group>
+                    //   <FieldError />
+                    // </NumberField>
                   )}
                 />
               </div>
@@ -745,21 +798,49 @@ export function ItemEditor({
                     //   isWheelDisabled
                     // />
 
-                    // to-do
-                    <NumberField
-                      className="w-full sm:col-span-2"
-                      value={toNumberInputValue(field.value)}
-                      onChange={(value) =>
-                        field.onChange(toFormNumberString(value))
-                      }
-                      isWheelDisabled
-                    >
-                      <Label>Qty</Label>
-                      <NumberField.Group>
-                        <NumberField.Input placeholder="1" type="number" />
-                      </NumberField.Group>
+                    <TextField className="w-full sm:col-span-4">
+                      <Label>
+                        {watchedTipMode === '%'
+                          ? 'Service Charge/Tip (% of subtotal)'
+                          : 'Service Charge/Tip'}
+                      </Label>
+                      <InputGroup variant="secondary">
+                        <InputGroup.Prefix>
+                          <TypographyOverline>
+                            {watchedTipMode === '$' ? currencySymbol : '%'}
+                          </TypographyOverline>
+                        </InputGroup.Prefix>
+                        <InputGroup.Input
+                          placeholder="0.00"
+                          type="number"
+                          inputMode="decimal"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <InputGroup.Suffix>
+                          <div
+                            className="flex items-center"
+                            onMouseDown={(event) => event.stopPropagation()}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <ModeDropdown
+                              mode={watchedTipMode}
+                              currencySymbol={currencySymbol}
+                              ariaLabel="Tip mode"
+                              onChange={(mode) =>
+                                setValue('tipMode', mode, {
+                                  shouldTouch: true,
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                })
+                              }
+                            />
+                          </div>
+                        </InputGroup.Suffix>
+                      </InputGroup>
                       <FieldError />
-                    </NumberField>
+                    </TextField>
                   )}
                 />
               </div>
@@ -782,7 +863,7 @@ export function ItemEditor({
             </div>
           </div>
 
-          <div className="bg-surface w-full rounded-lg px-3 py-2 text-center">
+          <Surface variant="secondary" className="rounded-lg p-2 text-center">
             <TypographyCaption>Total</TypographyCaption>
             <TypographySectionTitle>
               {formatCurrency({
@@ -791,13 +872,14 @@ export function ItemEditor({
                 decimal: 2,
               })}
             </TypographySectionTitle>
-          </div>
+          </Surface>
         </div>
 
         <Button
           size="lg"
-          onPress={() => rhfHandleSubmit(onFormSubmit)()}
+          onPress={() => handleSubmit(onFormSubmit)()}
           isPending={isSubmitting}
+          fullWidth
         >
           {submitLabel}
         </Button>
@@ -808,7 +890,7 @@ export function ItemEditor({
         onOpenChange={cancelRemoveItem}
       >
         <Modal.Container>
-          <Modal.Dialog>
+          <Modal.Dialog aria-label="Remove item confirmation">
             {({ close }) => (
               <>
                 <Modal.Header>Remove item?</Modal.Header>
@@ -816,7 +898,7 @@ export function ItemEditor({
                   <p>
                     This will remove{' '}
                     {removeIndex !== null
-                      ? watchedItems[removeIndex]?.name?.trim() ||
+                      ? watchedItems[removeIndex]?.name?.trim().toLowerCase() ||
                         `Item ${removeIndex + 1}`
                       : ''}
                     . Continue?

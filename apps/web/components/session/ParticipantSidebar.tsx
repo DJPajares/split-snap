@@ -164,7 +164,7 @@ export function ParticipantSidebar({
                 {/* Trigger */}
                 <Button
                   variant="ghost"
-                  className={`flex w-full items-center justify-between rounded-2xl px-4 py-8 transition-colors ${
+                  className={`flex items-center justify-between rounded-2xl px-4 py-8 transition-colors ${
                     isCurrentUser
                       ? 'bg-accent/10'
                       : isKickable
@@ -177,6 +177,7 @@ export function ParticipantSidebar({
                     }
                   }}
                   isPending={isKicking}
+                  fullWidth
                 >
                   <div className="inline-flex items-center gap-2">
                     <Avatar size="sm">

@@ -27,6 +27,10 @@ interface MockInputProps {
   onBlur?: () => void;
   [key: string]: unknown;
 }
+interface MockInputGroupProps {
+  children: ReactNode;
+  [key: string]: unknown;
+}
 interface MockSelectProps {
   children: ReactNode;
   [key: string]: unknown;
@@ -51,6 +55,7 @@ vi.mock('@heroui/react', () => ({
   CardHeader: ({ children }: MockChildrenProps) => <div>{children}</div>,
   Separator: () => <hr />,
   FieldError: () => null,
+  Surface: ({ children }: MockChildrenProps) => <div>{children}</div>,
   Label: ({ children }: MockChildrenProps) => <span>{children}</span>,
   TextField: ({ children }: MockChildrenProps) => <div>{children}</div>,
   Button: ({ children, onPress, isDisabled, ...rest }: MockButtonProps) => (
@@ -69,6 +74,20 @@ vi.mock('@heroui/react', () => ({
       onChange={(e) => onChange?.(e.target.value)}
     />
   ),
+  InputGroup: Object.assign(
+    ({ children }: MockInputGroupProps) => <div>{children}</div>,
+    {
+      Prefix: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Input: ({ value, onChange, placeholder }: MockInputProps) => (
+        <input
+          value={value ?? ''}
+          placeholder={placeholder}
+          onChange={(e) => onChange?.(e.target.value)}
+        />
+      ),
+      Suffix: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    },
+  ),
   NumberField: Object.assign(
     ({ children }: MockChildrenProps) => <div>{children}</div>,
     {
@@ -81,6 +100,9 @@ vi.mock('@heroui/react', () => ({
   Select: Object.assign(
     ({ children }: MockSelectProps) => <div>{children}</div>,
     {
+      Trigger: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Value: () => <span />,
+      Indicator: () => <span />,
       Popover: ({ children }: MockChildrenProps) => <div>{children}</div>,
     },
   ),
@@ -94,9 +116,11 @@ vi.mock('@heroui/react', () => ({
   Dropdown: Object.assign(
     ({ children }: MockChildrenProps) => <div>{children}</div>,
     {
+      Trigger: ({ children }: MockChildrenProps) => <div>{children}</div>,
       Popover: ({ children }: MockChildrenProps) => <div>{children}</div>,
       Menu: ({ children }: MockChildrenProps) => <div>{children}</div>,
       Item: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      ItemIndicator: () => <span />,
     },
   ),
   Modal: Object.assign(({ children }: MockModalProps) => <>{children}</>, {
@@ -225,7 +249,7 @@ describe('ItemEditor', () => {
     await user.click(removeButtons[0]);
 
     const modal = screen.getByTestId('modal');
-    expect(within(modal).getByText(/Burger/)).toBeInTheDocument();
+    expect(within(modal).getByText(/burger/)).toBeInTheDocument();
   });
 
   it('shows remove confirmation modal with fallback text for unnamed items', async () => {

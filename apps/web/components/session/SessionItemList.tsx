@@ -63,7 +63,7 @@ export function SessionItemList({
             isDisabled={isSettled || allItemsLoading}
             onChange={handleToggleAll}
           >
-            <Checkbox.Control className="rounded-xl">
+            <Checkbox.Control>
               <Checkbox.Indicator />
             </Checkbox.Control>
             <Checkbox.Content>
@@ -108,7 +108,7 @@ export function SessionItemList({
                       isDisabled={isSettled || isLoading}
                       onChange={() => handleClaimToggle(item.id)}
                     >
-                      <Checkbox.Control className="size-6 rounded-2xl">
+                      <Checkbox.Control className="size-6">
                         <Checkbox.Indicator />
                       </Checkbox.Control>
                     </Checkbox>
