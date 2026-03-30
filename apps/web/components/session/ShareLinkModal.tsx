@@ -32,53 +32,51 @@ export function ShareLinkModal({
   };
 
   return (
-    <Modal>
-      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
-        <Modal.Container placement="center">
-          <Modal.Dialog>
-            {({ close }) => (
-              <>
-                <Modal.CloseTrigger />
-                <Modal.Header>
-                  <Modal.Heading>Share This Session</Modal.Heading>
-                </Modal.Header>
-                <Modal.Body>
-                  <div className="gap-6">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="rounded-xl bg-white p-4">
-                        <QRCodeSVG value={shareUrl} size={200} level="M" />
-                      </div>
-                      <TypographyMuted className="text-center">
-                        Scan this QR code or share the link below
-                      </TypographyMuted>
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal.Container placement="center">
+        <Modal.Dialog>
+          {({ close }) => (
+            <>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>Share This Session</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="gap-6">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="rounded-xl bg-white p-4">
+                      <QRCodeSVG value={shareUrl} size={200} level="M" />
                     </div>
-
-                    <div className="flex gap-2">
-                      <Input value={shareUrl} className="flex-1" readOnly />
-                      <Button
-                        size="sm"
-                        onPress={() => {
-                          copyLink();
-                          close();
-                        }}
-                      >
-                        Copy
-                      </Button>
-                    </div>
-
-                    <div className="text-center">
-                      <p className="font-mono text-lg font-bold tracking-widest">
-                        {sessionCode}
-                      </p>
-                      <TypographyCaption>Session Code</TypographyCaption>
-                    </div>
+                    <TypographyMuted className="text-center">
+                      Scan this QR code or share the link below
+                    </TypographyMuted>
                   </div>
-                </Modal.Body>
-              </>
-            )}
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+
+                  <div className="flex gap-2">
+                    <Input value={shareUrl} className="flex-1" readOnly />
+                    <Button
+                      size="sm"
+                      onPress={() => {
+                        copyLink();
+                        close();
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="font-mono text-lg font-bold tracking-widest">
+                      {sessionCode}
+                    </p>
+                    <TypographyCaption>Session Code</TypographyCaption>
+                  </div>
+                </div>
+              </Modal.Body>
+            </>
+          )}
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }

@@ -76,42 +76,37 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
     <ErrorModalContext.Provider value={{ showErrorModal }}>
       {children}
 
-      <Modal>
-        <Modal.Backdrop
-          isOpen={modal !== null}
-          onOpenChange={(open) => {
-            if (!open) handleClose();
-          }}
-          isDismissable={false}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              {() => (
-                <>
-                  <Modal.Header className="flex items-center gap-2">
-                    <IconAlertTriangleFilled
-                      size={20}
-                      className="text-warning"
-                    />
-                    {modal?.title}
-                  </Modal.Header>
-                  <Modal.Body>
-                    <TypographyMuted className="text-base">
-                      {modal?.message}
-                    </TypographyMuted>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button onPress={handleClose}>
-                      {modal?.options?.actionLabel ??
-                        (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <Modal.Backdrop
+        isOpen={modal !== null}
+        onOpenChange={(open) => {
+          if (!open) handleClose();
+        }}
+        isDismissable={false}
+      >
+        <Modal.Container>
+          <Modal.Dialog>
+            {() => (
+              <>
+                <Modal.Header className="flex items-center gap-2">
+                  <IconAlertTriangleFilled size={20} className="text-warning" />
+                  {modal?.title}
+                </Modal.Header>
+                <Modal.Body>
+                  <TypographyMuted className="text-base">
+                    {modal?.message}
+                  </TypographyMuted>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button onPress={handleClose}>
+                    {modal?.options?.actionLabel ??
+                      (modal?.options?.redirectTo ? 'Go Home' : 'OK')}
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </ErrorModalContext.Provider>
   );
 }

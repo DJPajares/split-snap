@@ -803,52 +803,50 @@ export function ItemEditor({
         </Button>
       </Card.Content>
 
-      <Modal>
-        <Modal.Backdrop
-          isOpen={removeIndex !== null}
-          onOpenChange={cancelRemoveItem}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.Header>Remove item?</Modal.Header>
-                  <Modal.Body>
-                    <p>
-                      This will remove{' '}
-                      {removeIndex !== null
-                        ? watchedItems[removeIndex]?.name?.trim() ||
-                          `Item ${removeIndex + 1}`
-                        : ''}
-                      . Continue?
-                    </p>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button
-                      variant="tertiary"
-                      onPress={() => {
-                        cancelRemoveItem();
-                        close();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onPress={() => {
-                        confirmRemoveItem();
-                        close();
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <Modal.Backdrop
+        isOpen={removeIndex !== null}
+        onOpenChange={cancelRemoveItem}
+      >
+        <Modal.Container>
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.Header>Remove item?</Modal.Header>
+                <Modal.Body>
+                  <p>
+                    This will remove{' '}
+                    {removeIndex !== null
+                      ? watchedItems[removeIndex]?.name?.trim() ||
+                        `Item ${removeIndex + 1}`
+                      : ''}
+                    . Continue?
+                  </p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="tertiary"
+                    onPress={() => {
+                      cancelRemoveItem();
+                      close();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onPress={() => {
+                      confirmRemoveItem();
+                      close();
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Card>
   );
 }

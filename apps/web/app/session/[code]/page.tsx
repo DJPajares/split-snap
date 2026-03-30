@@ -543,77 +543,73 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       />
 
       {/* Settle confirmation modal */}
-      <Modal>
-        <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
-          <Modal.Container>
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.Header>Settle Session</Modal.Header>
-                  <Modal.Body>
-                    <p>Finalize this session now?</p>
-                    <TypographyMuted>
-                      Participants will no longer be able to claim or unclaim
-                      items until you undo settlement.
-                    </TypographyMuted>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="tertiary" onPress={close}>
-                      Cancel
-                    </Button>
-                    <Button
-                      isPending={settleLoading}
-                      onPress={async () => {
-                        await handleSettle();
-                        close();
-                      }}
-                    >
-                      Confirm Settle
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
+        <Modal.Container>
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.Header>Settle Session</Modal.Header>
+                <Modal.Body>
+                  <p>Finalize this session now?</p>
+                  <TypographyMuted>
+                    Participants will no longer be able to claim or unclaim
+                    items until you undo settlement.
+                  </TypographyMuted>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="tertiary" onPress={close}>
+                    Cancel
+                  </Button>
+                  <Button
+                    isPending={settleLoading}
+                    onPress={async () => {
+                      await handleSettle();
+                      close();
+                    }}
+                  >
+                    Confirm Settle
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
 
       {/* Delete confirmation modal */}
-      <Modal>
-        <Modal.Backdrop isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
-          <Modal.Container>
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.Header>Delete Session</Modal.Header>
-                  <Modal.Body>
-                    <p>Are you sure you want to delete this session?</p>
-                    <TypographyMuted>
-                      This will permanently remove the session and disconnect
-                      all participants. This action cannot be undone.
-                    </TypographyMuted>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="tertiary" onPress={close}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="danger"
-                      isPending={deleteLoading}
-                      onPress={async () => {
-                        await handleDelete();
-                        close();
-                      }}
-                    >
-                      Delete Session
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <Modal.Backdrop isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
+        <Modal.Container>
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.Header>Delete Session</Modal.Header>
+                <Modal.Body>
+                  <p>Are you sure you want to delete this session?</p>
+                  <TypographyMuted>
+                    This will permanently remove the session and disconnect all
+                    participants. This action cannot be undone.
+                  </TypographyMuted>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="tertiary" onPress={close}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    isPending={deleteLoading}
+                    onPress={async () => {
+                      await handleDelete();
+                      close();
+                    }}
+                  >
+                    Delete Session
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   );
 }
