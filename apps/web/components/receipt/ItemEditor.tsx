@@ -107,7 +107,7 @@ const ModeDropdown = ({
       </div>
     </Dropdown.Trigger>
     {/* Menu */}
-    <Dropdown.Popover className="min-w-32">
+    <Dropdown.Popover className="min-w-32" aria-label="Select amount mode">
       <Dropdown.Menu
         aria-label={ariaLabel}
         selectionMode="single"
@@ -340,7 +340,10 @@ export function ItemEditor({
 
   return (
     <Card>
-      <Form onSubmit={handleSubmit(onFormSubmit)}>
+      <Form
+        onSubmit={handleSubmit(onFormSubmit)}
+        className="flex flex-col gap-4"
+      >
         <CardHeader className="flex flex-col items-start gap-2">
           <TypographyCardTitle>Review Items</TypographyCardTitle>
           <TypographyMuted>
@@ -354,6 +357,7 @@ export function ItemEditor({
               <Select
                 variant="secondary"
                 placeholder="Select currency"
+                aria-label="Currency selection"
                 name={field.name}
                 value={field.value}
                 onChange={(key) => {
@@ -390,7 +394,7 @@ export function ItemEditor({
 
         <Separator />
 
-        <Card.Content className="gap-5">
+        <Card.Content className="gap-4">
           {/* Receipt reference image */}
           {receiptImageUrl && (
             <ReceiptImage receiptImageUrl={receiptImageUrl} />
