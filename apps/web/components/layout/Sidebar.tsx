@@ -1,6 +1,7 @@
-import { Description, Drawer, Link } from '@heroui/react';
+import { Description, Drawer } from '@heroui/react';
 import { APP } from '@split-snap/shared/constants';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 import packageInfo from '@/package.json';
@@ -25,7 +26,11 @@ export default function Sidebar({
         <Drawer.Dialog>
           <Drawer.Header>
             <Drawer.Heading>
-              <Link href="/" className="flex items-center gap-2 no-underline">
+              <Link
+                href="/"
+                className="flex items-center gap-2 no-underline"
+                onClick={() => setIsOpen(false)}
+              >
                 <Image
                   src="/logo.png"
                   alt={`${APP.NAME} logo`}
@@ -44,23 +49,22 @@ export default function Sidebar({
             <p className="">Menu</p>
             <nav className="flex flex-col gap-1">
               {menuItems.map((item) => (
-                <button
+                <Link
                   key={item.label}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
                   className="text-foreground hover:bg-default flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors"
-                  type="button"
                 >
-                  <Link
-                    key={item.label}
-                    href={item.href}
+                  <span
                     className={cn(
-                      'w-full gap-2 no-underline',
+                      'flex w-full items-center gap-2 no-underline',
                       item.isActive && 'text-accent font-medium',
                     )}
                   >
                     {item.icon}
                     {item.label}
-                  </Link>
-                </button>
+                  </span>
+                </Link>
               ))}
             </nav>
           </Drawer.Body>

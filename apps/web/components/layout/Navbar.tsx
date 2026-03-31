@@ -1,7 +1,7 @@
 'use client';
 
-import { Link } from '@heroui/react';
 import { IconMenu2 } from '@tabler/icons-react';
+import Link from 'next/link';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils';
