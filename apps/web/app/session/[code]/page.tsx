@@ -51,6 +51,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const isDeletingSession = useRef(false);
 
   const {
     isOpen: isSettleOpen,
@@ -152,6 +153,10 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       }
     },
     onDeleted: () => {
+      if (isDeletingSession.current) {
+        return;
+      }
+
       toast.warning('Session deleted', {
         description: 'This session was deleted by the host.',
       });
@@ -367,11 +372,14 @@ export default function SessionPage({ params }: ParamsCodeProps) {
 
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
+    isDeletingSession.current = true;
+
     try {
       await api.sessions.delete(normalizedCode);
       toast.success('Session deleted');
-      router.push('/');
+      router.replace('/');
     } catch (err) {
+      isDeletingSession.current = false;
       handleError(err, 'Failed to delete session');
     } finally {
       setDeleteLoading(false);
@@ -597,10 +605,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                   <Button
                     variant="danger"
                     isPending={deleteLoading}
-                    onPress={async () => {
-                      await handleDelete();
-                      close();
-                    }}
+                    onPress={handleDelete}
                   >
                     Delete Session
                   </Button>
