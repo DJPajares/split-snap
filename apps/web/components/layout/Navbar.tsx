@@ -4,7 +4,7 @@ import { Link } from '@heroui/react';
 import { IconMenu2 } from '@tabler/icons-react';
 import { ReactNode, useEffect, useState } from 'react';
 
-import { cn } from '@/lib/utils'; // or your cn utility
+import { cn } from '@/lib/utils';
 
 import { TypographySubsectionTitle } from '../shared/Typography';
 import Sidebar from './Sidebar';
@@ -117,11 +117,13 @@ export function Navbar({
                   href={item.href}
                   className={cn(
                     'no-underline',
-                    item.isActive && 'text-accent font-medium',
+                    item.isActive && 'text-accent font-bold',
                   )}
                   aria-current={item.isActive ? 'page' : undefined}
                 >
-                  {item.label}
+                  <TypographySubsectionTitle>
+                    {item.label}
+                  </TypographySubsectionTitle>
                 </Link>
               </li>
             ))}

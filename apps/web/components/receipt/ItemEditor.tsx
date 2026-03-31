@@ -437,12 +437,13 @@ export function ItemEditor({
                       Item {i + 1}
                     </TypographyCaption>
                     <Button
-                      isIconOnly
-                      variant="danger-soft"
+                      variant="ghost"
                       size="sm"
                       onPress={() => requestRemoveItem(i)}
                       isDisabled={fields.length <= 1}
                       aria-label="Remove item"
+                      className="text-danger"
+                      isIconOnly
                     >
                       <IconX />
                     </Button>
