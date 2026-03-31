@@ -70,7 +70,7 @@ export function NavbarDropdownMenu() {
           </Avatar>
         )}
       </Dropdown.Trigger>
-      <Dropdown.Popover className="min-w-40">
+      <Dropdown.Popover className="w-max max-w-[calc(100vw-2rem)] min-w-40 overflow-hidden">
         {/* User Info */}
         {user && (
           <div className="flex items-center gap-3 p-3">
@@ -80,9 +80,13 @@ export function NavbarDropdownMenu() {
                 <IconUserFilled size={20} />
               </Avatar.Fallback>
             </Avatar>
-            <div className="flex flex-col gap-0">
-              <TypographyLabel>{user?.name}</TypographyLabel>
-              <TypographyCaption>{user?.email}</TypographyCaption>
+            <div className="flex min-w-0 flex-1 flex-col gap-0">
+              <TypographyLabel className="max-w-full wrap-anywhere">
+                {user?.name}
+              </TypographyLabel>
+              <TypographyCaption className="max-w-full wrap-anywhere">
+                {user?.email}
+              </TypographyCaption>
             </div>
           </div>
         )}
