@@ -84,7 +84,7 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
         isDismissable={false}
       >
         <Modal.Container>
-          <Modal.Dialog>
+          <Modal.Dialog aria-label="Error Modal">
             {() => (
               <>
                 <Modal.Header className="flex items-center gap-2">

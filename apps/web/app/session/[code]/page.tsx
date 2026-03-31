@@ -545,7 +545,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       {/* Settle confirmation modal */}
       <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
         <Modal.Container>
-          <Modal.Dialog>
+          <Modal.Dialog aria-label="Settle Session Confirmation">
             {({ close }) => (
               <>
                 <Modal.Header>Settle Session</Modal.Header>
@@ -579,7 +579,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       {/* Delete confirmation modal */}
       <Modal.Backdrop isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
         <Modal.Container>
-          <Modal.Dialog>
+          <Modal.Dialog aria-label="Delete Session Confirmation">
             {({ close }) => (
               <>
                 <Modal.Header>Delete Session</Modal.Header>

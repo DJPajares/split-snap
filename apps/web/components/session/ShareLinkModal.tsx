@@ -34,7 +34,7 @@ export function ShareLinkModal({
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
       <Modal.Container placement="center">
-        <Modal.Dialog>
+        <Modal.Dialog aria-label="Share This Session">
           {({ close }) => (
             <>
               <Modal.CloseTrigger />
