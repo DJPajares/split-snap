@@ -76,7 +76,7 @@ export function Navbar({
     <>
       <nav
         className={cn(
-          'bg-background/70 z-40 w-full backdrop-blur-lg transition-transform duration-300',
+          'bg-background/70 z-40 w-full shrink-0 backdrop-blur-lg transition-transform duration-300 ease-linear',
           position === 'sticky' && 'sticky top-0',
           position === 'fixed' && 'fixed top-0',
           position === 'hide-on-scroll' && 'sticky top-0',
@@ -86,13 +86,13 @@ export function Navbar({
       >
         <header
           className={cn(
-            'flex h-16 items-center justify-between px-6',
+            'relative flex h-16 items-center justify-between px-6',
             maxWidth !== 'full' && maxWidthClasses[maxWidth],
             'mx-auto',
           )}
         >
           {/* Left side (brand and menu button) */}
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label="Toggle menu"
@@ -115,7 +115,7 @@ export function Navbar({
           </div>
 
           {/* Header menu */}
-          <ul className="hidden items-center gap-4 sm:flex">
+          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-4 sm:flex">
             {items.map((item) => (
               <li key={item.href}>
                 <Link
