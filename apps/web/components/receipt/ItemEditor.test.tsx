@@ -17,6 +17,7 @@ interface MockButtonProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   isIconOnly?: boolean;
+  type?: 'button' | 'submit' | 'reset';
   'aria-label'?: string;
   [key: string]: unknown;
 }
@@ -54,12 +55,34 @@ vi.mock('@heroui/react', () => ({
   ),
   CardHeader: ({ children }: MockChildrenProps) => <div>{children}</div>,
   Separator: () => <hr />,
-  FieldError: () => null,
+  FieldError: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Form: ({
+    children,
+    onSubmit,
+  }: MockChildrenProps & {
+    onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
+  }) => (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit?.(event);
+      }}
+    >
+      {children}
+    </form>
+  ),
   Surface: ({ children }: MockChildrenProps) => <div>{children}</div>,
   Label: ({ children }: MockChildrenProps) => <span>{children}</span>,
   TextField: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  Button: ({ children, onPress, isDisabled, ...rest }: MockButtonProps) => (
+  Button: ({
+    children,
+    onPress,
+    isDisabled,
+    type,
+    ...rest
+  }: MockButtonProps) => (
     <button
+      type={type}
       onClick={onPress}
       disabled={isDisabled}
       aria-label={rest['aria-label']}
@@ -346,5 +369,19 @@ describe('ItemEditor', () => {
         currency: 'USD',
       }),
     );
+  });
+
+  it('renders field errors after submit through FieldError', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ItemEditor {...defaultProps} onSubmit={onSubmit} />);
+
+    await user.click(screen.getByRole('button', { name: 'Create Session' }));
+
+    expect(
+      await screen.findByText('Item name is required'),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Amount is required')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });
