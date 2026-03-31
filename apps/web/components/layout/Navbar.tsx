@@ -2,7 +2,7 @@
 
 import { IconMenu2 } from '@tabler/icons-react';
 import Link from 'next/link';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -42,16 +42,22 @@ const maxWidthClasses = {
 
 function useScrollDirection() {
   const [isHidden, setIsHidden] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
+
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsHidden(currentScrollY > lastScrollY && currentScrollY > 64);
-      setLastScrollY(currentScrollY);
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const isScrollingDown = currentScrollY > lastScrollYRef.current;
+
+      setIsHidden(isScrollingDown && currentScrollY > 64);
+      lastScrollYRef.current = currentScrollY;
     };
+
+    lastScrollYRef.current = window.scrollY;
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
+
   return isHidden;
 }
 
@@ -73,9 +79,8 @@ export function Navbar({
           'bg-background/70 z-40 w-full backdrop-blur-lg transition-transform duration-300',
           position === 'sticky' && 'sticky top-0',
           position === 'fixed' && 'fixed top-0',
-          position === 'hide-on-scroll' &&
-            isHidden &&
-            'sticky top-0 -translate-y-full',
+          position === 'hide-on-scroll' && 'sticky top-0',
+          position === 'hide-on-scroll' && isHidden && '-translate-y-full',
           className,
         )}
       >
