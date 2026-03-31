@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 onClick={() => router.push(`/session/${session.code}`)}
               >
                 <Card.Content className="flex flex-row items-center justify-between gap-4">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 text-start">
                     <div className="flex items-center gap-2">
                       <TypographySubsectionTitle>
                         {session.code}
