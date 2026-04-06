@@ -1,6 +1,6 @@
 'use client';
 
-import { addToast, Button, Spinner } from '@heroui/react';
+import { Button, Spinner, toast } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type {
   ParamsCodeProps,
@@ -12,6 +12,10 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
 import { ItemEditor } from '@/components/receipt/ItemEditor';
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -122,7 +126,7 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
         currency: data.currency,
       });
 
-      addToast({ title: 'Items updated!', color: 'success' });
+      toast.success('Items updated!');
       router.push(`/session/${normalizedCode}`);
     } catch (err) {
       handleError(err, 'Failed to update items');
@@ -165,22 +169,24 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-3">
           <div className="flex flex-col">
-            <h3 className="title-section">Edit Items</h3>
-            <p className="text-description-lg">Session {code}</p>
+            <TypographySectionTitle>Edit Items</TypographySectionTitle>
+            <TypographyMuted className="text-base">
+              Session {code}
+            </TypographyMuted>
           </div>
           <Button
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<IconArrowBigLeft size={16} />}
             onPress={() => router.push(`/session/${normalizedCode}`)}
           >
+            <IconArrowBigLeft size={16} />
             Back
           </Button>
         </div>
-        <p className="text-description">
+        <TypographyMuted>
           Modify items, prices, or quantities. Claims on changed items will be
           cleared.
-        </p>
+        </TypographyMuted>
       </div>
 
       <ItemEditor

@@ -1,13 +1,19 @@
-import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
+import { Card, CardHeader, Separator } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import type { PersonSummary } from '@split-snap/shared/types';
 
-type PersonSummaryCardProps = {
+import {
+  TypographyCardTitle,
+  TypographyMuted,
+  TypographySubsectionTitle,
+} from '@/components/shared/Typography';
+
+type SummaryCardProps = {
   summary: PersonSummary;
   currency: string;
 };
 
-const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
+const SummaryCard = ({ summary, currency }: SummaryCardProps) => {
   const quantityFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -58,26 +64,28 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
     <Card>
       <CardHeader>
         <div className="flex w-full items-center justify-between">
-          <h5 className="title-subsection">{summary.displayName}</h5>
-          <h4 className="title-card text-primary">
+          <TypographySubsectionTitle>
+            {summary.displayName}
+          </TypographySubsectionTitle>
+          <TypographyCardTitle className="text-accent">
             {formatCurrency({
               value: summary.total,
               currency,
               decimal: 2,
             })}
-          </h4>
+          </TypographyCardTitle>
         </div>
       </CardHeader>
 
-      <Divider />
+      <Separator />
 
-      <CardBody className="gap-2">
+      <Card.Content className="gap-2">
         {summary.items.map((item, i) => (
           <div key={i} className="flex justify-between">
-            <p className="text-description-lg">
+            <TypographyMuted>
               {item.name}
               {getItemQuantityLabel(item.claimedQuantity)}
-            </p>
+            </TypographyMuted>
             <p>
               {formatCurrency({
                 value: item.amount,
@@ -88,10 +96,10 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
           </div>
         ))}
 
-        {summary.items.length > 0 && <Divider className="my-1" />}
+        {summary.items.length > 0 && <Separator className="my-1" />}
 
         <div className="flex justify-between">
-          <span className="text-description-lg">Items subtotal</span>
+          <TypographyMuted>Items subtotal</TypographyMuted>
           <span>
             {formatCurrency({
               value: summary.itemsSubtotal,
@@ -101,7 +109,7 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-description-lg">Tax (share)</span>
+          <TypographyMuted>Tax (share)</TypographyMuted>
           <span>
             {formatCurrency({
               value: summary.taxShare,
@@ -111,9 +119,7 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-description-lg">
-            Service Charge/Tip (share)
-          </span>
+          <TypographyMuted>Service Charge/Tip (share)</TypographyMuted>
           <span>
             {formatCurrency({
               value: summary.tipShare,
@@ -122,9 +128,9 @@ const PersonSummaryCard = ({ summary, currency }: PersonSummaryCardProps) => {
             })}
           </span>
         </div>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 };
 
-export default PersonSummaryCard;
+export default SummaryCard;

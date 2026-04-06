@@ -1,6 +1,6 @@
 'use client';
 
-import { addToast } from '@heroui/react';
+import { toast } from '@heroui/react';
 import { useCallback } from 'react';
 
 import { useErrorModal } from '@/components/error/error-modal-context';
@@ -36,10 +36,8 @@ export function useApiError(options?: UseApiErrorOptions) {
             ? err.message
             : 'An unexpected error occurred';
 
-      addToast({
-        title: toastTitle ?? 'Error',
+      toast.danger(toastTitle ?? 'Error', {
         description: message,
-        color: 'danger',
       });
     },
     [showErrorModal, options?.redirectTo],

@@ -1,21 +1,20 @@
 'use client';
 
 import {
+  Avatar,
   Button,
   Card,
-  CardBody,
   Chip,
-  Divider,
   Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Separator,
   Spinner,
-  User as UserAvatar,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
 import type { Session } from '@split-snap/shared/types';
 import { useState } from 'react';
+
+import { TypographyLabel, TypographyMuted } from '../shared/Typography';
 
 interface ParticipantSidebarProps {
   session: Session;
@@ -81,7 +80,7 @@ export function ParticipantSidebar({
 
   return (
     <Card>
-      <CardBody className="gap-3">
+      <Card.Content className="gap-3">
         {/* Pending participants (only visible to host) */}
         {isCreator &&
           session.pendingParticipants &&
@@ -91,41 +90,43 @@ export function ParticipantSidebar({
                 <p className="text-warning text-sm font-semibold">
                   Pending Requests
                 </p>
-                <Chip size="sm" variant="flat" color="warning">
+                <Chip size="sm" variant="soft" color="warning">
                   {session.pendingParticipants.length}
                 </Chip>
               </div>
               {session.pendingParticipants.map((pending) => (
                 <div
                   key={pending.id}
-                  className="bg-warning/10 flex items-center justify-between rounded-lg p-2"
+                  className="bg-warning/10 flex items-center justify-between rounded-2xl p-2"
                 >
-                  <UserAvatar
-                    name={pending.displayName}
-                    description={pending.isAnonymous ? 'Guest' : 'Member'}
-                    avatarProps={{
-                      name: pending.displayName[0],
-                      size: 'sm',
-                      color: 'warning',
-                    }}
-                  />
+                  <div className="inline-flex items-center gap-2">
+                    <Avatar size="sm">
+                      <Avatar.Fallback className="bg-warning text-warning-foreground">
+                        {pending.displayName[0]}
+                      </Avatar.Fallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <TypographyLabel>{pending.displayName}</TypographyLabel>
+                      <TypographyMuted>
+                        {pending.isAnonymous ? 'Guest' : 'Member'}
+                      </TypographyMuted>
+                    </div>
+                  </div>
                   <div className="flex gap-1">
                     <Button
                       size="sm"
-                      color="success"
-                      variant="flat"
                       onPress={() => handleApprove(pending.id)}
-                      isLoading={approvingId === pending.id}
+                      isPending={approvingId === pending.id}
                       isDisabled={rejectingId === pending.id}
+                      className="bg-success hover:bg-success/90 text-success-foreground"
                     >
                       Accept
                     </Button>
                     <Button
                       size="sm"
-                      color="danger"
-                      variant="flat"
+                      variant="danger"
                       onPress={() => handleReject(pending.id)}
-                      isLoading={rejectingId === pending.id}
+                      isPending={rejectingId === pending.id}
                       isDisabled={approvingId === pending.id}
                     >
                       Reject
@@ -133,14 +134,14 @@ export function ParticipantSidebar({
                   </div>
                 </div>
               ))}
-              <Divider />
+              <Separator />
             </>
           )}
 
         {session.participants.length === 0 ? (
-          <p className="text-description py-4 text-center">
+          <TypographyMuted className="py-4 text-center">
             No one has joined yet. Share the link!
-          </p>
+          </TypographyMuted>
         ) : (
           session.participants.map((participant) => {
             const summary = summaries.find(
@@ -159,90 +160,103 @@ export function ParticipantSidebar({
                 onOpenChange={(open) =>
                   setConfirmId(open ? participant.id : null)
                 }
-                placement="bottom"
-                triggerScaleOnOpen={isKickable ? true : false}
               >
-                <PopoverTrigger>
-                  <div
-                    className={`flex items-center justify-between rounded-lg p-2 transition-colors ${
-                      isCurrentUser
-                        ? 'bg-primary/10'
-                        : isKickable
-                          ? 'hover:bg-danger/10 cursor-pointer'
-                          : ''
-                    }`}
-                    onClick={() => {
-                      if (isKickable && !isKicking) {
-                        setConfirmId(participant.id);
-                      }
-                    }}
-                  >
-                    <UserAvatar
-                      name={participant.displayName}
-                      description={
-                        isParticipantInitiator
+                {/* Trigger */}
+                <Button
+                  variant="ghost"
+                  className={`flex items-center justify-between rounded-2xl px-4 py-8 transition-colors ${
+                    isCurrentUser
+                      ? 'bg-accent/10'
+                      : isKickable
+                        ? 'hover:bg-danger/10 cursor-pointer'
+                        : ''
+                  }`}
+                  onClick={() => {
+                    if (isKickable && !isKicking) {
+                      setConfirmId(participant.id);
+                    }
+                  }}
+                  isPending={isKicking}
+                  fullWidth
+                >
+                  <div className="inline-flex items-center gap-2">
+                    <Avatar size="sm">
+                      <Avatar.Fallback
+                        className={`${
+                          isParticipantInitiator
+                            ? 'bg-warning text-warning-foreground'
+                            : isCurrentUser
+                              ? 'bg-accent text-accent-foreground'
+                              : ''
+                        }`}
+                      >
+                        {participant.displayName[0]}
+                      </Avatar.Fallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <TypographyLabel className="font-semibold">
+                        {participant.displayName}
+                      </TypographyLabel>
+                      <TypographyMuted className="text-xs">
+                        {isParticipantInitiator
                           ? 'Host'
                           : isCurrentUser
                             ? 'You'
                             : participant.isAnonymous
                               ? 'Guest'
-                              : 'Member'
-                      }
-                      avatarProps={{
-                        name: participant.displayName[0],
-                        size: 'sm',
-                        color: isParticipantInitiator
-                          ? 'warning'
-                          : isCurrentUser
-                            ? 'primary'
-                            : 'default',
-                      }}
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">
-                          {formatCurrency({
-                            value: summary?.total ?? 0,
-                            currency: session.currency,
-                            decimal: 2,
-                          })}
-                        </p>
-                        <p className="text-description">
-                          {summary?.items.length ?? 0} items
-                        </p>
-                      </div>
-                      {isKicking && <Spinner size="sm" color="danger" />}
+                              : 'Member'}
+                      </TypographyMuted>
                     </div>
                   </div>
-                </PopoverTrigger>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">
+                        {formatCurrency({
+                          value: summary?.total ?? 0,
+                          currency: session.currency,
+                          decimal: 2,
+                        })}
+                      </p>
+                      <TypographyMuted>
+                        {summary?.items.length ?? 0} items
+                      </TypographyMuted>
+                    </div>
+                    {isKicking && <Spinner size="sm" color="danger" />}
+                  </div>
+                </Button>
+
+                {/* Content */}
                 {isKickable && (
-                  <PopoverContent>
-                    <div className="space-y-2 p-3">
-                      <p className="text-sm font-medium">
+                  <Popover.Content>
+                    <Popover.Arrow />
+                    <Popover.Dialog className="flex flex-col gap-2">
+                      <Popover.Heading>
                         Remove {participant.displayName}?
-                      </p>
-                      <p className="text-description">
+                      </Popover.Heading>
+
+                      <TypographyMuted>
                         All their claims will be removed.
-                      </p>
+                      </TypographyMuted>
+
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
-                          variant="flat"
+                          variant="tertiary"
                           onPress={() => setConfirmId(null)}
                         >
                           Cancel
                         </Button>
                         <Button
                           size="sm"
-                          color="danger"
+                          variant="danger"
                           onPress={() => handleKick(participant.id)}
-                          isLoading={isKicking}
+                          isPending={isKicking}
                         >
                           Remove
                         </Button>
                       </div>
-                    </div>
-                  </PopoverContent>
+                    </Popover.Dialog>
+                  </Popover.Content>
                 )}
               </Popover>
             );
@@ -250,10 +264,11 @@ export function ParticipantSidebar({
         )}
 
         {/* Session totals */}
-        <Divider />
+        <Separator />
+
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-description-lg">Subtotal</span>
+            <TypographyMuted>Subtotal</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.subtotal,
@@ -263,7 +278,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-description-lg">Tax</span>
+            <TypographyMuted>Tax</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.tax,
@@ -273,7 +288,7 @@ export function ParticipantSidebar({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-description-lg">Service Charge/Tip</span>
+            <TypographyMuted>Service Charge/Tip</TypographyMuted>
             <span>
               {formatCurrency({
                 value: session.tip,
@@ -282,7 +297,7 @@ export function ParticipantSidebar({
               })}
             </span>
           </div>
-          <Divider />
+          <Separator />
           <div className="flex justify-between font-bold">
             <span>Total</span>
             <span>
@@ -294,7 +309,7 @@ export function ParticipantSidebar({
             </span>
           </div>
         </div>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

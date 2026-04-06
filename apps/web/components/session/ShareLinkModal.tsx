@@ -1,25 +1,19 @@
 'use client';
 
-import {
-  addToast,
-  Button,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-} from '@heroui/react';
+import { Button, Input, Modal, toast } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
+
+import { TypographyCaption, TypographyMuted } from '../shared/Typography';
 
 interface ShareLinkModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   sessionCode: string;
 }
 
 export function ShareLinkModal({
   isOpen,
-  onClose,
+  onOpenChange,
   sessionCode,
 }: ShareLinkModalProps) {
   const shareUrl =
@@ -30,42 +24,62 @@ export function ShareLinkModal({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      addToast({ title: 'Link copied!', color: 'success' });
-      onClose();
+      onOpenChange(false);
+      toast.success('Link copied!');
     } catch {
-      addToast({ title: 'Failed to copy', color: 'danger' });
+      toast.danger('Failed to copy');
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} placement="center">
-      <ModalContent>
-        <ModalHeader>Share This Session</ModalHeader>
-        <ModalBody className="gap-6">
-          <div className="flex flex-col items-center gap-4">
-            <div className="rounded-xl bg-white p-4">
-              <QRCodeSVG value={shareUrl} size={200} level="M" />
-            </div>
-            <p className="text-description text-center">
-              Scan this QR code or share the link below
-            </p>
-          </div>
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal.Container placement="center">
+        <Modal.Dialog aria-label="Share This Session">
+          {({ close }) => (
+            <>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>Share This Session</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="flex flex-col gap-4 p-2">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="rounded-xl bg-white p-4">
+                    <QRCodeSVG value={shareUrl} size={200} level="M" />
+                  </div>
+                  <TypographyMuted className="text-center">
+                    Scan this QR code or share the link below
+                  </TypographyMuted>
+                </div>
 
-          <div className="flex gap-2">
-            <Input readOnly value={shareUrl} size="sm" className="flex-1" />
-            <Button color="primary" size="sm" onPress={copyLink}>
-              Copy
-            </Button>
-          </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    variant="secondary"
+                    value={shareUrl}
+                    className="flex-1"
+                    readOnly
+                  />
+                  <Button
+                    // size="sm"
+                    onPress={() => {
+                      copyLink();
+                      close();
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
 
-          <div className="text-center">
-            <p className="font-mono text-lg font-bold tracking-widest">
-              {sessionCode}
-            </p>
-            <p className="text-caption">Session Code</p>
-          </div>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                <div className="text-center">
+                  <p className="font-mono text-lg font-bold tracking-widest">
+                    {sessionCode}
+                  </p>
+                  <TypographyCaption>Session Code</TypographyCaption>
+                </div>
+              </Modal.Body>
+            </>
+          )}
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }

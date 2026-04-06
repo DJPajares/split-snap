@@ -1,124 +1,152 @@
 'use client';
 
-import {
-  Avatar,
-  Link,
-  Navbar as HeroNavbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenu,
-  NavbarMenuItem,
-  NavbarMenuToggle,
-} from '@heroui/react';
-import { APP } from '@split-snap/shared/constants';
-import Image from 'next/image';
-import { useState } from 'react';
+import { IconMenu2 } from '@tabler/icons-react';
+import Link from 'next/link';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
-import { NavbarDropdownMenu } from './NavbarDropdownMenu';
+import { TypographySubsectionTitle } from '../shared/Typography';
+import Sidebar from './Sidebar';
 
-export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+export type MenuItemsProps = {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  isActive?: boolean;
+};
+
+export type BrandProps = {
+  name: string;
+  logo?: React.ReactNode;
+  href?: string;
+};
+
+type NavbarProps = {
+  brand: BrandProps;
+  items: MenuItemsProps[];
+  rightContent?: ReactNode;
+  className?: string;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  position?: 'static' | 'sticky' | 'fixed' | 'hide-on-scroll';
+};
+
+const maxWidthClasses = {
+  sm: 'max-w-[640px]',
+  md: 'max-w-[768px]',
+  lg: 'max-w-[1024px]',
+  xl: 'max-w-[1280px]',
+  '2xl': 'max-w-[1536px]',
+  full: 'max-w-full',
+};
+
+function useScrollDirection() {
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const isScrollingDown = currentScrollY > lastScrollYRef.current;
+
+      setIsHidden(isScrollingDown && currentScrollY > 64);
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    lastScrollYRef.current = window.scrollY;
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return isHidden;
+}
+
+export function Navbar({
+  brand,
+  items,
+  rightContent,
+  className,
+  maxWidth = 'lg',
+  position = 'hide-on-scroll',
+}: NavbarProps) {
+  const isHidden = useScrollDirection();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <HeroNavbar
-      isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
-      maxWidth="full"
-      isBordered
-    >
-      <NavbarContent>
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="sm:hidden"
-        />
-        <NavbarBrand>
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt={`${APP.NAME} logo`}
-              width={28}
-              height={28}
-              className="rounded-md"
-              priority
-            />
-            <h4 className="title-card">{APP.NAME}</h4>
-          </Link>
-        </NavbarBrand>
-      </NavbarContent>
-
-      <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-        <NavbarItem>
-          <Link href="/scan">
-            <h5 className="title-subsection">Scan Receipt</h5>
-          </Link>
-        </NavbarItem>
-        {user && (
-          <NavbarItem>
-            <Link href="/dashboard">
-              <h5 className="title-subsection">Dashboard</h5>
-            </Link>
-          </NavbarItem>
+    <>
+      <nav
+        className={cn(
+          'bg-background/70 z-40 w-full shrink-0 backdrop-blur-lg transition-transform duration-300 ease-linear',
+          position === 'sticky' && 'sticky top-0',
+          position === 'fixed' && 'fixed top-0',
+          position === 'hide-on-scroll' && 'sticky top-0',
+          position === 'hide-on-scroll' && isHidden && '-translate-y-full',
+          className,
         )}
-      </NavbarContent>
-
-      <NavbarContent justify="end">
-        <NavbarItem>
-          <NavbarDropdownMenu>
-            {user ? (
-              <Avatar
-                isBordered
-                size="sm"
-                color="primary"
-                src="https://i.pravatar.cc/150?u=a04258114e29026708c"
-              />
-            ) : (
-              <Avatar size="sm" />
-            )}
-          </NavbarDropdownMenu>
-        </NavbarItem>
-      </NavbarContent>
-
-      {/* Mobile menu */}
-      <NavbarMenu>
-        <NavbarMenuItem>
-          <Link
-            href="/scan"
-            className="w-full"
-            size="lg"
-            onPress={() => setIsMenuOpen(false)}
-          >
-            <h4 className="title-card">Scan Receipt</h4>
-          </Link>
-        </NavbarMenuItem>
-        {user && (
-          <NavbarMenuItem>
-            <Link
-              href="/dashboard"
-              className="w-full"
-              size="lg"
-              onPress={() => setIsMenuOpen(false)}
+      >
+        <header
+          className={cn(
+            'relative flex h-16 items-center justify-between px-6',
+            maxWidth !== 'full' && maxWidthClasses[maxWidth],
+            'mx-auto',
+          )}
+        >
+          {/* Left side (brand and menu button) */}
+          <div className="flex min-w-0 items-center gap-4">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label="Toggle menu"
+              aria-expanded={isSidebarOpen}
+              className="cursor-pointer sm:hidden"
             >
-              <h4 className="title-card">Dashboard</h4>
-            </Link>
-          </NavbarMenuItem>
-        )}
-        {!user && (
-          <NavbarMenuItem>
+              <span className="sr-only">Menu</span>
+              <IconMenu2 size={24} />
+            </button>
+
             <Link
-              href="/auth/login"
-              className="w-full"
-              size="lg"
-              onPress={() => setIsMenuOpen(false)}
+              href={brand.href || '/'}
+              className="flex items-center gap-2 no-underline"
             >
-              <h4 className="title-card">Log In</h4>
+              {brand.logo && <>{brand.logo}</>}
+              <TypographySubsectionTitle>
+                {brand.name}
+              </TypographySubsectionTitle>
             </Link>
-          </NavbarMenuItem>
-        )}
-      </NavbarMenu>
-    </HeroNavbar>
+          </div>
+
+          {/* Header menu */}
+          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-4 sm:flex">
+            {items.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'no-underline',
+                    item.isActive && 'text-accent font-bold',
+                  )}
+                  aria-current={item.isActive ? 'page' : undefined}
+                >
+                  <TypographySubsectionTitle>
+                    {item.label}
+                  </TypographySubsectionTitle>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {/* Right side (user avatar, etc.) */}
+          {rightContent && (
+            <div className="flex items-center gap-4">{rightContent}</div>
+          )}
+        </header>
+      </nav>
+
+      {/* Mobile view only */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+        menuItems={items}
+      />
+    </>
   );
 }

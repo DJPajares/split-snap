@@ -1,16 +1,21 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Card,
-  CardBody,
   CardHeader,
-  Divider,
+  Description,
+  FieldError,
+  Fieldset,
+  Form,
   Input,
+  InputGroup,
+  Label,
   Link,
-  Tab,
+  Separator,
   Tabs,
+  TextField,
+  toast,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { APP, STORAGE_KEYS } from '@split-snap/shared/constants';
@@ -26,6 +31,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { TypographySectionTitle } from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -81,7 +87,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(data.email, data.password);
-      addToast({ title: 'Welcome back!', color: 'success' });
+      toast.success('Welcome back!');
       router.push(getPostAuthRedirect());
     } catch (err) {
       handleError(err, 'Login failed');
@@ -94,7 +100,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await register(data.email, data.password, data.name);
-      addToast({ title: 'Account created!', color: 'success' });
+      toast.success('Account created!');
       router.push(getPostAuthRedirect());
     } catch (err) {
       handleError(err, 'Registration failed');
@@ -106,200 +112,236 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <Card>
-        <CardHeader className="flex flex-col items-center gap-2 pt-8 text-center">
+        <CardHeader className="items-center gap-2 text-center">
           <Image
             src="/logo.png"
             alt={`${APP.NAME} logo`}
             width={36}
             height={36}
-            className="rounded-md"
             priority
           />
-          <h3 className="title-section">{`Welcome to ${APP.NAME}`}</h3>
-          <p className="text-description">
+          <TypographySectionTitle>{`Welcome to ${APP.NAME}`}</TypographySectionTitle>
+          <Card.Description>
             Sign in to save your sessions and access them later
-          </p>
+          </Card.Description>
         </CardHeader>
 
-        <Divider />
+        <Separator />
 
-        <CardBody className="px-6 pb-8">
+        <Card.Content>
           <Tabs
+            className="w-full"
             selectedKey={tab}
             onSelectionChange={(key) => setTab(key as string)}
-            fullWidth
-            className="mb-4"
           >
-            <Tab key="login" title="Log In">
-              <form
-                className="mt-4 flex flex-col gap-4"
-                onSubmit={loginForm.handleSubmit(handleLogin)}
-              >
-                <Controller
-                  name="email"
-                  control={loginForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="password"
-                  control={loginForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
-                    />
-                  )}
-                />
-                <Button
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  className="font-semibold"
-                  isLoading={loading}
-                  isDisabled={!loginForm.formState.isValid}
-                >
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="authentication">
+                <Tabs.Tab id="login">
                   Log In
-                </Button>
-              </form>
-            </Tab>
-            <Tab key="register" title="Sign Up">
-              <form
-                className="mt-4 flex flex-col gap-4"
-                onSubmit={registerForm.handleSubmit(handleRegister)}
-              >
-                <Controller
-                  name="name"
-                  control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Name"
-                      placeholder="Your name"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="register">
+                  Sign Up
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+            <Tabs.Panel id="login">
+              <Form onSubmit={loginForm.handleSubmit(handleLogin)}>
+                <Fieldset>
+                  <Fieldset.Group>
+                    <Controller
+                      name="email"
+                      control={loginForm.control}
+                      render={({ field }) => (
+                        <TextField type="email">
+                          <Label>Email</Label>
+                          <Input
+                            variant="secondary"
+                            placeholder="you@example.com"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                          />
+                          <FieldError />
+                        </TextField>
+                      )}
                     />
-                  )}
-                />
-                <Controller
-                  name="email"
-                  control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="password"
-                  control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
+                    <Controller
+                      name="password"
+                      control={loginForm.control}
+                      render={({ field }) => (
+                        <TextField
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
                         >
-                          {showPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
+                          <Label>Password</Label>
+                          <InputGroup variant="secondary">
+                            <InputGroup.Input
+                              placeholder="Enter your password"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            />
+                            <InputGroup.Suffix>
+                              <button
+                                aria-label="toggle password visibility"
+                                className="outline-transparent focus:outline-solid"
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                              >
+                                {showPassword ? <IconEyeOff /> : <IconEye />}
+                              </button>
+                            </InputGroup.Suffix>
+                          </InputGroup>
+                          <FieldError />
+                        </TextField>
+                      )}
                     />
-                  )}
-                />
-                <Controller
-                  name="confirmPassword"
-                  control={registerForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Confirm Password"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Re-enter your password"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                      endContent={
-                        <button
-                          aria-label="toggle password visibility"
-                          className="outline-transparent focus:outline-solid"
-                          type="button"
-                          onClick={() =>
-                            setShowConfirmPassword((prev) => !prev)
-                          }
+                  </Fieldset.Group>
+                  <Fieldset.Actions>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="font-semibold"
+                      isPending={loading}
+                      isDisabled={!loginForm.formState.isValid}
+                      fullWidth
+                    >
+                      Log In
+                    </Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>
+            </Tabs.Panel>
+            <Tabs.Panel id="register">
+              <Form onSubmit={registerForm.handleSubmit(handleRegister)}>
+                <Fieldset>
+                  <Fieldset.Group>
+                    <Controller
+                      name="name"
+                      control={registerForm.control}
+                      render={({ field }) => (
+                        <TextField type="text">
+                          <Label>Name</Label>
+                          <Input
+                            variant="secondary"
+                            placeholder="Your name"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                          />
+                          <FieldError />
+                        </TextField>
+                      )}
+                    />
+                    <Controller
+                      name="email"
+                      control={registerForm.control}
+                      render={({ field }) => (
+                        <TextField type="email">
+                          <Label>Email</Label>
+                          <Input
+                            variant="secondary"
+                            placeholder="you@example.com"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                          />
+                          <FieldError />
+                        </TextField>
+                      )}
+                    />
+                    <Controller
+                      name="password"
+                      control={registerForm.control}
+                      render={({ field }) => (
+                        <TextField type={showPassword ? 'text' : 'password'}>
+                          <Label>Password</Label>
+                          <InputGroup variant="secondary">
+                            <InputGroup.Input
+                              placeholder="Enter your password"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            />
+                            <InputGroup.Suffix>
+                              <button
+                                aria-label="toggle password visibility"
+                                className="outline-transparent focus:outline-solid"
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                              >
+                                {showPassword ? <IconEyeOff /> : <IconEye />}
+                              </button>
+                            </InputGroup.Suffix>
+                          </InputGroup>
+                          <FieldError />
+                        </TextField>
+                      )}
+                    />
+                    <Controller
+                      name="confirmPassword"
+                      control={registerForm.control}
+                      render={({ field }) => (
+                        <TextField
+                          name="confirmPassword"
+                          type={showConfirmPassword ? 'text' : 'password'}
                         >
-                          {showConfirmPassword ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      }
+                          <Label>Confirm Password</Label>
+                          <InputGroup variant="secondary">
+                            <InputGroup.Input
+                              placeholder="Enter your password"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            />
+                            <InputGroup.Suffix>
+                              <button
+                                aria-label="toggle password visibility"
+                                className="outline-transparent focus:outline-solid"
+                                type="button"
+                                onClick={() =>
+                                  setShowConfirmPassword((prev) => !prev)
+                                }
+                              >
+                                {showConfirmPassword ? (
+                                  <IconEyeOff />
+                                ) : (
+                                  <IconEye />
+                                )}
+                              </button>
+                            </InputGroup.Suffix>
+                          </InputGroup>
+                          <FieldError />
+                        </TextField>
+                      )}
                     />
-                  )}
-                />
-                <Button
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  className="font-semibold"
-                  isLoading={loading}
-                  isDisabled={!registerForm.formState.isValid}
-                >
-                  Create Account
-                </Button>
-              </form>
-            </Tab>
+                  </Fieldset.Group>
+                  <Fieldset.Actions>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="font-semibold"
+                      isPending={loading}
+                      isDisabled={!registerForm.formState.isValid}
+                      fullWidth
+                    >
+                      Create Account
+                    </Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>
+            </Tabs.Panel>
           </Tabs>
 
-          <p className="text-description text-center">
-            You don&apos;t need an account to join sessions.{' '}
-            <Link href="/" size="sm" className="font-semibold">
+          <Description className="text-center">
+            {`You don't need an account to join sessions. `}
+            <Link href="/" className="text-xs font-semibold">
               Go back
             </Link>
-          </p>
-        </CardBody>
+          </Description>
+        </Card.Content>
       </Card>
     </div>
   );

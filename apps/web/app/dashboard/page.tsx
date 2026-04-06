@@ -4,9 +4,9 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
   Chip,
-  Link,
+  IconPlus,
+  Skeleton,
   Spinner,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
@@ -15,6 +15,11 @@ import { IconClipboardText } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+  TypographySubsectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -63,41 +68,37 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="title-section">Welcome, {user.name}</h3>
-          <p className="text-description-lg">
+          <TypographySectionTitle>Welcome, {user.name}</TypographySectionTitle>
+          <TypographyMuted className="text-base">
             Manage your bill-splitting sessions
-          </p>
+          </TypographyMuted>
         </div>
-        <Button
-          as={Link}
-          href="/scan"
-          color="primary"
-          className="font-semibold"
-        >
-          + New Split
+        <Button className="font-semibold" onPress={() => router.push('/scan')}>
+          <IconPlus />
+          New Split
         </Button>
       </div>
 
       {/* Filter chips */}
       <div>
-        <ButtonGroup variant="flat" size="sm">
+        <ButtonGroup variant="tertiary" size="sm">
           <Button
-            color={roleFilter === 'all' ? 'primary' : 'default'}
+            variant={roleFilter === 'all' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('all')}
           >
             All ({sessions.length})
           </Button>
           <Button
-            color={roleFilter === 'host' ? 'primary' : 'default'}
+            variant={roleFilter === 'host' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('host')}
           >
             Hosted ({sessions.filter((s) => s.role === 'host').length})
           </Button>
           <Button
-            color={roleFilter === 'participant' ? 'primary' : 'default'}
+            variant={roleFilter === 'participant' ? 'primary' : 'secondary'}
             onPress={() => setRoleFilter('participant')}
           >
             Joined ({sessions.filter((s) => s.role === 'participant').length})
@@ -106,87 +107,88 @@ export default function DashboardPage() {
       </div>
 
       {loadingSessions ? (
-        <div className="flex items-center justify-center py-16">
-          <Spinner size="lg" variant="wave" />
-        </div>
+        <Skeleton className="h-80 rounded-xl" />
       ) : filteredSessions.length === 0 ? (
         <Card>
-          <CardBody className="flex flex-col items-center justify-center gap-4 py-16">
+          <Card.Content className="flex flex-col items-center justify-center gap-4 py-8">
             <IconClipboardText size={48} className="text-default" />
-            <h5 className="title-subsection">
+            <TypographySubsectionTitle>
               {roleFilter === 'all'
                 ? 'No sessions yet'
                 : roleFilter === 'host'
                   ? 'No hosted sessions'
                   : 'No joined sessions'}
-            </h5>
-            <p className="text-description text-center">
+            </TypographySubsectionTitle>
+            <TypographyMuted className="text-center">
               {roleFilter === 'all'
                 ? 'Start by scanning a receipt or entering items manually. Your sessions will appear here.'
                 : roleFilter === 'host'
                   ? 'Sessions you create will appear here.'
                   : 'Sessions you join will appear here.'}
-            </p>
+            </TypographyMuted>
             {(roleFilter === 'all' || roleFilter === 'host') && (
-              <Button as={Link} href="/scan" color="primary" variant="flat">
+              <Button variant="tertiary" onPress={() => router.push('/scan')}>
                 Create Your First Split
               </Button>
             )}
-          </CardBody>
+          </Card.Content>
         </Card>
       ) : (
         <div className="space-y-3">
           {filteredSessions.map((session) => (
-            <Card
-              key={session.id}
-              isPressable
-              onPress={() => router.push(`/session/${session.code}`)}
-              className="w-full"
-            >
-              <CardBody className="flex flex-row items-center justify-between gap-4 py-4">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <h5 className="title-subsection">{session.code}</h5>
-                    <Chip
-                      size="sm"
-                      color={session.role === 'host' ? 'warning' : 'primary'}
-                      variant="flat"
-                    >
-                      {session.role === 'host' ? 'Host' : 'Participant'}
-                    </Chip>
-                    <Chip
-                      size="sm"
-                      color={
-                        session.status === 'active'
-                          ? 'success'
-                          : session.status === 'settled'
-                            ? 'default'
-                            : 'warning'
-                      }
-                      variant="flat"
-                    >
-                      {session.status}
-                    </Chip>
+            <Card key={session.id} className="w-full">
+              <button
+                type="button"
+                className="cursor-pointer"
+                onClick={() => router.push(`/session/${session.code}`)}
+              >
+                <Card.Content className="flex flex-row items-center justify-between gap-4">
+                  <div className="flex flex-col gap-1 text-start">
+                    <div className="flex items-center gap-2">
+                      <TypographySubsectionTitle>
+                        {session.code}
+                      </TypographySubsectionTitle>
+                      <Chip
+                        size="sm"
+                        color={session.role === 'host' ? 'warning' : 'default'}
+                        variant="soft"
+                      >
+                        {session.role === 'host' ? 'Host' : 'Participant'}
+                      </Chip>
+                      <Chip
+                        size="sm"
+                        color={
+                          session.status === 'active'
+                            ? 'success'
+                            : session.status === 'settled'
+                              ? 'default'
+                              : 'warning'
+                        }
+                        variant="soft"
+                      >
+                        {session.status}
+                      </Chip>
+                    </div>
+                    <TypographyMuted>
+                      {session.items.length} item
+                      {session.items.length !== 1 ? 's' : ''} ·{' '}
+                      {session.participants.length} participant
+                      {session.participants.length !== 1 ? 's' : ''} ·{' '}
+                      {new Date(session.createdAt).toLocaleDateString()}
+                    </TypographyMuted>
                   </div>
-                  <p className="text-description">
-                    {session.items.length} item
-                    {session.items.length !== 1 ? 's' : ''} ·{' '}
-                    {session.participants.length} participant
-                    {session.participants.length !== 1 ? 's' : ''} ·{' '}
-                    {new Date(session.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <h5 className="title-subsection">
-                    {formatCurrency({
-                      value: session.total,
-                      currency: session.currency,
-                      decimal: 2,
-                    })}
-                  </h5>
-                  <p className="text-description">{session.currency}</p>
-                </div>
-              </CardBody>
+                  <div className="text-right">
+                    <TypographySubsectionTitle>
+                      {formatCurrency({
+                        value: session.total,
+                        currency: session.currency,
+                        decimal: 2,
+                      })}
+                    </TypographySubsectionTitle>
+                    <TypographyMuted>{session.currency}</TypographyMuted>
+                  </div>
+                </Card.Content>
+              </button>
             </Card>
           ))}
         </div>

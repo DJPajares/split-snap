@@ -17,49 +17,72 @@ interface MockButtonProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   isIconOnly?: boolean;
+  type?: 'button' | 'submit' | 'reset';
   'aria-label'?: string;
   [key: string]: unknown;
 }
 interface MockInputProps {
-  label?: string;
   value?: string;
   placeholder?: string;
-  onValueChange?: (v: string) => void;
+  onChange?: (v: string) => void;
   onBlur?: () => void;
-  isInvalid?: boolean;
-  errorMessage?: string;
   [key: string]: unknown;
 }
-interface MockNumberInputProps {
-  label?: string;
-  value?: number;
-  placeholder?: string;
-  onValueChange?: (v: number) => void;
-  onBlur?: () => void;
-  isInvalid?: boolean;
-  errorMessage?: string;
+interface MockInputGroupProps {
+  children: ReactNode;
   [key: string]: unknown;
 }
 interface MockSelectProps {
-  label?: string;
   children: ReactNode;
-  selectedKeys?: string[];
-  onSelectionChange?: (keys: Set<string>) => void;
   [key: string]: unknown;
 }
 interface MockModalProps {
-  children: ReactNode | ((onClose: () => void) => ReactNode);
+  children: ReactNode;
+}
+
+interface MockModalBackdropProps {
+  children: ReactNode;
   isOpen?: boolean;
   onOpenChange?: () => void;
 }
 
 vi.mock('@heroui/react', () => ({
-  Card: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Card: Object.assign(
+    ({ children }: MockChildrenProps) => <div>{children}</div>,
+    {
+      Content: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    },
+  ),
   CardHeader: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  CardBody: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  Divider: () => <hr />,
-  Button: ({ children, onPress, isDisabled, ...rest }: MockButtonProps) => (
+  Separator: () => <hr />,
+  FieldError: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Form: ({
+    children,
+    onSubmit,
+  }: MockChildrenProps & {
+    onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
+  }) => (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit?.(event);
+      }}
+    >
+      {children}
+    </form>
+  ),
+  Surface: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Label: ({ children }: MockChildrenProps) => <span>{children}</span>,
+  TextField: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Button: ({
+    children,
+    onPress,
+    isDisabled,
+    type,
+    ...rest
+  }: MockButtonProps) => (
     <button
+      type={type}
       onClick={onPress}
       disabled={isDisabled}
       aria-label={rest['aria-label']}
@@ -67,72 +90,85 @@ vi.mock('@heroui/react', () => ({
       {children}
     </button>
   ),
-  Input: ({ label, value, onValueChange, placeholder }: MockInputProps) => (
-    <label>
-      {label}
-      <input
-        value={value ?? ''}
-        placeholder={placeholder}
-        onChange={(e) => onValueChange?.(e.target.value)}
-      />
-    </label>
+  Input: ({ value, onChange, placeholder }: MockInputProps) => (
+    <input
+      value={value ?? ''}
+      placeholder={placeholder}
+      onChange={(e) => onChange?.(e.target.value)}
+    />
   ),
-  NumberInput: ({
-    label,
-    value,
-    onValueChange,
-    placeholder,
-  }: MockNumberInputProps) => (
-    <label>
-      {label}
-      <input
-        type="number"
-        value={value ?? ''}
-        placeholder={placeholder}
-        onChange={(e) => onValueChange?.(Number(e.target.value))}
-      />
-    </label>
+  InputGroup: Object.assign(
+    ({ children }: MockInputGroupProps) => <div>{children}</div>,
+    {
+      Prefix: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Input: ({ value, onChange, placeholder }: MockInputProps) => (
+        <input
+          value={value ?? ''}
+          placeholder={placeholder}
+          onChange={(e) => onChange?.(e.target.value)}
+        />
+      ),
+      Suffix: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    },
   ),
-  Select: ({
-    label,
-    children,
-    selectedKeys,
-    onSelectionChange,
-  }: MockSelectProps) => (
-    <label>
-      {label}
-      <select
-        value={selectedKeys?.[0] ?? ''}
-        onChange={(e) => onSelectionChange?.(new Set([e.target.value]))}
-      >
-        {children}
-      </select>
-    </label>
+  NumberField: Object.assign(
+    ({ children }: MockChildrenProps) => <div>{children}</div>,
+    {
+      Group: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Input: ({ placeholder }: { placeholder?: string }) => (
+        <input type="number" placeholder={placeholder} />
+      ),
+    },
   ),
-  SelectItem: ({
-    children,
-    ...rest
-  }: MockChildrenProps & { [key: string]: unknown }) => (
-    <option value={String(rest['data-key'] ?? '')}>{children}</option>
+  Select: Object.assign(
+    ({ children }: MockSelectProps) => <div>{children}</div>,
+    {
+      Trigger: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Value: () => <span />,
+      Indicator: () => <span />,
+      Popover: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    },
   ),
-  Dropdown: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  DropdownTrigger: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  DropdownMenu: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  DropdownItem: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  Modal: ({ children, isOpen, onOpenChange }: MockModalProps) =>
-    isOpen ? (
-      <div data-testid="modal">
+  ListBox: Object.assign(
+    ({ children }: MockChildrenProps) => <div>{children}</div>,
+    {
+      Item: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      ItemIndicator: () => <span />,
+    },
+  ),
+  Dropdown: Object.assign(
+    ({ children }: MockChildrenProps) => <div>{children}</div>,
+    {
+      Trigger: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Popover: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Menu: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      Item: ({ children }: MockChildrenProps) => <div>{children}</div>,
+      ItemIndicator: () => <span />,
+    },
+  ),
+  Modal: Object.assign(({ children }: MockModalProps) => <>{children}</>, {
+    Backdrop: ({ children, isOpen, onOpenChange }: MockModalBackdropProps) =>
+      isOpen ? (
+        <div data-testid="modal" onClick={onOpenChange}>
+          {children}
+        </div>
+      ) : null,
+    Container: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    Dialog: ({
+      children,
+    }: {
+      children: ReactNode | ((arg: { close: () => void }) => ReactNode);
+    }) => (
+      <div>
         {typeof children === 'function'
-          ? children(onOpenChange ?? (() => {}))
+          ? children({ close: () => {} })
           : children}
       </div>
-    ) : null,
-  ModalContent: ({ children }: MockModalProps) => (
-    <div>{typeof children === 'function' ? children(() => {}) : children}</div>
-  ),
-  ModalHeader: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  ModalBody: ({ children }: MockChildrenProps) => <div>{children}</div>,
-  ModalFooter: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    ),
+    Header: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    Body: ({ children }: MockChildrenProps) => <div>{children}</div>,
+    Footer: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  }),
 }));
 
 // --- Helpers ---
@@ -174,7 +210,7 @@ describe('ItemEditor', () => {
     render(<ItemEditor {...defaultProps} />);
 
     expect(screen.getByText('Item 1')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('e.g. Burger')).toHaveValue('');
+    expect(screen.getByPlaceholderText('Burger')).toHaveValue('');
   });
 
   it('shows the custom submit label', () => {
@@ -206,14 +242,14 @@ describe('ItemEditor', () => {
   it('disables "Add Item" button when current item is incomplete', () => {
     render(<ItemEditor {...defaultProps} />);
 
-    const addBtn = screen.getByRole('button', { name: '+ Add Item' });
+    const addBtn = screen.getByRole('button', { name: /Add Item/i });
     expect(addBtn).toBeDisabled();
   });
 
   it('enables "Add Item" button when all items are complete', () => {
     render(<ItemEditor {...twoItemProps} />);
 
-    const addBtn = screen.getByRole('button', { name: '+ Add Item' });
+    const addBtn = screen.getByRole('button', { name: /Add Item/i });
     expect(addBtn).not.toBeDisabled();
   });
 
@@ -221,7 +257,7 @@ describe('ItemEditor', () => {
     const user = userEvent.setup();
     render(<ItemEditor {...twoItemProps} />);
 
-    await user.click(screen.getByRole('button', { name: '+ Add Item' }));
+    await user.click(screen.getByRole('button', { name: /Add Item/i }));
 
     expect(screen.getByText('Item 3')).toBeInTheDocument();
   });
@@ -236,7 +272,7 @@ describe('ItemEditor', () => {
     await user.click(removeButtons[0]);
 
     const modal = screen.getByTestId('modal');
-    expect(within(modal).getByText(/Burger/)).toBeInTheDocument();
+    expect(within(modal).getByText(/burger/)).toBeInTheDocument();
   });
 
   it('shows remove confirmation modal with fallback text for unnamed items', async () => {
@@ -333,5 +369,19 @@ describe('ItemEditor', () => {
         currency: 'USD',
       }),
     );
+  });
+
+  it('renders field errors after submit through FieldError', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ItemEditor {...defaultProps} onSubmit={onSubmit} />);
+
+    await user.click(screen.getByRole('button', { name: 'Create Session' }));
+
+    expect(
+      await screen.findByText('Item name is required'),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Amount is required')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

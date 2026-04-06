@@ -1,14 +1,18 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Card,
-  CardBody,
   CardHeader,
-  Divider,
+  FieldError,
+  Fieldset,
+  Form,
   Input,
+  Label,
+  Separator,
   Spinner,
+  TextField,
+  toast,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
@@ -26,6 +30,12 @@ import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import {
+  TypographyCaption,
+  TypographyCardTitle,
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
@@ -132,7 +142,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           // Host approval required — wait
           setPendingParticipantId(result.pendingParticipantId ?? null);
           setJoinState('pending');
-          addToast({ title: 'Waiting for host approval...', color: 'warning' });
+          toast.warning('Waiting for host approval...');
           return;
         }
 
@@ -142,7 +152,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
             result.participantId,
           );
-          addToast({ title: `Welcome, ${displayName}!`, color: 'success' });
+          toast.success(`Welcome, ${displayName}!`);
           router.push(`/session/${code}`);
         }
       } catch (err) {
@@ -200,7 +210,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`,
           approvedParticipant.id,
         );
-        addToast({ title: 'You have been approved!', color: 'success' });
+        toast.success('You have been approved!');
         router.push(`/session/${code}`);
         return;
       }
@@ -208,7 +218,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       // Check if rejected (no longer in pending and not in participants)
       if (!isStillPending && !approvedParticipant) {
         setJoinState('rejected');
-        addToast({ title: 'Your join request was rejected', color: 'danger' });
+        toast.danger('Your join request was rejected');
       }
     },
   });
@@ -273,26 +283,24 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconHourglassLow size={48} className="text-warning" />
-            <h4 className="title-card">Temporarily Removed</h4>
-            <p className="text-description-lg text-center">
+            <TypographyCardTitle>Temporarily Removed</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               You were removed from this session.
               {hasCountdown
                 ? ` You can rejoin in ${minutes}:${seconds.toString().padStart(2, '0')}.`
                 : ' You can try again shortly.'}
-            </p>
+            </TypographyMuted>
             <div className="flex gap-2">
-              <Button color="primary" onPress={() => router.push('/')}>
-                Go Home
-              </Button>
+              <Button onPress={() => router.push('/')}>Go Home</Button>
               {!hasCountdown && (
-                <Button variant="flat" onPress={() => setJoinState('idle')}>
+                <Button variant="tertiary" onPress={() => setJoinState('idle')}>
                   Try Again
                 </Button>
               )}
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -303,16 +311,14 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
             <IconBan size={48} className="text-danger" />
-            <h4 className="title-card">Request Rejected</h4>
-            <p className="text-description-lg text-center">
+            <TypographyCardTitle>Request Rejected</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               The host has rejected your join request.
-            </p>
-            <Button color="primary" onPress={() => router.push('/')}>
-              Go Home
-            </Button>
-          </CardBody>
+            </TypographyMuted>
+            <Button onPress={() => router.push('/')}>Go Home</Button>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -323,17 +329,17 @@ export default function JoinPage({ params }: ParamsCodeProps) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
-          <CardBody className="flex flex-col items-center gap-4 py-12">
-            <Spinner size="lg" variant="wave" />
-            <h4 className="title-card">Waiting for Approval</h4>
-            <p className="text-description-lg text-center">
+          <Card.Content className="flex flex-col items-center gap-4 py-12">
+            <Spinner size="lg" />
+            <TypographyCardTitle>Waiting for Approval</TypographyCardTitle>
+            <TypographyMuted className="text-center text-base">
               The host needs to approve your request to join this session.
-            </p>
-            <div className="text-primary font-mono text-lg font-bold tracking-widest">
+            </TypographyMuted>
+            <div className="text-accent font-mono text-lg font-bold tracking-widest">
               {code.toUpperCase()}
             </div>
             <Button
-              variant="flat"
+              variant="tertiary"
               onPress={() => {
                 setJoinState('idle');
                 setPendingParticipantId(null);
@@ -341,7 +347,7 @@ export default function JoinPage({ params }: ParamsCodeProps) {
             >
               Cancel
             </Button>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -352,56 +358,61 @@ export default function JoinPage({ params }: ParamsCodeProps) {
       <Card>
         <CardHeader className="flex flex-col items-center gap-2">
           <IconArrowBigRightLines size={40} />
-          <h3 className="title-section">Join Session</h3>
-          <p className="text-description-lg">
+          <TypographySectionTitle>Join Session</TypographySectionTitle>
+          <TypographyMuted className="text-center text-base">
             {user
               ? `Joining as ${user.name}`
               : 'Enter your name to start claiming your items'}
-          </p>
-          <p className="text-primary font-mono text-lg font-bold tracking-widest">
+          </TypographyMuted>
+          <p className="text-accent font-mono text-lg font-bold tracking-widest">
             {code.toUpperCase()}
           </p>
         </CardHeader>
-        <Divider />
-        <CardBody className="gap-4 px-6 pb-8">
+        <Separator />
+        <Card.Content className="gap-4 px-6 pb-8">
           {!user && (
-            <form onSubmit={nameForm.handleSubmit(handleJoin)}>
-              <div className="flex flex-col gap-4">
-                <Controller
-                  name="name"
-                  control={nameForm.control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      label="Your Name"
-                      placeholder="e.g. DJ"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      size="lg"
-                      autoFocus
-                      isInvalid={Boolean(fieldState.error)}
-                      errorMessage={fieldState.error?.message}
-                    />
-                  )}
-                />
-                <Button
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  isLoading={joinState === 'joining'}
-                  isDisabled={!nameForm.formState.isValid}
-                >
-                  Join & Start Picking
-                </Button>
-              </div>
-            </form>
+            <Form onSubmit={nameForm.handleSubmit(handleJoin)}>
+              <Fieldset>
+                <Fieldset.Group>
+                  <Controller
+                    name="name"
+                    control={nameForm.control}
+                    render={({ field }) => (
+                      <TextField type="text">
+                        <Label>Your Name</Label>
+                        <Input
+                          variant="secondary"
+                          placeholder="e.g. DJ"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          autoFocus
+                        />
+                        <FieldError />
+                      </TextField>
+                    )}
+                  />
+                </Fieldset.Group>
+                <Fieldset.Actions>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    isPending={joinState === 'joining'}
+                    isDisabled={!nameForm.formState.isValid}
+                    fullWidth
+                  >
+                    Join & Start Picking
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           )}
           {user && (
             <Button
-              color="primary"
               size="lg"
               onPress={() => void joinSession(user.name, user.id)}
-              isLoading={joinState === 'joining'}
+              isPending={joinState === 'joining'}
+              fullWidth
             >
               Join as Account
             </Button>
@@ -411,16 +422,21 @@ export default function JoinPage({ params }: ParamsCodeProps) {
           )}
           {!user && (
             <>
-              <Divider />
-              <Button variant="flat" size="md" onPress={handleLoginRedirect}>
+              <Separator />
+              <Button
+                variant="tertiary"
+                size="md"
+                onPress={handleLoginRedirect}
+                fullWidth
+              >
                 Log in to join with your account
               </Button>
             </>
           )}
-          <p className="text-caption text-center">
+          <TypographyCaption className="text-center">
             No account needed — just pick a name.
-          </p>
-        </CardBody>
+          </TypographyCaption>
+        </Card.Content>
       </Card>
     </div>
   );

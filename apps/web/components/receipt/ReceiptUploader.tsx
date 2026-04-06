@@ -1,8 +1,10 @@
 'use client';
 
-import { Button, Card, CardBody, Spinner } from '@heroui/react';
+import { Button, Card, Spinner } from '@heroui/react';
 import { IconCamera } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
+
+import { TypographyMuted } from '../shared/Typography';
 
 interface ReceiptUploaderProps {
   onFileSelected: (file: File) => void;
@@ -40,10 +42,10 @@ export function ReceiptUploader({
   return (
     <Card
       className={`border-2 border-dashed transition-colors ${
-        isDragging ? 'border-primary bg-primary/10' : 'border-default-300'
+        isDragging ? 'border-accent bg-accent/10' : 'border-default-300'
       }`}
     >
-      <CardBody
+      <Card.Content
         className="flex min-h-50 cursor-pointer flex-col items-center justify-center gap-4 p-8 text-center"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -66,8 +68,10 @@ export function ReceiptUploader({
 
         {isLoading ? (
           <>
-            <Spinner size="lg" variant="wave" />
-            <p className="text-description-lg">Scanning receipt with AI...</p>
+            <Spinner size="lg" />
+            <TypographyMuted className="text-base">
+              Scanning receipt with AI...
+            </TypographyMuted>
           </>
         ) : preview ? (
           <>
@@ -77,7 +81,7 @@ export function ReceiptUploader({
               alt="Receipt preview"
               className="max-h-48 rounded-lg object-contain"
             />
-            <p className="text-description">Click or drop to replace</p>
+            <TypographyMuted>Click or drop to replace</TypographyMuted>
           </>
         ) : (
           <>
@@ -85,17 +89,16 @@ export function ReceiptUploader({
             <p className="text-lg font-semibold">
               Drop a receipt image or tap to scan
             </p>
-            <p className="text-description">Supports JPEG, PNG, HEIC</p>
+            <TypographyMuted>Supports JPEG, PNG, HEIC</TypographyMuted>
             <Button
-              color="primary"
-              variant="flat"
+              variant="tertiary"
               onPress={() => inputRef.current?.click()}
             >
               Choose File
             </Button>
           </>
         )}
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

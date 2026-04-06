@@ -6,7 +6,7 @@ import { GeistSans } from 'geist/font/sans';
 import type { Metadata } from 'next';
 
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import Header from '@/components/layout/Header';
 
 import { Providers } from './providers';
 
@@ -35,16 +35,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html className="light" data-theme="light" suppressHydrationWarning>
+      {/* <html lang="en" className="dark" suppressHydrationWarning> */}
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} bg-background text-foreground flex min-h-screen flex-col font-sans antialiased`}
       >
         <Providers>
-          <Navbar />
+          <Header />
 
-          <main className="flex-1">
-            <div className="mx-auto max-w-5xl p-4 sm:p-8">{children}</div>
-          </main>
+          <main className="flex-1">{children}</main>
 
           <Footer />
         </Providers>

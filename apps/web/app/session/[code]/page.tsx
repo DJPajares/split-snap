@@ -1,16 +1,12 @@
 'use client';
 
 import {
-  addToast,
   Button,
   Chip,
   Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   Spinner,
-  useDisclosure,
+  toast,
+  useOverlayState,
 } from '@heroui/react';
 import { STORAGE_KEYS } from '@split-snap/shared/constants';
 import type { ParamsCodeProps, Session } from '@split-snap/shared/types';
@@ -18,6 +14,7 @@ import {
   IconArrowBack,
   IconChartColumn,
   IconCheck,
+  IconCircleFilled,
   IconEdit,
   IconShare3,
   IconTrash,
@@ -29,6 +26,10 @@ import { ReceiptImage } from '@/components/receipt/ReceiptImage';
 import { ParticipantSidebar } from '@/components/session/ParticipantSidebar';
 import { SessionItemList } from '@/components/session/SessionItemList';
 import { ShareLinkModal } from '@/components/session/ShareLinkModal';
+import {
+  TypographyMuted,
+  TypographySectionTitle,
+} from '@/components/shared/Typography';
 import { useApiError } from '@/hooks/useApiError';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionSSE } from '@/hooks/useSessionSSE';
@@ -50,17 +51,18 @@ export default function SessionPage({ params }: ParamsCodeProps) {
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const isDeletingSession = useRef(false);
 
   const {
     isOpen: isSettleOpen,
-    onOpen: onSettleOpen,
-    onOpenChange: onSettleOpenChange,
-  } = useDisclosure();
+    open: onSettleOpen,
+    toggle: onSettleOpenChange,
+  } = useOverlayState();
   const {
     isOpen: isDeleteOpen,
-    onOpen: onDeleteOpen,
-    onOpenChange: onDeleteOpenChange,
-  } = useDisclosure();
+    open: onDeleteOpen,
+    toggle: onDeleteOpenChange,
+  } = useOverlayState();
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
 
@@ -143,20 +145,20 @@ export default function SessionPage({ params }: ParamsCodeProps) {
             `${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${normalizedCode}`,
           );
           setParticipantId(null);
-          addToast({
-            title: 'You were removed from this session',
+          toast.warning('You were removed from this session', {
             description: 'The host removed you from this session.',
-            color: 'warning',
           });
           router.replace('/');
         }
       }
     },
     onDeleted: () => {
-      addToast({
-        title: 'Session deleted',
+      if (isDeletingSession.current) {
+        return;
+      }
+
+      toast.warning('Session deleted', {
         description: 'This session was deleted by the host.',
-        color: 'warning',
       });
       localStorage.removeItem(`${STORAGE_KEYS.KEY_PARTICIPANT_PREFIX}${code}`);
       localStorage.removeItem(
@@ -306,7 +308,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     setSettleLoading(true);
     try {
       await api.sessions.settle(normalizedCode);
-      addToast({ title: 'Session settled!', color: 'success' });
+      toast.success('Session settled!');
     } catch (err) {
       handleError(err, 'Failed to settle');
     } finally {
@@ -318,7 +320,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     setUnsettleLoading(true);
     try {
       await api.sessions.unsettle(normalizedCode);
-      addToast({ title: 'Settlement undone', color: 'success' });
+      toast.success('Settlement undone');
     } catch (err) {
       handleError(err, 'Failed to undo settlement');
     } finally {
@@ -330,7 +332,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     async (targetParticipantId: string) => {
       try {
         await api.sessions.kick(normalizedCode, targetParticipantId);
-        addToast({ title: 'Participant removed', color: 'success' });
+        toast.success('Participant removed');
       } catch (err) {
         handleError(err, 'Failed to remove participant');
       }
@@ -345,7 +347,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           normalizedCode,
           pendingParticipantId,
         );
-        addToast({ title: 'Participant approved', color: 'success' });
+        toast.success('Participant approved');
       } catch (err) {
         handleError(err, 'Failed to approve participant');
       }
@@ -360,7 +362,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           normalizedCode,
           pendingParticipantId,
         );
-        addToast({ title: 'Participant rejected', color: 'success' });
+        toast.success('Participant rejected');
       } catch (err) {
         handleError(err, 'Failed to reject participant');
       }
@@ -370,11 +372,14 @@ export default function SessionPage({ params }: ParamsCodeProps) {
 
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
+    isDeletingSession.current = true;
+
     try {
       await api.sessions.delete(normalizedCode);
-      addToast({ title: 'Session deleted', color: 'success' });
-      router.push('/');
+      toast.success('Session deleted');
+      router.replace('/');
     } catch (err) {
+      isDeletingSession.current = false;
       handleError(err, 'Failed to delete session');
     } finally {
       setDeleteLoading(false);
@@ -409,7 +414,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
-            <h3 className="title-section">Session {code}</h3>
+            <TypographySectionTitle>Session {code}</TypographySectionTitle>
             <Chip
               size="sm"
               color={
@@ -419,35 +424,34 @@ export default function SessionPage({ params }: ParamsCodeProps) {
                     ? 'default'
                     : 'warning'
               }
-              variant="flat"
+              variant="soft"
             >
-              {session.status}
+              <Chip.Label>{session.status}</Chip.Label>
             </Chip>
-            <Chip
-              size="sm"
-              variant="dot"
-              color={connected ? 'success' : 'danger'}
-            >
-              {connected ? 'Live' : 'Reconnecting...'}
+            <Chip size="sm">
+              <IconCircleFilled
+                size={6}
+                className={connected ? 'text-success' : 'text-danger'}
+              />
+              <Chip.Label>{connected ? 'Live' : 'Reconnecting...'}</Chip.Label>
             </Chip>
           </div>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<IconShare3 />}
             onPress={() => setShowShare(true)}
           >
+            <IconShare3 />
             Share
           </Button>
           <Button
-            as="a"
-            href={`/session/${code}/summary`}
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<IconChartColumn />}
+            onPress={() => router.push(`/session/${code}/summary`)}
           >
+            <IconChartColumn />
             Summary
           </Button>
         </div>
@@ -459,47 +463,44 @@ export default function SessionPage({ params }: ParamsCodeProps) {
           {session.status === 'active' && (
             <>
               <Button
-                color="primary"
                 size="md"
-                className="w-full sm:w-auto"
-                startContent={<IconCheck size={16} />}
                 onPress={onSettleOpen}
                 isDisabled={hasUnclaimedItems}
+                className="w-full sm:w-auto"
               >
+                <IconCheck size={16} />
                 Settle
               </Button>
               <Button
-                as="a"
-                href={`/session/${code}/edit`}
-                variant="faded"
+                variant="secondary"
                 size="md"
                 className="w-full sm:w-auto"
-                startContent={<IconEdit size={16} />}
+                onPress={() => router.push(`/session/${code}/edit`)}
               >
+                <IconEdit size={16} />
                 Edit Items
               </Button>
             </>
           )}
           {session.status === 'settled' && (
             <Button
-              color="secondary"
+              variant="secondary"
               size="md"
               className="w-full sm:w-auto"
-              startContent={<IconArrowBack size={16} />}
+              isPending={unsettleLoading}
               onPress={handleUnsettle}
-              isLoading={unsettleLoading}
             >
+              <IconArrowBack size={16} />
               Undo Settlement
             </Button>
           )}
           <Button
-            color="danger"
-            variant="light"
+            variant="danger-soft"
             size="md"
             className="w-full sm:w-auto"
-            startContent={<IconTrash size={16} />}
             onPress={onDeleteOpen}
           >
+            <IconTrash size={16} />
             Delete
           </Button>
         </div>
@@ -545,74 +546,75 @@ export default function SessionPage({ params }: ParamsCodeProps) {
       {/* Share modal */}
       <ShareLinkModal
         isOpen={showShare}
-        onClose={() => setShowShare(false)}
+        onOpenChange={setShowShare}
         sessionCode={code}
       />
 
-      <Modal isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Settle Session</ModalHeader>
-              <ModalBody>
-                <p>Finalize this session now?</p>
-                <p className="text-description">
-                  Participants will no longer be able to claim or unclaim items
-                  until you undo settlement.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  onPress={async () => {
-                    await handleSettle();
-                    onClose();
-                  }}
-                  isLoading={settleLoading}
-                >
-                  Confirm Settle
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      {/* Settle confirmation modal */}
+      <Modal.Backdrop isOpen={isSettleOpen} onOpenChange={onSettleOpenChange}>
+        <Modal.Container>
+          <Modal.Dialog aria-label="Settle Session Confirmation">
+            {({ close }) => (
+              <>
+                <Modal.Header>Settle Session</Modal.Header>
+                <Modal.Body>
+                  <p>Finalize this session now?</p>
+                  <TypographyMuted>
+                    Participants will no longer be able to claim or unclaim
+                    items until you undo settlement.
+                  </TypographyMuted>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="tertiary" onPress={close}>
+                    Cancel
+                  </Button>
+                  <Button
+                    isPending={settleLoading}
+                    onPress={async () => {
+                      await handleSettle();
+                      close();
+                    }}
+                  >
+                    Confirm Settle
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
 
       {/* Delete confirmation modal */}
-      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Delete Session</ModalHeader>
-              <ModalBody>
-                <p>Are you sure you want to delete this session?</p>
-                <p className="text-description">
-                  This will permanently remove the session and disconnect all
-                  participants. This action cannot be undone.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  color="danger"
-                  onPress={async () => {
-                    await handleDelete();
-                    onClose();
-                  }}
-                  isLoading={deleteLoading}
-                >
-                  Delete Session
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <Modal.Backdrop isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
+        <Modal.Container>
+          <Modal.Dialog aria-label="Delete Session Confirmation">
+            {({ close }) => (
+              <>
+                <Modal.Header>Delete Session</Modal.Header>
+                <Modal.Body>
+                  <p>Are you sure you want to delete this session?</p>
+                  <TypographyMuted>
+                    This will permanently remove the session and disconnect all
+                    participants. This action cannot be undone.
+                  </TypographyMuted>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="tertiary" onPress={close}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    isPending={deleteLoading}
+                    onPress={handleDelete}
+                  >
+                    Delete Session
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   );
 }
