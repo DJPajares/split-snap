@@ -50,8 +50,16 @@ export default function SessionPage({ params }: ParamsCodeProps) {
   const [settleLoading, setSettleLoading] = useState(false);
   const [unsettleLoading, setUnsettleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const [receiptImageUrl] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
+    } catch {
+      return null;
+    }
+  });
   const isDeletingSession = useRef(false);
+  const isAutoJoining = useRef(false);
 
   const {
     isOpen: isSettleOpen,
@@ -65,18 +73,6 @@ export default function SessionPage({ params }: ParamsCodeProps) {
   } = useOverlayState();
   const { user } = useAuth();
   const { handleError } = useApiError({ redirectTo: '/' });
-
-  // Load receipt image from sessionStorage if available
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
-      if (stored) {
-        setReceiptImageUrl(stored);
-      }
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
 
   // Load initial session data and validate participant
   useEffect(() => {
@@ -191,10 +187,14 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     hasHostToken,
   );
 
-  const [autoJoining, setAutoJoining] = useState(false);
-
   useEffect(() => {
-    if (!loading && !error && session && !participantId && !autoJoining) {
+    if (
+      !loading &&
+      !error &&
+      session &&
+      !participantId &&
+      !isAutoJoining.current
+    ) {
       const isLoggedInHost =
         user && session.createdBy && session.createdBy === user.id;
       const isGuestHost = Boolean(
@@ -205,7 +205,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
 
       if (isLoggedInHost || isGuestHost) {
         // Auto-rejoin as host instead of redirecting to join page
-        setAutoJoining(true);
+        isAutoJoining.current = true;
         const displayName = user?.name ?? 'Host';
         api.sessions
           .join(normalizedCode, {
@@ -227,21 +227,14 @@ export default function SessionPage({ params }: ParamsCodeProps) {
             // If auto-join fails, fall back to join page
             router.replace(`/join/${normalizedCode}`);
           })
-          .finally(() => setAutoJoining(false));
+          .finally(() => {
+            isAutoJoining.current = false;
+          });
       } else {
         router.replace(`/join/${normalizedCode}`);
       }
     }
-  }, [
-    loading,
-    error,
-    session,
-    participantId,
-    router,
-    normalizedCode,
-    user,
-    autoJoining,
-  ]);
+  }, [loading, error, session, participantId, router, normalizedCode, user]);
 
   const handleClaimToggle = useCallback(
     (itemId: string) => {

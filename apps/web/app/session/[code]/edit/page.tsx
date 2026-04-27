@@ -29,7 +29,14 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const [receiptImageUrl] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
+    } catch {
+      return null;
+    }
+  });
   const { handleError } = useApiError({ redirectTo: '/' });
   const hasHostToken =
     typeof window !== 'undefined' &&
@@ -38,18 +45,6 @@ export default function EditSessionPage({ params }: ParamsCodeProps) {
         `${STORAGE_KEYS.KEY_HOST_TOKEN_PREFIX}${normalizedCode}`,
       ),
     );
-
-  // Load receipt image from sessionStorage if available
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEYS.KEY_RECEIPT_IMAGE);
-      if (stored) {
-        setReceiptImageUrl(stored);
-      }
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
 
   // Fetch existing session
   useEffect(() => {
