@@ -70,6 +70,8 @@ const baseSession: Session = {
   subtotal: 10,
   tax: 1,
   tip: 1,
+  taxMode: '$',
+  tipMode: '$',
   total: 12,
   currency: 'USD',
   status: 'active',
@@ -145,7 +147,9 @@ describe('SessionItemList', () => {
               name: 'Fries',
               price: 5,
               quantity: 1,
-              claimedBy: [{ participantId: 'p1', displayName: 'Pat' }],
+              claimedBy: [
+                { participantId: 'p1', displayName: 'Pat', portion: 1 },
+              ],
             },
           ],
         }}

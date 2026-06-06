@@ -5,9 +5,11 @@ import {
   Button,
   Card,
   Chip,
+  Label,
   Popover,
   Separator,
   Spinner,
+  Switch,
 } from '@heroui/react';
 import { formatCurrency } from '@split-snap/shared/currency';
 import { calculateSummaries } from '@split-snap/shared/tax';
@@ -23,6 +25,7 @@ interface ParticipantSidebarProps {
   onKick?: (participantId: string) => Promise<void>;
   onApprove?: (participantId: string) => Promise<void>;
   onReject?: (participantId: string) => Promise<void>;
+  onAutoAcceptChange?: (enabled: boolean) => Promise<void>;
 }
 
 export function ParticipantSidebar({
@@ -32,12 +35,14 @@ export function ParticipantSidebar({
   onKick,
   onApprove,
   onReject,
+  onAutoAcceptChange,
 }: ParticipantSidebarProps) {
   const summaries = calculateSummaries(session);
   const [kickingId, setKickingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [isUpdatingAutoAccept, setIsUpdatingAutoAccept] = useState(false);
 
   const handleKick = async (participantId: string) => {
     if (!onKick) return;
@@ -70,7 +75,18 @@ export function ParticipantSidebar({
     }
   };
 
+  const handleAutoAcceptChange = async (enabled: boolean) => {
+    if (!onAutoAcceptChange) return;
+    setIsUpdatingAutoAccept(true);
+    try {
+      await onAutoAcceptChange(enabled);
+    } finally {
+      setIsUpdatingAutoAccept(false);
+    }
+  };
+
   const canKick = isCreator && session.status === 'active' && !!onKick;
+  const autoAcceptEnabled = !session.requireApproval;
 
   // Determine if a participant is the initiator (creator)
   const isInitiator = (participant: (typeof session.participants)[0]) =>
@@ -81,6 +97,33 @@ export function ParticipantSidebar({
   return (
     <Card>
       <Card.Content className="gap-3">
+        {isCreator && (
+          <>
+            <Switch
+              isSelected={autoAcceptEnabled}
+              isDisabled={
+                !onAutoAcceptChange ||
+                isUpdatingAutoAccept ||
+                session.status !== 'active'
+              }
+              onChange={(enabled) => void handleAutoAcceptChange(enabled)}
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Content>
+                <Label className="text-sm font-medium">
+                  Auto-accept participants
+                </Label>
+                <TypographyMuted className="text-xs">
+                  New joiners can enter without host approval.
+                </TypographyMuted>
+              </Switch.Content>
+            </Switch>
+            <Separator />
+          </>
+        )}
+
         {/* Pending participants (only visible to host) */}
         {isCreator &&
           session.pendingParticipants &&

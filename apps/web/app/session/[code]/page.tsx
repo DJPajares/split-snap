@@ -41,6 +41,9 @@ export default function SessionPage({ params }: ParamsCodeProps) {
   const router = useRouter();
 
   const [initialSession, setInitialSession] = useState<Session | null>(null);
+  const [optimisticSession, setOptimisticSession] = useState<Session | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
@@ -127,6 +130,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     code,
     onUpdate: (updated) => {
       setInitialSession(updated);
+      setOptimisticSession(null);
 
       // Detect if current user was kicked
       if (participantId && updated.participants) {
@@ -164,7 +168,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     },
   });
 
-  const session = liveSession ?? initialSession;
+  const session = optimisticSession ?? liveSession ?? initialSession;
   const currentParticipant = session?.participants.find(
     (participant) => participant.id === participantId,
   );
@@ -363,6 +367,25 @@ export default function SessionPage({ params }: ParamsCodeProps) {
     [normalizedCode, handleError],
   );
 
+  const handleAutoAcceptChange = useCallback(
+    async (enabled: boolean) => {
+      try {
+        const updated = await api.sessions.updateSettings(normalizedCode, {
+          requireApproval: !enabled,
+        });
+        setInitialSession(updated);
+        setOptimisticSession(updated);
+        toast.success(
+          enabled ? 'Auto-accept enabled' : 'Host approval enabled',
+        );
+      } catch (err) {
+        handleError(err, 'Failed to update participant settings');
+        throw err;
+      }
+    },
+    [normalizedCode, handleError],
+  );
+
   const handleDelete = useCallback(async () => {
     setDeleteLoading(true);
     isDeletingSession.current = true;
@@ -532,6 +555,7 @@ export default function SessionPage({ params }: ParamsCodeProps) {
             onKick={handleKick}
             onApprove={handleApprove}
             onReject={handleReject}
+            onAutoAcceptChange={handleAutoAcceptChange}
           />
         </div>
       </div>
