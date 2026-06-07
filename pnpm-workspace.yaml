@@ -1,8 +1,19 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+allowBuilds:
+  '@google/genai': true
+  esbuild: true
+  protobufjs: true
+  sharp: true
+  tesseract.js: true
+  unrs-resolver: true
 onlyBuiltDependencies:
   - '@heroui/shared-utils'
   - esbuild
   - sharp
   - unrs-resolver
+packageExtensions:
+  '@hookform/resolvers@5.4.0':
+    dependencies:
+      zod: ^4.0.0
